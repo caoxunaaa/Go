@@ -1,28 +1,28 @@
-package routers
+package Router
 
 import (
-	"SuperxonWebSite/Controllers"
+	"SuperxonWebSite/Middlewares"
+	"SuperxonWebSite/apps/equipment"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
-	r := gin.Default()
-	r.GET("/", Controllers.IndexHandler)
+type Option func(*gin.Engine)
 
-	// v1
-	v1Group := r.Group("v1")
+var options []Option
+
+// 注册app的路由配置
+func Include(opts ...Option) {
+	options = append(options, opts...)
+}
+
+// 初始化
+func Init() *gin.Engine {
+	r := gin.Default()
+	r.Use(Middlewares.Cors())
+	v1 := r.Group("/product")
 	{
-		// 待办事项
-		// 添加
-		v1Group.POST("/todo", Controllers.CreateAEquipment)
-		// 查看所有的待办事项
-		v1Group.GET("/todo", Controllers.GetEquipmentList)
-		// 查看某一个待办事项
-		v1Group.GET("/todo/:id", Controllers.GetAEquipment)
-		// 修改某一个待办事项
-		v1Group.PUT("/todo/:id", Controllers.UpdateAEquipment)
-		// 删除某一个待办事项
-		v1Group.DELETE("/todo/:id", Controllers.DeleteAEquipment)
+		v1.GET("/", equipment.GetProductList)
+		v1.GET("/productInfo/:pn", equipment.GetModuleInfoList)
 	}
 	return r
 }
