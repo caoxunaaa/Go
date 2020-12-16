@@ -11,6 +11,7 @@ func GetProductList(c *gin.Context) {
 	startTimeStr, endTimeStr := Utils.GetTwoMonthAgoAndCurrentTime()
 	moduleList, err := Models.GetModuleList(startTimeStr, endTimeStr)
 	osaList, err := Models.GetOsaList(startTimeStr, endTimeStr)
+
 	var product []Models.Product
 	if osaList != nil {
 		product = append(product, osaList...)
@@ -18,6 +19,7 @@ func GetProductList(c *gin.Context) {
 	if moduleList != nil {
 		product = append(product, moduleList...)
 	}
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

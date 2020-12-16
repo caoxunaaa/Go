@@ -2,16 +2,17 @@ package main
 
 import (
 	"SuperxonWebSite/Databases"
-	routers "SuperxonWebSite/Router"
-	"fmt"
 )
 
 func main() {
-	Databases.InitOracle()
-	defer Databases.CloseOracle()
+	//Databases.InitOracle()
+	//defer Databases.CloseOracle()
 
-	r := routers.Init()
-	if err := r.Run("0.0.0.0:8002"); err != nil {
-		fmt.Printf("startup service failed, err:%v\n\n", err)
-	}
+	Databases.RedisInit()
+	defer Databases.RedisClose()
+
+	//r := routers.Init()
+	//if err := r.Run("0.0.0.0:8003"); err != nil {
+	//	fmt.Printf("startup service failed, err:%v\n\n", err)
+	//}
 }
