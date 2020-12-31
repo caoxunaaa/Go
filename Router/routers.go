@@ -18,6 +18,9 @@ var options []Option
 // 初始化
 func Init() *gin.Engine {
 	r := gin.Default()
+	r.Static("/assets", "./assets")
+	//r.StaticFS("/assets", http.Dir("assets"))
+	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
 	r.Use(Middlewares.Cors())
 	v1 := r.Group("/product")
 	{
@@ -27,6 +30,8 @@ func Init() *gin.Engine {
 		v1.GET("/osaInfo/:pn", equipment.GetOsaInfoList)
 		v1.GET("/moduleYesterdayInfo/:pn", equipment.GetYesterdayModuleInfoList)
 		v1.GET("/osaYesterdayInfo/:pn", equipment.GetYesterdayOsaInfoList)
+		v1.GET("/stationStatus", equipment.GetStationStatus)
+		v1.GET("/projectPlanList", equipment.GetProjectPlanList)
 	}
 	return r
 }

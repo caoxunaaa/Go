@@ -10,6 +10,9 @@ func main() {
 	Databases.InitOracle()
 	defer Databases.CloseOracle()
 
+	Databases.InitSqlite3()
+	defer Databases.CloseSqlite3()
+
 	Databases.RedisInit()
 	defer Databases.RedisClose()
 

@@ -8,9 +8,9 @@ import (
 )
 
 func GetModuleList(c *gin.Context) {
-	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{0, 0, -10})
+	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -10})
 	moduleList, err := Models.GetModuleList(startTimeStr, endTimeStr)
-
+	//fmt.Println(moduleList)
 	var product []Models.Product
 	if moduleList != nil {
 		product = append(product, moduleList...)
@@ -24,7 +24,7 @@ func GetModuleList(c *gin.Context) {
 }
 
 func GetOsaList(c *gin.Context) {
-	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{0, 0, -10})
+	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -10})
 	osaList, err := Models.GetOsaList(startTimeStr, endTimeStr)
 
 	var product []Models.Product

@@ -14,8 +14,8 @@ type Product struct {
 }
 
 func GetModuleList(startTime string, endTime string) (moduleList []Product, err error) {
-	rebytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "moduleList"))
-	_ = json.Unmarshal(rebytes, &moduleList)
+	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "moduleList"))
+	_ = json.Unmarshal(reBytes, &moduleList)
 	if len(moduleList) != 0 {
 		fmt.Println("使用redis")
 		return
@@ -37,7 +37,7 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 	}
 	datas, _ := json.Marshal(moduleList)
 	_, _ = Databases.RedisConn.Do("SET", "moduleList", datas)
-	_, err = Databases.RedisConn.Do("expire", "moduleList", 60)
+	_, err = Databases.RedisConn.Do("expire", "moduleList", 60*60)
 
 	return
 }
@@ -65,7 +65,7 @@ func GetOsaList(startTime string, endTime string) (osaList []Product, err error)
 	}
 	datas, _ := json.Marshal(osaList)
 	_, _ = Databases.RedisConn.Do("SET", "osaList", datas)
-	_, err = Databases.RedisConn.Do("expire", "osaList", 60*10)
+	_, err = Databases.RedisConn.Do("expire", "osaList", 60*60)
 	return
 }
 
