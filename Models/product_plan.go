@@ -21,7 +21,7 @@ type UndoneProjectPlanInfo struct {
 //已经完成的产品
 type DoneProjectPlanInfo struct {
 	Pn        string
-	DoneToPay string //已经交付数量
+	DoneToPay int //已经交付数量
 }
 
 type ProjectPlanInfo struct {
@@ -66,13 +66,20 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	}
 	fmt.Println(doneProjectPlanInfoList)
 
-	for _, valueUndone := range undoneProjectPlanInfoList {
-		for _, valueDone := range doneProjectPlanInfoList {
-			if valueUndone.Pn == valueDone.Pn {
-				projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, valueDone})
+	if len(doneProjectPlanInfoList) != 0 {
+		for _, valueUndone := range undoneProjectPlanInfoList {
+			for _, valueDone := range doneProjectPlanInfoList {
+				if valueUndone.Pn == valueDone.Pn {
+					projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, valueDone})
+				}
 			}
 		}
+	} else {
+		for _, valueUndone := range undoneProjectPlanInfoList {
+			projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, DoneProjectPlanInfo{Pn: valueUndone.Pn, DoneToPay: 0}})
+		}
 	}
+
 	fmt.Println(projectPlanInfoList)
 
 	datas, _ := json.Marshal(projectPlanInfoList)

@@ -32,6 +32,7 @@ func Init() *gin.Engine {
 		v1.GET("/osaYesterdayInfo/:pn", equipment.GetYesterdayOsaInfoList)
 		v1.GET("/stationStatus", equipment.GetStationStatus)
 		v1.GET("/projectPlanList", equipment.GetProjectPlanList)
+		v1.GET("/wipInfoList/:pn", equipment.GetWipInfoList)
 	}
 	return r
 }

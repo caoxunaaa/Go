@@ -24,7 +24,7 @@ func GetModuleList(c *gin.Context) {
 }
 
 func GetOsaList(c *gin.Context) {
-	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -10})
+	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -100})
 	osaList, err := Models.GetOsaList(startTimeStr, endTimeStr)
 
 	var product []Models.Product
