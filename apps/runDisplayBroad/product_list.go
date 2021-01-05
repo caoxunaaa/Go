@@ -1,7 +1,7 @@
-package equipment
+package runDisplayBroad
 
 import (
-	"SuperxonWebSite/Models"
+	"SuperxonWebSite/Models/RunDisplay"
 	"SuperxonWebSite/Utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -9,9 +9,9 @@ import (
 
 func GetModuleList(c *gin.Context) {
 	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -10})
-	moduleList, err := Models.GetModuleList(startTimeStr, endTimeStr)
+	moduleList, err := RunDisplay.GetModuleList(startTimeStr, endTimeStr)
 	//fmt.Println(moduleList)
-	var product []Models.Product
+	var product []RunDisplay.Product
 	if moduleList != nil {
 		product = append(product, moduleList...)
 	}
@@ -25,9 +25,9 @@ func GetModuleList(c *gin.Context) {
 
 func GetOsaList(c *gin.Context) {
 	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -100})
-	osaList, err := Models.GetOsaList(startTimeStr, endTimeStr)
+	osaList, err := RunDisplay.GetOsaList(startTimeStr, endTimeStr)
 
-	var product []Models.Product
+	var product []RunDisplay.Product
 	if osaList != nil {
 		product = append(product, osaList...)
 	}
@@ -46,7 +46,7 @@ func GetModuleInfoList(c *gin.Context) {
 		return
 	}
 	startTimeStr, endTimeStr := Utils.GetCurrentAndZeroTime()
-	moduleInfo, err := Models.GetModuleInfoList(pn, startTimeStr, endTimeStr)
+	moduleInfo, err := RunDisplay.GetModuleInfoList(pn, startTimeStr, endTimeStr)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -62,7 +62,7 @@ func GetOsaInfoList(c *gin.Context) {
 		return
 	}
 	startTimeStr, endTimeStr := Utils.GetCurrentAndZeroTime()
-	moduleInfo, err := Models.GetOsaInfoList(pn, startTimeStr, endTimeStr)
+	moduleInfo, err := RunDisplay.GetOsaInfoList(pn, startTimeStr, endTimeStr)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -77,7 +77,7 @@ func GetYesterdayModuleInfoList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
 		return
 	}
-	moduleInfo, err := Models.GetYesterdayModuleInfoList(pn)
+	moduleInfo, err := RunDisplay.GetYesterdayModuleInfoList(pn)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -92,7 +92,7 @@ func GetYesterdayOsaInfoList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
 		return
 	}
-	moduleInfo, err := Models.GetYesterdayOsaInfoList(pn)
+	moduleInfo, err := RunDisplay.GetYesterdayOsaInfoList(pn)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

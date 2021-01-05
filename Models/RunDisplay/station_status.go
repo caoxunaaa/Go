@@ -1,4 +1,4 @@
-package Models
+package RunDisplay
 
 import (
 	"SuperxonWebSite/Databases"
@@ -48,6 +48,7 @@ from TRX g where g.RR=1)d order by d.stationid asc`
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var stationStatus StationStatus
 	for rows.Next() {
 		err = rows.Scan(

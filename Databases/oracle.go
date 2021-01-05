@@ -17,7 +17,7 @@ func InitOracle() {
 		return
 	}
 	OracleDB.SetMaxIdleConns(10)
-	OracleDB.SetMaxOpenConns(200)
+	OracleDB.SetMaxOpenConns(20)
 }
 
 func CloseOracle() {

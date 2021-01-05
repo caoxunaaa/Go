@@ -1,13 +1,13 @@
-package equipment
+package runDisplayBroad
 
 import (
-	"SuperxonWebSite/Models"
+	"SuperxonWebSite/Models/RunDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetProjectPlanList(c *gin.Context) {
-	projectPlanInfoList, err := Models.GetProjectPlanList()
+	projectPlanInfoList, err := RunDisplay.GetProjectPlanList()
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

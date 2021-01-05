@@ -1,4 +1,4 @@
-package Models
+package RunDisplay
 
 import (
 	"SuperxonWebSite/Databases"
@@ -38,11 +38,15 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	}
 
 	undoneProjectPlanInfoList := make([]UndoneProjectPlanInfo, 0)
-	stmt, _ := Databases.SqliteDB.Prepare("SELECT * from ProjectPlanInfo")
-	rows, _ := stmt.Query()
+	stmt, _ := Databases.SqliteDbEntry.Prepare("SELECT * from ProjectPlanInfo")
+	rowsUndone, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer rowsUndone.Close()
 	var undoneProjectPlanInfo UndoneProjectPlanInfo
-	for rows.Next() {
-		_ = rows.Scan(
+	for rowsUndone.Next() {
+		_ = rowsUndone.Scan(
 			&undoneProjectPlanInfo.Id,
 			&undoneProjectPlanInfo.Type,
 			&undoneProjectPlanInfo.Customers,
@@ -56,10 +60,14 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	doneProjectPlanInfoList := make([]DoneProjectPlanInfo, 0)
 	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
 	sqlStr := `select model, count(*) from superxon.storagemanage_main a where a.shipmenttime between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss') group by a.model`
-	rows, _ = Databases.OracleDB.Query(sqlStr)
+	rowsDone, err := Databases.OracleDB.Query(sqlStr)
+	if err != nil {
+		return nil, err
+	}
+	defer rowsDone.Close()
 	var doneProjectPlanInfo DoneProjectPlanInfo
-	for rows.Next() {
-		_ = rows.Scan(
+	for rowsDone.Next() {
+		_ = rowsDone.Scan(
 			&doneProjectPlanInfo.Pn,
 			&doneProjectPlanInfo.DoneToPay)
 		doneProjectPlanInfoList = append(doneProjectPlanInfoList, doneProjectPlanInfo)

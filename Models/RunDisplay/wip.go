@@ -1,4 +1,4 @@
-package Models
+package RunDisplay
 
 import (
 	"SuperxonWebSite/Databases"
@@ -36,6 +36,7 @@ from TRX g where g.rr = 1 /*and g.log_action = 'FQC_INWH'*/)f order by f.PN,f.æ€
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var wipInfo WipInfo
 	for rows.Next() {
 		err = rows.Scan(&wipInfo.Pn, &wipInfo.Process, &wipInfo.Pass, &wipInfo.Fail, &wipInfo.Total)

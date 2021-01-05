@@ -1,4 +1,4 @@
-package Models
+package RunDisplay
 
 import (
 	"SuperxonWebSite/Databases"
@@ -25,6 +25,7 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var pn Product
 	for rows.Next() {
 		err = rows.Scan(&pn.Name)
@@ -43,8 +44,8 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 }
 
 func GetOsaList(startTime string, endTime string) (osaList []Product, err error) {
-	rebytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "osaList"))
-	_ = json.Unmarshal(rebytes, &osaList)
+	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "osaList"))
+	_ = json.Unmarshal(reBytes, &osaList)
 	if len(osaList) != 0 {
 		fmt.Println("使用redis")
 		return
@@ -53,6 +54,7 @@ func GetOsaList(startTime string, endTime string) (osaList []Product, err error)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var osa Product
 	for rows.Next() {
 		err = rows.Scan(&osa.Name)
@@ -63,8 +65,8 @@ func GetOsaList(startTime string, endTime string) (osaList []Product, err error)
 			osaList = append(osaList, osa)
 		}
 	}
-	datas, _ := json.Marshal(osaList)
-	_, _ = Databases.RedisConn.Do("SET", "osaList", datas)
+	dataset, _ := json.Marshal(osaList)
+	_, _ = Databases.RedisConn.Do("SET", "osaList", dataset)
 	_, err = Databases.RedisConn.Do("expire", "osaList", 60*60)
 	return
 }
@@ -112,28 +114,29 @@ sum(case m.p_value when 'PASS' then 0 else 1 end)over(partition by m.log_action,
 	if err != nil {
 		return nil, err
 	}
-	var moduleinfo ProductInfo
+	defer rows.Close()
+	var moduleInfo ProductInfo
 	for rows.Next() {
 		err = rows.Scan(
-			&moduleinfo.Pn,
-			&moduleinfo.Sequence,
-			&moduleinfo.Process,
-			&moduleinfo.TotalInvestment,
-			&moduleinfo.OnceOk,
-			&moduleinfo.OnceBad,
-			&moduleinfo.OncePassRate,
-			&moduleinfo.TotalInput,
-			&moduleinfo.FinalOk,
-			&moduleinfo.FinalBad,
-			&moduleinfo.FinalPassRate,
-			&moduleinfo.AccTotalTest,
-			&moduleinfo.AccOk,
-			&moduleinfo.AccBad,
-			&moduleinfo.AccPassRate)
+			&moduleInfo.Pn,
+			&moduleInfo.Sequence,
+			&moduleInfo.Process,
+			&moduleInfo.TotalInvestment,
+			&moduleInfo.OnceOk,
+			&moduleInfo.OnceBad,
+			&moduleInfo.OncePassRate,
+			&moduleInfo.TotalInput,
+			&moduleInfo.FinalOk,
+			&moduleInfo.FinalBad,
+			&moduleInfo.FinalPassRate,
+			&moduleInfo.AccTotalTest,
+			&moduleInfo.AccOk,
+			&moduleInfo.AccBad,
+			&moduleInfo.AccPassRate)
 		if err != nil {
 			return nil, err
 		}
-		moduleInfoList = append(moduleInfoList, moduleinfo)
+		moduleInfoList = append(moduleInfoList, moduleInfo)
 	}
 	return
 }
@@ -206,6 +209,7 @@ from OSA e )f where b.工序=d.工序 and b.工序=f.工序  and b.序列=d.序�
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var osainfo ProductInfo
 	for rows.Next() {
 		err = rows.Scan(
@@ -258,6 +262,7 @@ sum(case m.p_value when 'PASS' then 0 else 1 end)over(partition by m.log_action,
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var moduleinfo ProductInfo
 	for rows.Next() {
 		err = rows.Scan(
@@ -353,6 +358,7 @@ from OSA e )f where b.工序=d.工序 and b.工序=f.工序  and b.序列=d.序�
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var osainfo ProductInfo
 	for rows.Next() {
 		err = rows.Scan(

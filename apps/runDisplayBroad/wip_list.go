@@ -1,7 +1,7 @@
-package equipment
+package runDisplayBroad
 
 import (
-	"SuperxonWebSite/Models"
+	"SuperxonWebSite/Models/RunDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,7 +11,7 @@ func GetWipInfoList(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的PN"})
 	}
-	wipInfoList, err := Models.GetWipInfoList(pn)
+	wipInfoList, err := RunDisplay.GetWipInfoList(pn)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
