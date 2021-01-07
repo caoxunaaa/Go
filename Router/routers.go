@@ -2,6 +2,7 @@ package Router
 
 import (
 	"SuperxonWebSite/Middlewares"
+	"SuperxonWebSite/apps/deviceManangeApp"
 	"SuperxonWebSite/apps/qaStatisticBroad"
 	"SuperxonWebSite/apps/runDisplayBroad"
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,13 @@ func Init() *gin.Engine {
 		v2.GET("/qaPnList", qaStatisticBroad.GetQaPnList)
 		v2.GET("/qaStatisticsInfo", qaStatisticBroad.GetQaStatisticInfoList)
 		v2.GET("/qaDefectsInfo", qaStatisticBroad.GetQaDefectsInfoList)
+	}
+	v3 := r.Group("/deviceManage")
+	{
+		v3.GET("/deviceRootCategory", deviceManangeApp.GetAllDeviceCategoryRootList)
+		v3.GET("/deviceChildCategory/:rootCategory", deviceManangeApp.GetAllDeviceCategoryChildList)
+		v3.POST("/deviceChildCategory", deviceManangeApp.CreateDeviceCategoryChild)
+		v3.GET("/deviceBaseInfo", deviceManangeApp.GetAllDeviceBaseInfoList)
 	}
 	return r
 }

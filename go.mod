@@ -8,6 +8,8 @@ require (
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/gomodule/redigo/redis v0.0.0-20200429221454-e14091dffc1b
 	github.com/gookit/color v1.3.2 // indirect
+	github.com/jinzhu/gorm v1.9.16
+	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/mattn/go-oci8 v0.1.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible

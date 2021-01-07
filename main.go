@@ -2,6 +2,7 @@ package main
 
 import (
 	"SuperxonWebSite/Databases"
+	"SuperxonWebSite/Models/DeviceManage"
 	"SuperxonWebSite/Router"
 	"fmt"
 )
@@ -11,6 +12,17 @@ func main() {
 	defer Databases.CloseOracle()
 
 	Databases.InitSqlite3()
+	Databases.SqliteDbDeviceOrm.AutoMigrate(
+		&DeviceManage.DeviceBaseInfo{},
+		&DeviceManage.DeviceRepairInfo{},
+		&DeviceManage.DeviceMaintenanceItem{},
+		&DeviceManage.DeviceMaintenanceCurrentInfo{},
+		&DeviceManage.DeviceMaintenanceRecord{},
+		&DeviceManage.DeviceTransmitInfo{},
+		&DeviceManage.DeviceCategory{},
+		&DeviceManage.SelfTest{},
+	)
+	_ = Databases.SqliteDbDeviceOrm.Close()
 	defer Databases.CloseSqlite3()
 
 	Databases.RedisInit()

@@ -1,6 +1,9 @@
 package QaStatisticDisplay
 
-import "SuperxonWebSite/Databases"
+import (
+	"SuperxonWebSite/Databases"
+	"fmt"
+)
 
 type QaPn struct {
 	Pn string
@@ -13,14 +16,17 @@ func GetQaPnList(startTime string, endTime string) (qaPnList []QaPn, err error) 
 		return nil, err
 	}
 	defer rows.Close()
-	var qaPn QaPn
+	fmt.Println(rows)
+	var qaPn *QaPn
+	qaPn = new(QaPn)
 	for rows.Next() {
 		err = rows.Scan(
 			&qaPn.Pn)
 		if err != nil {
+			fmt.Println(err)
 			return nil, err
 		}
-		qaPnList = append(qaPnList, qaPn)
+		qaPnList = append(qaPnList, *qaPn)
 	}
 	return
 }
