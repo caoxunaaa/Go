@@ -14,7 +14,7 @@ type DeviceCategory struct {
 
 func GetAllDeviceCategoryRootList() (deviceCategoryRootNameList []string, err error) {
 	sqlStr := "select name from device_categories where parent_category_name is NUll"
-	err = Databases.SqliteDbDevice.Select(&deviceCategoryRootNameList, sqlStr)
+	err = Databases.SuperxonDbDevice.Select(&deviceCategoryRootNameList, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func GetAllDeviceCategoryRootList() (deviceCategoryRootNameList []string, err er
 
 func GetAllDeviceCategoryChildList(rootCategory string) (deviceCategoryChildNameList []string, err error) {
 	sqlStr := "select Child.name from device_categories Child, (select id, name from device_categories where parent_category_name is NUll) As Root WHERE Child.parent_category_name = Root.name and Root.name = ?"
-	err = Databases.SqliteDbDevice.Select(&deviceCategoryChildNameList, sqlStr, rootCategory)
+	err = Databases.SuperxonDbDevice.Select(&deviceCategoryChildNameList, sqlStr, rootCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func CreateDeviceCategoryChild(rootCategory string, childCategory string) (err e
 		}
 	}
 	sqlStr := "INSERT INTO device_categories(name, parent_category_name) values (?, ?)"
-	_, err = Databases.SqliteDbDevice.Exec(sqlStr, childCategory, rootCategory)
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, childCategory, rootCategory)
 	if err != nil {
 		return err
 	}

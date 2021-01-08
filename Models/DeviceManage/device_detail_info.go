@@ -30,7 +30,7 @@ type SelfTest struct {
 
 func GetAllDeviceBaseInfoList() (deviceBaseInfoList []DeviceBaseInfo, err error) {
 	sqlStr := "select * from device_base_infos where id > ?"
-	err = Databases.SqliteDbDevice.Select(&deviceBaseInfoList, sqlStr, 0)
+	err = Databases.SuperxonDbDevice.Select(&deviceBaseInfoList, sqlStr, 0)
 	if err != nil {
 		return nil, err
 	}

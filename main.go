@@ -12,7 +12,12 @@ func main() {
 	defer Databases.CloseOracle()
 
 	Databases.InitSqlite3()
-	Databases.SqliteDbDeviceOrm.AutoMigrate(
+	defer Databases.CloseSqlite3()
+
+	Databases.InitMysql()
+	defer Databases.CloseMysql()
+
+	Databases.SuperxonDbDeviceOrm.AutoMigrate(
 		&DeviceManage.DeviceBaseInfo{},
 		&DeviceManage.DeviceRepairInfo{},
 		&DeviceManage.DeviceMaintenanceItem{},
@@ -22,8 +27,7 @@ func main() {
 		&DeviceManage.DeviceCategory{},
 		&DeviceManage.SelfTest{},
 	)
-	_ = Databases.SqliteDbDeviceOrm.Close()
-	defer Databases.CloseSqlite3()
+	_ = Databases.SuperxonDbDeviceOrm.Close()
 
 	Databases.RedisInit()
 	defer Databases.RedisClose()
