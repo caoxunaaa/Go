@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetAllDeviceTransmitInfoList(c *gin.Context) {
+func GetAllDeviceTransmitInfoListHandler(c *gin.Context) {
 	deviceTransmitInfoList, err := DeviceManage.GetAllDeviceTransmitInfoList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

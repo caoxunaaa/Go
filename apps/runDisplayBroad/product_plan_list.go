@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetProjectPlanList(c *gin.Context) {
+func GetProjectPlanListHandler(c *gin.Context) {
 	projectPlanInfoList, err := RunDisplay.GetProjectPlanList()
 
 	if err != nil {

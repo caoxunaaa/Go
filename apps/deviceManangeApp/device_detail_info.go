@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetAllDeviceBaseInfoList(c *gin.Context) {
+func GetAllDeviceBaseInfoListHandler(c *gin.Context) {
 	deviceBaseInfoList, err := DeviceManage.GetAllDeviceBaseInfoList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -15,7 +15,7 @@ func GetAllDeviceBaseInfoList(c *gin.Context) {
 	}
 }
 
-func GetDeviceBaseInfo(c *gin.Context) {
+func GetDeviceBaseInfoHandler(c *gin.Context) {
 	snAssetsIc, ok := c.Params.Get("snAssetsIc")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn Assets 或者InternalCoding"})

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetAllDeviceRepairInfoList(c *gin.Context) {
+func GetAllDeviceRepairInfoListHandler(c *gin.Context) {
 	deviceRepairInfoList, err := DeviceManage.GetAllDeviceRepairInfoList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -15,7 +15,7 @@ func GetAllDeviceRepairInfoList(c *gin.Context) {
 	}
 }
 
-func GetDeviceRepairInfo(c *gin.Context) {
+func GetDeviceRepairInfoHandler(c *gin.Context) {
 	deviceSn, ok := c.Params.Get("deviceSn")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})

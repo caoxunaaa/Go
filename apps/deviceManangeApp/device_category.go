@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetAllDeviceCategoryRootList(c *gin.Context) {
+func GetAllDeviceCategoryRootListHandler(c *gin.Context) {
 	deviceCategoryRootNameList, err := DeviceManage.GetAllDeviceCategoryRootList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -15,7 +15,7 @@ func GetAllDeviceCategoryRootList(c *gin.Context) {
 	}
 }
 
-func GetAllDeviceCategoryChildList(c *gin.Context) {
+func GetAllDeviceCategoryChildListHandler(c *gin.Context) {
 	rootCategory, ok := c.Params.Get("rootCategory")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
@@ -29,7 +29,7 @@ func GetAllDeviceCategoryChildList(c *gin.Context) {
 	}
 }
 
-func CreateDeviceCategoryChild(c *gin.Context) {
+func CreateDeviceCategoryChildHandler(c *gin.Context) {
 	var deviceCategory DeviceManage.DeviceCategory
 	if err := c.BindJSON(&deviceCategory); err == nil {
 		err = DeviceManage.CreateDeviceCategoryChild(&deviceCategory)

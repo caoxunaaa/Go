@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetStationStatus(c *gin.Context) {
+func GetStationStatusHandler(c *gin.Context) {
 	stationStatusList, err := RunDisplay.GetStationStatus()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

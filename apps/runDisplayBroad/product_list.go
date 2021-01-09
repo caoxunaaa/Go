@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func GetModuleList(c *gin.Context) {
+func GetModuleListHandler(c *gin.Context) {
 	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -10})
 	moduleList, err := RunDisplay.GetModuleList(startTimeStr, endTimeStr)
 	//fmt.Println(moduleList)
@@ -23,7 +23,7 @@ func GetModuleList(c *gin.Context) {
 	}
 }
 
-func GetOsaList(c *gin.Context) {
+func GetOsaListHandler(c *gin.Context) {
 	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -100})
 	osaList, err := RunDisplay.GetOsaList(startTimeStr, endTimeStr)
 
@@ -39,7 +39,7 @@ func GetOsaList(c *gin.Context) {
 	}
 }
 
-func GetModuleInfoList(c *gin.Context) {
+func GetModuleInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
@@ -55,7 +55,7 @@ func GetModuleInfoList(c *gin.Context) {
 	}
 }
 
-func GetOsaInfoList(c *gin.Context) {
+func GetOsaInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
@@ -71,7 +71,7 @@ func GetOsaInfoList(c *gin.Context) {
 	}
 }
 
-func GetYesterdayModuleInfoList(c *gin.Context) {
+func GetYesterdayModuleInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
@@ -86,7 +86,7 @@ func GetYesterdayModuleInfoList(c *gin.Context) {
 	}
 }
 
-func GetYesterdayOsaInfoList(c *gin.Context) {
+func GetYesterdayOsaInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})

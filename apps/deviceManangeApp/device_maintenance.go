@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetAllDeviceMaintenanceCategoryList(c *gin.Context) {
+func GetAllDeviceMaintenanceCategoryListHandler(c *gin.Context) {
 	deviceMaintenanceItemCategoryList, err := DeviceManage.GetAllDeviceMaintenanceCategoryList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -15,7 +15,7 @@ func GetAllDeviceMaintenanceCategoryList(c *gin.Context) {
 	}
 }
 
-func GetDeviceMaintenanceItemOfCategory(c *gin.Context) {
+func GetDeviceMaintenanceItemOfCategoryHandler(c *gin.Context) {
 	category, ok := c.Params.Get("category")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的保养类型"})
@@ -29,7 +29,7 @@ func GetDeviceMaintenanceItemOfCategory(c *gin.Context) {
 	}
 }
 
-func GetAllDeviceMaintenanceCurrentInfoList(c *gin.Context) {
+func GetAllDeviceMaintenanceCurrentInfoListHandler(c *gin.Context) {
 	deviceMaintenanceCurrentInfoList, err := DeviceManage.GetAllDeviceMaintenanceCurrentInfoList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -38,7 +38,7 @@ func GetAllDeviceMaintenanceCurrentInfoList(c *gin.Context) {
 	}
 }
 
-func GetDeviceMaintenanceCurrentInfo(c *gin.Context) {
+func GetDeviceMaintenanceCurrentInfoHandler(c *gin.Context) {
 	snAssets, ok := c.Params.Get("snAssets")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的保养类型"})
@@ -52,7 +52,7 @@ func GetDeviceMaintenanceCurrentInfo(c *gin.Context) {
 	}
 }
 
-func GetAllDeviceMaintenanceAllRecords(c *gin.Context) {
+func GetAllDeviceMaintenanceAllRecordsHandler(c *gin.Context) {
 	deviceMaintenanceRecords, err := DeviceManage.GetAllDeviceMaintenanceRecords("")
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -61,7 +61,7 @@ func GetAllDeviceMaintenanceAllRecords(c *gin.Context) {
 	}
 }
 
-func GetAllDeviceMaintenanceRecordsOfItemName(c *gin.Context) {
+func GetAllDeviceMaintenanceRecordsOfItemNameHandler(c *gin.Context) {
 	itemName, ok := c.Params.Get("itemName")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的保养类型"})
@@ -75,7 +75,7 @@ func GetAllDeviceMaintenanceRecordsOfItemName(c *gin.Context) {
 	}
 }
 
-func GetDeviceMaintenanceRecords(c *gin.Context) {
+func GetDeviceMaintenanceRecordsHandler(c *gin.Context) {
 	snAssets, ok := c.Params.Get("snAssets")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn 或者 固资号"})
@@ -90,7 +90,7 @@ func GetDeviceMaintenanceRecords(c *gin.Context) {
 	}
 }
 
-func GetDeviceMaintenanceRecordOfItemName(c *gin.Context) {
+func GetDeviceMaintenanceRecordOfItemNameHandler(c *gin.Context) {
 	snAssets, ok := c.Params.Get("snAssets")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn 或者 固资号"})

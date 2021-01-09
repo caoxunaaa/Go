@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetWipInfoList(c *gin.Context) {
+func GetWipInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的PN"})

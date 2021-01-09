@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetQaPnList(c *gin.Context) {
+func GetQaPnListHandler(c *gin.Context) {
 	startTime := c.DefaultQuery("startTime", "None")
 	endTime := c.DefaultQuery("endTime", "None")
 	if startTime == "None" || endTime == "None" {
@@ -21,7 +21,7 @@ func GetQaPnList(c *gin.Context) {
 	}
 }
 
-func GetQaStatisticInfoList(c *gin.Context) {
+func GetQaStatisticInfoListHandler(c *gin.Context) {
 	pn := c.DefaultQuery("pn", "None")
 	startTime := c.DefaultQuery("startTime", "None")
 	endTime := c.DefaultQuery("endTime", "None")
@@ -37,7 +37,7 @@ func GetQaStatisticInfoList(c *gin.Context) {
 	}
 }
 
-func GetQaDefectsInfoList(c *gin.Context) {
+func GetQaDefectsInfoListHandler(c *gin.Context) {
 	pn := c.DefaultQuery("pn", "None")
 	startTime := c.DefaultQuery("startTime", "None")
 	endTime := c.DefaultQuery("endTime", "None")
