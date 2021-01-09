@@ -3,6 +3,7 @@ package DeviceManage
 import (
 	"SuperxonWebSite/Databases"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -28,10 +29,21 @@ type SelfTest struct {
 	Name string `db:"name"`
 }
 
-func GetAllDeviceBaseInfoList() (deviceBaseInfoList []DeviceBaseInfo, err error) {
-	sqlStr := "select * from device_base_infos where id > ?"
-	err = Databases.SuperxonDbDevice.Select(&deviceBaseInfoList, sqlStr, 0)
+func GetAllDeviceBaseInfoList() (deviceBaseInfoList []*DeviceBaseInfo, err error) {
+	sqlStr := "SELECT * FROM device_base_infos ORDER BY (CASE status_of_repair WHEN '维修中' THEN 1 WHEN '正常' THEN 2 ELSE 3 END), (CASE status_of_maintenance WHEN '保养超时' THEN 1 WHEN '待保养' THEN 2 WHEN '未绑定' THEN 3 ELSE 4 END) ASC"
+	err = Databases.SuperxonDbDevice.Select(&deviceBaseInfoList, sqlStr)
 	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func GetDeviceBaseInfo(snAssetsIc string) (deviceBaseInfo *DeviceBaseInfo, err error) {
+	deviceBaseInfo = new(DeviceBaseInfo)
+	sqlStr := "select * from device_base_infos where sn = ? or assets = ? or internal_coding = ?"
+	err = Databases.SuperxonDbDevice.Get(deviceBaseInfo, sqlStr, snAssetsIc, snAssetsIc, snAssetsIc)
+	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	return

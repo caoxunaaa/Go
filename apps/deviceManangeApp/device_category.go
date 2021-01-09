@@ -31,12 +31,12 @@ func GetAllDeviceCategoryChildList(c *gin.Context) {
 
 func CreateDeviceCategoryChild(c *gin.Context) {
 	var deviceCategory DeviceManage.DeviceCategory
-	if err := c.ShouldBind(&deviceCategory); err == nil {
-		err = DeviceManage.CreateDeviceCategoryChild(deviceCategory.ParentCategoryName.String, deviceCategory.Name)
+	if err := c.BindJSON(&deviceCategory); err == nil {
+		err = DeviceManage.CreateDeviceCategoryChild(&deviceCategory)
 		if err == nil {
 			c.JSON(http.StatusOK, gin.H{
 				"ChildName": deviceCategory.Name,
-				"RootName":  deviceCategory.ParentCategoryName,
+				"RootName":  deviceCategory.ParentCategoryName.String,
 			})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Option func(*gin.Engine)
+//type Option func(*gin.Engine)
 
-var options []Option
+//var options []Option
 
 // 注册app的路由配置
 //func Include(opts ...Option) {
@@ -47,7 +47,26 @@ func Init() *gin.Engine {
 		v3.GET("/deviceRootCategory", deviceManangeApp.GetAllDeviceCategoryRootList)
 		v3.GET("/deviceChildCategory/:rootCategory", deviceManangeApp.GetAllDeviceCategoryChildList)
 		v3.POST("/deviceChildCategory", deviceManangeApp.CreateDeviceCategoryChild)
+
 		v3.GET("/deviceBaseInfo", deviceManangeApp.GetAllDeviceBaseInfoList)
+		v3.GET("/deviceBaseInfo/:snAssetsIc", deviceManangeApp.GetDeviceBaseInfo)
+
+		v3.GET("/deviceTransmit", deviceManangeApp.GetAllDeviceTransmitInfoList)
+
+		v3.GET("/deviceRepair", deviceManangeApp.GetAllDeviceRepairInfoList)
+		v3.GET("/deviceRepair/:deviceSn", deviceManangeApp.GetDeviceRepairInfo)
+
+		v3.GET("/deviceMaintenanceItem", deviceManangeApp.GetAllDeviceMaintenanceCategoryList)
+		v3.GET("/deviceMaintenanceItem/:category", deviceManangeApp.GetDeviceMaintenanceItemOfCategory)
+
+		v3.GET("/deviceCurrentMaintenance", deviceManangeApp.GetAllDeviceMaintenanceCurrentInfoList)
+		v3.GET("/deviceCurrentMaintenance/:snAssets", deviceManangeApp.GetDeviceMaintenanceCurrentInfo)
+
+		v3.GET("/deviceMaintenanceRecord", deviceManangeApp.GetAllDeviceMaintenanceAllRecords)
+		v3.GET("/deviceMaintenanceRecord/:itemName", deviceManangeApp.GetAllDeviceMaintenanceRecordsOfItemName)
+
+		v3.GET("/deviceMaintenanceRecordOfDevice/:snAssets", deviceManangeApp.GetDeviceMaintenanceRecords)
+		v3.GET("/deviceMaintenanceRecordOfDevice/:snAssets/:itemName", deviceManangeApp.GetDeviceMaintenanceRecordOfItemName)
 	}
 	return r
 }

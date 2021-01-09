@@ -8,12 +8,12 @@ import (
 
 type DeviceCategory struct {
 	ID                 uint           `gorm:"primary_key" db:"id"`
-	Name               string         `gorm:"unique;not null" db:"category_root"`
-	ParentCategoryName sql.NullString `db:"parent_category_id"`
+	Name               string         `gorm:"unique;not null" db:"name"`
+	ParentCategoryName sql.NullString `db:"parent_category_name"`
 }
 
-func GetAllDeviceCategoryRootList() (deviceCategoryRootNameList []string, err error) {
-	sqlStr := "select name from device_categories where parent_category_name is NUll"
+func GetAllDeviceCategoryRootList() (deviceCategoryRootNameList []*DeviceCategory, err error) {
+	sqlStr := "select * from device_categories where parent_category_name is NUll"
 	err = Databases.SuperxonDbDevice.Select(&deviceCategoryRootNameList, sqlStr)
 	if err != nil {
 		return nil, err
@@ -21,8 +21,9 @@ func GetAllDeviceCategoryRootList() (deviceCategoryRootNameList []string, err er
 	return
 }
 
-func GetAllDeviceCategoryChildList(rootCategory string) (deviceCategoryChildNameList []string, err error) {
-	sqlStr := "select Child.name from device_categories Child, (select id, name from device_categories where parent_category_name is NUll) As Root WHERE Child.parent_category_name = Root.name and Root.name = ?"
+func GetAllDeviceCategoryChildList(rootCategory string) (deviceCategoryChildNameList []*DeviceCategory, err error) {
+	sqlStr := "select * from device_categories where parent_category_name = ?"
+	//sqlStr := "select Child.name from device_categories Child, (select id, name from device_categories where parent_category_name is NUll) As Root WHERE Child.parent_category_name = Root.name and Root.name = ?"
 	err = Databases.SuperxonDbDevice.Select(&deviceCategoryChildNameList, sqlStr, rootCategory)
 	if err != nil {
 		return nil, err
@@ -30,10 +31,10 @@ func GetAllDeviceCategoryChildList(rootCategory string) (deviceCategoryChildName
 	return
 }
 
-func CreateDeviceCategoryChild(rootCategory string, childCategory string) (err error) {
+func CreateDeviceCategoryChild(deviceCategory *DeviceCategory) (err error) {
 	allDeviceCategoryRootList, _ := GetAllDeviceCategoryRootList()
 	for index, v := range allDeviceCategoryRootList {
-		if v == rootCategory {
+		if v.Name == deviceCategory.ParentCategoryName.String {
 			break
 		}
 		if index == (len(allDeviceCategoryRootList) - 1) {
@@ -41,7 +42,7 @@ func CreateDeviceCategoryChild(rootCategory string, childCategory string) (err e
 		}
 	}
 	sqlStr := "INSERT INTO device_categories(name, parent_category_name) values (?, ?)"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, childCategory, rootCategory)
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, deviceCategory.Name, deviceCategory.ParentCategoryName.String)
 	if err != nil {
 		return err
 	}
