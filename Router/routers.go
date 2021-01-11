@@ -33,6 +33,8 @@ func Init() *gin.Engine {
 		v2.GET("/qaPnList", qaStatisticBroad.GetQaPnListHandler)
 		v2.GET("/qaStatisticsInfo", qaStatisticBroad.GetQaStatisticInfoListHandler)
 		v2.GET("/qaDefectsInfo", qaStatisticBroad.GetQaDefectsInfoListHandler)
+		v2.GET("/pnSetParams", qaStatisticBroad.GetPnSetParamsListHandler)
+		v2.GET("/pnWorkOrderYields", qaStatisticBroad.GetPnWorkOrderYieldsListHandler)
 	}
 	v3 := r.Group("/deviceManage")
 	{
@@ -42,8 +44,12 @@ func Init() *gin.Engine {
 
 		v3.GET("/deviceBaseInfo", deviceManangeApp.GetAllDeviceBaseInfoListHandler)
 		v3.GET("/deviceBaseInfo/:snAssetsIc", deviceManangeApp.GetDeviceBaseInfoHandler)
+		v3.POST("/deviceBaseInfo", deviceManangeApp.CreateDeviceBaseInfoHandler)
+		v3.DELETE("/deviceBaseInfo/:deviceSn", deviceManangeApp.DeleteDeviceBaseInfoHandler)
+		v3.PUT("/deviceBaseInfo/:deviceSn", deviceManangeApp.UpdateDeviceBaseInfoHandler)
 
 		v3.GET("/deviceTransmit", deviceManangeApp.GetAllDeviceTransmitInfoListHandler)
+		v3.GET("/deviceTransmit/:deviceSn", deviceManangeApp.GetDeviceTransmitInfoHandler)
 
 		v3.GET("/deviceRepair", deviceManangeApp.GetAllDeviceRepairInfoListHandler)
 		v3.GET("/deviceRepair/:deviceSn", deviceManangeApp.GetDeviceRepairInfoHandler)

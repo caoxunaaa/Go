@@ -90,6 +90,14 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 
 	fmt.Println(projectPlanInfoList)
 
+	// 再进行一次redis的读取，避免读写冲突导致数据出错
+	reBytes, _ = redis.Bytes(Databases.RedisConn.Do("get", "projectPlanInfoList"))
+	_ = json.Unmarshal(reBytes, &projectPlanInfoList)
+	if len(projectPlanInfoList) != 0 {
+		fmt.Println("使用redis")
+		return
+	}
+
 	datas, _ := json.Marshal(projectPlanInfoList)
 	_, _ = Databases.RedisConn.Do("SET", "projectPlanInfoList", datas)
 	_, err = Databases.RedisConn.Do("expire", "projectPlanInfoList", 60*60)

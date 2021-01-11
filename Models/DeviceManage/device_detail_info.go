@@ -48,3 +48,55 @@ func GetDeviceBaseInfo(snAssetsIc string) (deviceBaseInfo *DeviceBaseInfo, err e
 	}
 	return
 }
+
+func DeleteDeviceBaseInfo(deviceSn string) (length int64, err error) {
+	sqlStr := "DELETE FROM device_base_infos where sn = ?"
+	res, err := Databases.SuperxonDbDevice.Exec(sqlStr, deviceSn)
+	if err != nil {
+		return length, err
+	}
+	length, err = res.RowsAffected()
+	return
+}
+
+func CreateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo) (err error) {
+	sqlStr := "INSERT INTO device_base_infos(name, sort, sn, assets, category_root, category_child, owner, internal_coding, calibration_type, supplier, storage_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+		deviceBaseInfo.Name,
+		deviceBaseInfo.Sort,
+		deviceBaseInfo.Sn,
+		deviceBaseInfo.Assets,
+		deviceBaseInfo.CategoryRoot,
+		deviceBaseInfo.CategoryChild,
+		deviceBaseInfo.Owner,
+		deviceBaseInfo.InternalCoding.String,
+		deviceBaseInfo.CalibrationType,
+		deviceBaseInfo.Supplier.String,
+		deviceBaseInfo.StorageTime)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+func UpdateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo, oldSn string) (length int64, err error) {
+	sqlStr := "UPDATE device_base_infos SET name=?, sort=?, sn=?, assets=?, category_root=?, category_child=?, owner=?, internal_coding=?, calibration_type=?, supplier=?, storage_time=? WHERE sn=?"
+	res, err := Databases.SuperxonDbDevice.Exec(sqlStr,
+		deviceBaseInfo.Name,
+		deviceBaseInfo.Sort,
+		deviceBaseInfo.Sn,
+		deviceBaseInfo.Assets,
+		deviceBaseInfo.CategoryRoot,
+		deviceBaseInfo.CategoryChild,
+		deviceBaseInfo.Owner,
+		deviceBaseInfo.InternalCoding.String,
+		deviceBaseInfo.CalibrationType,
+		deviceBaseInfo.Supplier.String,
+		deviceBaseInfo.StorageTime,
+		oldSn)
+	if err != nil {
+		return length, err
+	}
+	length, err = res.RowsAffected()
+	return
+}
