@@ -44,8 +44,8 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 		return
 	}
 
-	datas, _ := json.Marshal(moduleList)
-	_, _ = Databases.RedisConn.Do("SET", "moduleList", datas)
+	data, _ := json.Marshal(moduleList)
+	_, _ = Databases.RedisConn.Do("SET", "moduleList", data)
 	_, err = Databases.RedisConn.Do("expire", "moduleList", 60*60)
 
 	return

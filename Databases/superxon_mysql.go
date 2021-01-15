@@ -13,13 +13,13 @@ var SuperxonDbDeviceOrm *gorm.DB
 
 func InitMysql() {
 	var err error
-	SuperxonDbDeviceOrm, err = gorm.Open("mysql", "superxon:superxon@(172.20.3.124:3306)/Superxon?charset=utf8mb4&parseTime=true&loc=Local")
+	SuperxonDbDeviceOrm, err = gorm.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	SuperxonDbDevice, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.124:3306)/Superxon?charset=utf8mb4&parseTime=true&loc=Local")
+	SuperxonDbDevice, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println("open mysql failed,", err)
 		return

@@ -9,8 +9,8 @@ var RedisConn redis.Conn
 
 func RedisPollInit() *redis.Pool {
 	return &redis.Pool{
-		MaxIdle:   3,
-		MaxActive: 5,
+		MaxIdle:   5,
+		MaxActive: 30,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", "127.0.0.1:6379")
 			if err != nil {

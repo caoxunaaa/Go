@@ -3,40 +3,38 @@ package qaStatisticBroad
 import (
 	"SuperxonWebSite/Models/QaStatisticDisplay"
 	"SuperxonWebSite/Utils"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func GetPnSetParamsListHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
-
-	queryCondition.Pn = c.DefaultQuery("pn", "")
-	queryCondition.WorkOrderId = c.DefaultQuery("workOrderId", "")
-	queryCondition.BomId = c.DefaultQuery("bomId", "")
-	queryCondition.Process = c.DefaultQuery("process", "")
-	fmt.Println(queryCondition)
-
-	resultList, err := QaStatisticDisplay.GetPnSetParams(&queryCondition)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-	} else {
-		c.JSON(http.StatusOK, resultList)
-	}
-}
-
-func GetPnWorkOrderYieldsListHandler(c *gin.Context) {
+func GetQaCpkInfoListHandler(c *gin.Context) {
+	var err error
 	var queryCondition QaStatisticDisplay.QueryCondition
 	StartTime, EndTime := Utils.GetCurrentAndZeroTime()
 	queryCondition.Pn = c.DefaultQuery("pn", "")
-	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "")
+	queryCondition.Process = c.DefaultQuery("process", "")
 	queryCondition.StartTime = c.DefaultQuery("startTime", StartTime)
 	queryCondition.EndTime = c.DefaultQuery("endTime", EndTime)
-	fmt.Println(queryCondition)
-	resultList, err := QaStatisticDisplay.GetPnWorkOrderYields(&queryCondition)
+	result, err := QaStatisticDisplay.GetQaCpkInfoList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
-		c.JSON(http.StatusOK, resultList)
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+func GetQaCpkRssiListHandler(c *gin.Context) {
+	var err error
+	var queryCondition QaStatisticDisplay.QueryCondition
+	StartTime, EndTime := Utils.GetCurrentAndZeroTime()
+	queryCondition.Pn = c.DefaultQuery("pn", "")
+	queryCondition.Process = c.DefaultQuery("process", "")
+	queryCondition.StartTime = c.DefaultQuery("startTime", StartTime)
+	queryCondition.EndTime = c.DefaultQuery("endTime", EndTime)
+	result, err := QaStatisticDisplay.GetQaCpkRssiList(&queryCondition)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, result)
 	}
 }

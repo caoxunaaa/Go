@@ -3,6 +3,8 @@ package main
 import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Models/DeviceManage"
+	"SuperxonWebSite/Models/FileManage"
+	"SuperxonWebSite/Models/User"
 	"SuperxonWebSite/Router"
 	"fmt"
 )
@@ -26,6 +28,8 @@ func main() {
 		&DeviceManage.DeviceTransmitInfo{},
 		&DeviceManage.DeviceCategory{},
 		&DeviceManage.SelfTest{},
+		&User.Profile{},
+		&FileManage.VideoInfo{},
 	)
 	_ = Databases.SuperxonDbDeviceOrm.Close()
 
