@@ -10,7 +10,7 @@ type Profile struct {
 }
 
 func GetAllProfileList() (profileList []*Profile, err error) {
-	sqlStr := "SELECT * FROM profiles"
+	sqlStr := "SELECT id, username, is_superuser FROM profiles"
 	err = Databases.SuperxonDbDevice.Select(&profileList, sqlStr)
 	if err != nil {
 		return nil, err

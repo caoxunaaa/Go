@@ -80,7 +80,7 @@ func CreateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo) (err error) {
 }
 
 func UpdateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo, oldSn string) (length int64, err error) {
-	sqlStr := "UPDATE device_base_infos SET name=?, sort=?, sn=?, assets=?, category_root=?, category_child=?, owner=?, internal_coding=?, calibration_type=?, supplier=?, storage_time=? WHERE sn=?"
+	sqlStr := "UPDATE device_base_infos SET name=?, sort=?, sn=?, assets=?, category_root=?, category_child=?, owner=?, internal_coding=?, calibration_type=?, supplier=?, storage_time=?, status_of_repair=?, status_of_maintenance=? WHERE sn=?"
 	res, err := Databases.SuperxonDbDevice.Exec(sqlStr,
 		deviceBaseInfo.Name,
 		deviceBaseInfo.Sort,
@@ -93,6 +93,8 @@ func UpdateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo, oldSn string) (length 
 		deviceBaseInfo.CalibrationType,
 		deviceBaseInfo.Supplier.String,
 		deviceBaseInfo.StorageTime,
+		deviceBaseInfo.StatusOfRepair,
+		deviceBaseInfo.StatusOfMaintenance,
 		oldSn)
 	if err != nil {
 		return length, err

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func MaxAndMin(values ...float64) (max float64, min float64) {
+func MaxAndMin(interval float64, values ...float64) (max float64, min float64) {
 	if len(values) == 0 {
 		return
 	}
@@ -19,12 +19,17 @@ func MaxAndMin(values ...float64) (max float64, min float64) {
 			min = val
 		}
 	}
-	max = math.Ceil(max)
-	min = math.Floor(min)
+	if interval > 5 {
+		max = float64(int(math.Floor(max))/10)*10 + 10
+		min = float64(int(math.Floor(min))/10) * 10
+	} else {
+		max = float64(int(math.Floor(max))/5)*5 + 5
+		min = float64(int(math.Floor(min))/5) * 5
+	}
 	return
 }
 
-func NegativeMaxAndMin(values ...float64) (max float64, min float64) {
+func NegativeMaxAndMin(interval float64, values ...float64) (max float64, min float64) {
 	if len(values) == 0 {
 		return
 	}
@@ -38,8 +43,13 @@ func NegativeMaxAndMin(values ...float64) (max float64, min float64) {
 			min = val
 		}
 	}
-	max = math.Ceil(max)
-	min = math.Floor(min)
+	if interval > 5 {
+		max = float64(int(math.Ceil(max))/10) * 10
+		min = float64(int(math.Ceil(min))/10)*10 - 10
+	} else {
+		max = float64(int(math.Ceil(max))/5) * 5
+		min = float64(int(math.Ceil(min))/5)*5 - 5
+	}
 	return
 }
 

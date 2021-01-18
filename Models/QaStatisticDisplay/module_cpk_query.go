@@ -4,7 +4,6 @@ import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
 	"fmt"
-	"math"
 	"strconv"
 	"time"
 )
@@ -119,10 +118,22 @@ func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]ui
 }
 
 func CpkDataHandle(slice []float64, segmentInterval float64, dst map[string]uint, c chan bool) {
-	//dst = make(map[string]uint)
-	_, sliceMin := Utils.MaxAndMin(slice...)
+	sliceMax, sliceMin := Utils.MaxAndMin(segmentInterval, slice...)
+	AxisSlice := make([]float64, 0)
+	segment := (sliceMax - sliceMin) / segmentInterval //分成多少段
+	for i := 0; i < int(segment); i++ {
+		AxisSlice = append(AxisSlice, sliceMin+float64(i)*segmentInterval)
+	}
+	fmt.Println("AxisSlice", AxisSlice)
 	for _, value := range slice {
-		dst[strconv.FormatFloat(math.Floor((value-sliceMin)/segmentInterval)*segmentInterval+sliceMin, 'f', 1, 64)] += 1
+		for indexAxis, _ := range AxisSlice {
+			if indexAxis < (len(AxisSlice) - 1) {
+				if value > AxisSlice[indexAxis] && value < AxisSlice[indexAxis+1] {
+					dst[strconv.FormatFloat(AxisSlice[indexAxis], 'f', 1, 64)+"-"+strconv.FormatFloat(AxisSlice[indexAxis+1], 'f', 1, 64)] += 1
+					break
+				}
+			}
+		}
 	}
 	c <- true
 }
@@ -257,9 +268,21 @@ func GetQaCpkRssiResult(qaCpkRssiList ...QaCpkRssi) (result map[string]map[strin
 }
 
 func CpkRssiDataHandle(slice []float64, segmentInterval float64, dst map[string]uint, c chan bool) {
-	sliceMax, _ := Utils.NegativeMaxAndMin(slice...)
+	sliceMax, sliceMin := Utils.NegativeMaxAndMin(segmentInterval, slice...)
+	AxisSlice := make([]float64, 0)
+	segment := (sliceMax - sliceMin) / segmentInterval //分成多少段
+	for i := 0; i < int(segment); i++ {
+		AxisSlice = append(AxisSlice, sliceMax-float64(i)*segmentInterval)
+	}
 	for _, value := range slice {
-		dst[strconv.FormatFloat(math.Ceil((value-sliceMax)/segmentInterval)*segmentInterval+sliceMax, 'f', 1, 64)] += 1
+		for indexAxis, _ := range AxisSlice {
+			if indexAxis < (len(AxisSlice) - 1) {
+				if value < AxisSlice[indexAxis] && value > AxisSlice[indexAxis+1] {
+					dst[strconv.FormatFloat(AxisSlice[indexAxis], 'f', 1, 64)+"-"+strconv.FormatFloat(AxisSlice[indexAxis+1], 'f', 1, 64)] += 1
+					break
+				}
+			}
+		}
 	}
 	c <- true
 }
