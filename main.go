@@ -6,6 +6,7 @@ import (
 	"SuperxonWebSite/Models/FileManage"
 	"SuperxonWebSite/Models/User"
 	"SuperxonWebSite/Router"
+	"SuperxonWebSite/Services"
 	"fmt"
 )
 
@@ -35,6 +36,9 @@ func main() {
 
 	Databases.RedisInit()
 	defer Databases.RedisClose()
+
+	Services.InitCron()
+	defer Services.CloseCron()
 
 	r := Router.Init()
 	if err := r.Run("0.0.0.0:8002"); err != nil {

@@ -19,6 +19,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.1.1 // indirect
 	github.com/nsf/termbox-go v0.0.0-20201107200903-9b52a5faed9e // indirect
+	github.com/robfig/cron v1.2.0
 	github.com/spf13/cobra v1.1.1 // indirect
 	github.com/ugorji/go v1.2.0 // indirect
 	github.com/xxjwxc/gormt v0.0.0-20201030104547-9a6d72b83141 // indirect

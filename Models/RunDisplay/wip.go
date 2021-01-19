@@ -14,7 +14,7 @@ type WipInfo struct {
 }
 
 func GetWipInfoList(pn string) (wipInfoList []WipInfo, err error) {
-	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
+	startTime, endTime := Utils.GetCurrentAndZeroTime()
 	sqlStr := `with TRX AS (select * from (SELECT distinct a.MANUFACTURE_GROUP,b.*,dense_rank()over(partition by b.sn order by b.action_time asc)zz,
 dense_rank()over(partition by b.sn order by b.id DESC)rr,
 c."sequence" as SEQ FROM superxon.autodt_process_log b,superxon.autodt_tracking a,superxon.workstage c where b.sn=a.bosa_sn 

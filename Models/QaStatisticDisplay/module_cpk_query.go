@@ -106,7 +106,7 @@ func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]ui
 	defer close(c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxAop), 0.5, result["TxAop"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxER), 0.5, result["TxER"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.A2Ibias), 10.0, result["A2Ibias"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.A2Ibias), 5.0, result["A2Ibias"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.EaAbsorb), 0.5, result["EaAbsorb"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Sigma), 2.0, result["Sigma"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Smsr), 2.0, result["Smsr"], c)
@@ -124,7 +124,6 @@ func CpkDataHandle(slice []float64, segmentInterval float64, dst map[string]uint
 	for i := 0; i < int(segment); i++ {
 		AxisSlice = append(AxisSlice, sliceMin+float64(i)*segmentInterval)
 	}
-	fmt.Println("AxisSlice", AxisSlice)
 	for _, value := range slice {
 		for indexAxis, _ := range AxisSlice {
 			if indexAxis < (len(AxisSlice) - 1) {
