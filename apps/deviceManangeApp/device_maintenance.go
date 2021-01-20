@@ -109,3 +109,41 @@ func GetDeviceMaintenanceRecordOfItemNameHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, deviceMaintenanceCurrentInfo)
 	}
 }
+
+func BindDeviceMaintenanceItemHandler(c *gin.Context) {
+	var deviceMaintenanceItems []*DeviceManage.DeviceMaintenanceItem
+	deviceSn, ok := c.Params.Get("deviceSn")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})
+		return
+	}
+	if err := c.ShouldBindJSON(&deviceMaintenanceItems); err == nil {
+		err = DeviceManage.BindDeviceMaintenanceItem(deviceSn, deviceMaintenanceItems)
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"DeviceSn":         deviceSn,
+				"MaintenanceItems": deviceMaintenanceItems,
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
+func UnBindDeviceMaintenanceItemHandler(c *gin.Context) {
+	deviceSn, ok := c.Params.Get("deviceSn")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})
+		return
+	}
+	err := DeviceManage.UnBindDeviceMaintenanceItem(deviceSn)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"DeviceSn": deviceSn,
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}

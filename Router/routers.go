@@ -63,6 +63,8 @@ func Init() *gin.Engine {
 
 		v3.GET("/deviceMaintenanceItem", deviceManangeApp.GetAllDeviceMaintenanceCategoryListHandler)
 		v3.GET("/deviceMaintenanceItem/:category", deviceManangeApp.GetDeviceMaintenanceItemOfCategoryHandler)
+		v3.POST("/bindDeviceMaintenanceItem/:deviceSn", deviceManangeApp.BindDeviceMaintenanceItemHandler)
+		v3.GET("/unbindDeviceMaintenanceItem/:deviceSn", deviceManangeApp.UnBindDeviceMaintenanceItemHandler)
 
 		v3.GET("/deviceCurrentMaintenance", deviceManangeApp.GetAllDeviceMaintenanceCurrentInfoListHandler)
 		v3.GET("/deviceCurrentMaintenance/:snAssets", deviceManangeApp.GetDeviceMaintenanceCurrentInfoHandler)

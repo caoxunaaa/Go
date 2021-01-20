@@ -36,17 +36,16 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 			moduleList = append(moduleList, pn)
 		}
 	}
-	// 再进行一次redis的读取，避免读写冲突导致数据出错
-	reBytes, _ = redis.Bytes(Databases.RedisConn.Do("get", "moduleList"))
-	_ = json.Unmarshal(reBytes, &moduleList)
-	if len(moduleList) != 0 {
-		fmt.Println("使用redis")
-		return
-	}
 
 	data, _ := json.Marshal(moduleList)
-	_, _ = Databases.RedisConn.Do("SET", "moduleList", data)
+	_, err = Databases.RedisConn.Do("SET", "moduleList", data)
+	if err != nil {
+		return nil, err
+	}
 	_, err = Databases.RedisConn.Do("expire", "moduleList", 60*60*24)
+	if err != nil {
+		return nil, err
+	}
 
 	return
 }
@@ -74,17 +73,16 @@ func GetOsaList(startTime string, endTime string) (osaList []Product, err error)
 			osaList = append(osaList, osa)
 		}
 	}
-	// 再进行一次redis的读取，避免读写冲突导致数据出错
-	reBytes, _ = redis.Bytes(Databases.RedisConn.Do("get", "osaList"))
-	_ = json.Unmarshal(reBytes, &osaList)
-	if len(osaList) != 0 {
-		fmt.Println("使用redis")
-		return
-	}
 
 	dataset, _ := json.Marshal(osaList)
-	_, _ = Databases.RedisConn.Do("SET", "osaList", dataset)
+	_, err = Databases.RedisConn.Do("SET", "osaList", dataset)
+	if err != nil {
+		return nil, err
+	}
 	_, err = Databases.RedisConn.Do("expire", "osaList", 60*60*24)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 

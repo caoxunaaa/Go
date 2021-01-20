@@ -2,6 +2,7 @@ package QaStatisticDisplay
 
 import (
 	"SuperxonWebSite/Databases"
+	"database/sql"
 	"fmt"
 )
 
@@ -9,14 +10,13 @@ type QaPn struct {
 	Pn string
 }
 
-func GetQaPnList(startTime string, endTime string) (qaPnList []QaPn, err error) {
-	sqlStr := `select distinct t.pn from superxon.autodt_process_log t where t.action_time between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss')`
+func GetQaPnList(queryCondition *QueryCondition) (qaPnList []QaPn, err error) {
+	sqlStr := `select distinct t.pn from superxon.autodt_process_log t where t.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	fmt.Println(rows)
 	var qaPn *QaPn
 	qaPn = new(QaPn)
 	for rows.Next() {
@@ -42,7 +42,7 @@ type QaStatisticInfo struct {
 	FinalPassRate string
 }
 
-func GetQaStatisticInfoList(pn string, startTime string, endTime string) (qaStatisticInfoList []QaStatisticInfo, err error) {
+func GetQaStatisticInfoList(queryCondition *QueryCondition) (qaStatisticInfoList []QaStatisticInfo, err error) {
 	sqlStr := `with TRX as (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,b.*,
 				rank()over(partition by b.sn,b.log_action order by b.action_time asc)zz,
 				rank()over(partition by b.sn,b.log_action order by b.action_time DESC)rr,
@@ -54,8 +54,8 @@ func GetQaStatisticInfoList(pn string, startTime string, endTime string) (qaStat
 				from superxon.sgd_scdd_trx t) d
 				where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn 
 				and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-				and b.action_time between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss')
-				and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn = '` + pn + `')
+				and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+				and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn = '` + queryCondition.Pn + `')
 				select e.pn,e.序列,e.工序,e.总输入,e.最终良品,e.最终不良品,round(e.最终良品/e.总输入*100,2)||'%' 最终良率
 				from
 				(select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序 ,
@@ -86,7 +86,7 @@ func GetQaStatisticInfoList(pn string, startTime string, endTime string) (qaStat
 	return
 }
 
-func GetQaStatisticOrderInfoList(pn string, startTime string, endTime string, order string) (qaStatisticInfoList []QaStatisticInfo, err error) {
+func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInfoList []QaStatisticInfo, err error) {
 	sqlStr := `with TRX as (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,
 			(case when substr(b.softversion,length(b.softversion)-4) like '%验证软件' then substr(b.softversion,0,length(b.softversion)-5)
 			when substr(b.softversion,length(b.softversion)-1) LIKE '%*_'escape '*' then substr(b.softversion,0,length(b.softversion)-1) else B.SOFTVERSION END) as SVERSION,b.*,
@@ -99,15 +99,14 @@ func GetQaStatisticOrderInfoList(pn string, startTime string, endTime string, or
 			when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else 'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 			from superxon.sgd_scdd_trx t) d
 			where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-			and b.action_time between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss')
-			and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '%` + pn + `%' AND D.LOT_TYPE LIKE '%` + order + `%')
+			and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+			and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '%` + queryCondition.Pn + `%' AND D.LOT_TYPE LIKE '%` + queryCondition.WorkOrderType + `%')
 			select e.* from (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序,h.SVERSION,
 			count(sn)over(partition by h.log_action,h.PN,h.SVERSION)总输入,
 			sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN,h.SVERSION)最终良品,
 			sum(case h.p_value when 'PASS' then 0 else 1 end)over(partition by h.log_action,h.PN,h.SVERSION)最终不良品
 			from TRX h where h.rr=1)e
 			order by e.pn,e.序列 ASC`
-	fmt.Println(sqlStr)
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -141,7 +140,7 @@ type QaDefectsInfo struct {
 	ErrorInputRate string
 }
 
-func GetQaDefectsInfoList(pn string, startTime string, endTime string) (qaDefectsInfoList []QaDefectsInfo, err error) {
+func GetQaDefectsInfoList(queryCondition *QueryCondition) (qaDefectsInfoList []QaDefectsInfo, err error) {
 	sqlStr := `with TRX AS (select y.errorcode,x.* from (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,b.*,
 				rank()over(partition by b.sn,b.log_action order by b.action_time asc)zz,
 				rank()over(partition by b.sn,b.log_action order by b.action_time DESC)rr,
@@ -152,9 +151,9 @@ func GetQaDefectsInfoList(pn string, startTime string, endTime string) (qaDefect
 				when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 				from superxon.sgd_scdd_trx t)d
 				where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-				and b.pn = '` + pn + `'
-				and b.action_time between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') 
-				and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss'))x,superxon.autodt_results_ate_new y
+				and b.pn = '` + queryCondition.Pn + `'
+				and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss') 
+				and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss'))x,superxon.autodt_results_ate_new y
 				where x.sn=y.opticssn and x.resultsid =y.id and y.errorcode <> '0')              
 				select d.* from (select distinct g.PN as PN,g.log_action as 工序,g.ERRORCODE,
 				count(G.sn)over(partition by g.log_action,g.ERRORCODE)不良数量,
@@ -181,7 +180,7 @@ func GetQaDefectsInfoList(pn string, startTime string, endTime string) (qaDefect
 	return
 }
 
-func GetQaDefectsOrderInfoList(pn string, startTime string, endTime string, order string) (qaDefectsInfoList []QaDefectsInfo, err error) {
+func GetQaDefectsOrderInfoList(queryCondition *QueryCondition) (qaDefectsInfoList []QaDefectsInfo, err error) {
 	sqlStr := `with TRX AS (select y.errorcode,x.* from (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,
 				(case when substr(b.softversion,length(b.softversion)-4) like '%验证软件' then substr(b.softversion,0,length(b.softversion)-5)
 				when substr(b.softversion,length(b.softversion)-1) LIKE '%*_'escape '*' then substr(b.softversion,0,length(b.softversion)-1) else B.SOFTVERSION END) as SVERSION,b.*,
@@ -194,9 +193,9 @@ func GetQaDefectsOrderInfoList(pn string, startTime string, endTime string, orde
 				when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 				from superxon.sgd_scdd_trx t)d
 				where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-				and b.pn = '` + pn + `' and D.LOT_TYPE = '` + order + `' 
-				and b.action_time between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss')
-				and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss'))x,superxon.autodt_results_ate_new y
+				and b.pn = '` + queryCondition.Pn + `' and D.LOT_TYPE = '` + queryCondition.WorkOrderType + `' 
+				and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+				and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss'))x,superxon.autodt_results_ate_new y
 				where x.sn=y.opticssn and x.resultsid =y.id and y.errorcode <> '0')
 										
 				select d.* from (select distinct g.PN as PN,g.log_action as 工序,G.SVERSION,g.ERRORCODE,
@@ -225,3 +224,80 @@ func GetQaDefectsOrderInfoList(pn string, startTime string, endTime string, orde
 	}
 	return
 }
+
+type QaDefectsDetailInfo struct {
+	WorkOrderId       string
+	PchLx             string
+	Pn                string
+	Sn                string
+	Operator          string
+	LogAction         string
+	ActionTime        string
+	Parameter         string
+	PValue            string
+	Comments          string
+	StationId         string
+	SoftVersion       string
+	RunTime           int
+	RunCount          int
+	CommitVer         string
+	ModuleSn          sql.NullString
+	Version           string
+	Temperature       float64
+	ErrorCode         string
+	TxAOP             float64
+	TxER              float64
+	TxPPJ             float64
+	TxTR              float64
+	TxTF              float64
+	MARGIN            float64
+	TxCROSS           float64
+	TxOffPOWER        float64
+	OVERLOAD          float64
+	SENSITIVITY       float64
+	SDASSERT          float64
+	SDDASSERT         float64
+	PathPenalty       float64
+	PeakWavelength    float64
+	SIGMA             float64
+	BandWidth         float64
+	SMSR              float64
+	TXI               float64
+	RXI               float64
+	TE                float64
+	DacApc            float64
+	DacMod            float64
+	DacCross          float64
+	DacApd            float64
+	DacLos            float64
+	InfoApc           sql.NullString
+	InfoMod           sql.NullString
+	InfoCross         sql.NullString
+	InfoApd           sql.NullString
+	InfoLos           sql.NullString
+	A2Temperature     float64
+	A2Vcc             float64
+	A2Ibias           float64
+	A2TxMon           float64
+	CaseTemperature   float64
+	TecTemperature    float64
+	EAAbsorb          float64
+	InfoEA            sql.NullString
+	DacEA             float64
+	CenterSensitivity float64
+	AopStability01    float64
+	AopStability02    float64
+	AopStability03    float64
+	AopStability04    float64
+	AopStability05    float64
+	AopStability06    float64
+	AopStability07    float64
+	AopStability08    float64
+	AopStability09    float64
+	AopStability10    float64
+	AopStabilityDelta float64
+	Current5V         float64
+	SetVcc            float64
+}
+
+//func GetQaDefectsDetailByPn(queryCondition *QueryCondition) ()

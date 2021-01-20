@@ -7,13 +7,15 @@ import (
 )
 
 func GetQaPnListHandler(c *gin.Context) {
-	startTime := c.DefaultQuery("startTime", "None")
-	endTime := c.DefaultQuery("endTime", "None")
-	if startTime == "None" || endTime == "None" {
+	var queryCondition QaStatisticDisplay.QueryCondition
+	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
+	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
+	if queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaPnList, err := QaStatisticDisplay.GetQaPnList(startTime, endTime)
+
+	qaPnList, err := QaStatisticDisplay.GetQaPnList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -23,19 +25,20 @@ func GetQaPnListHandler(c *gin.Context) {
 
 func GetQaStatisticInfoListHandler(c *gin.Context) {
 	var err error
+	var queryCondition QaStatisticDisplay.QueryCondition
 	var qaStatisticInfoList []QaStatisticDisplay.QaStatisticInfo
-	pn := c.DefaultQuery("pn", "None")
-	startTime := c.DefaultQuery("startTime", "None")
-	endTime := c.DefaultQuery("endTime", "None")
-	order := c.DefaultQuery("order", "None")
-	if pn == "None" || startTime == "None" || endTime == "None" {
+	queryCondition.Pn = c.DefaultQuery("pn", "None")
+	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
+	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
+	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "None")
+	if queryCondition.Pn == "None" || queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	if order == "TRX正常品" || order == "TRX改制返工品" {
-		qaStatisticInfoList, err = QaStatisticDisplay.GetQaStatisticOrderInfoList(pn, startTime, endTime, order)
+	if queryCondition.WorkOrderType == "TRX正常品" || queryCondition.WorkOrderType == "TRX改制返工品" {
+		qaStatisticInfoList, err = QaStatisticDisplay.GetQaStatisticOrderInfoList(&queryCondition)
 	} else {
-		qaStatisticInfoList, err = QaStatisticDisplay.GetQaStatisticInfoList(pn, startTime, endTime)
+		qaStatisticInfoList, err = QaStatisticDisplay.GetQaStatisticInfoList(&queryCondition)
 	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -46,19 +49,20 @@ func GetQaStatisticInfoListHandler(c *gin.Context) {
 
 func GetQaDefectsInfoListHandler(c *gin.Context) {
 	var err error
+	var queryCondition QaStatisticDisplay.QueryCondition
 	var qaDefectsInfoList []QaStatisticDisplay.QaDefectsInfo
-	pn := c.DefaultQuery("pn", "None")
-	startTime := c.DefaultQuery("startTime", "None")
-	endTime := c.DefaultQuery("endTime", "None")
-	order := c.DefaultQuery("workOrderType", "None")
-	if pn == "None" || startTime == "None" || endTime == "None" {
+	queryCondition.Pn = c.DefaultQuery("pn", "None")
+	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
+	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
+	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "None")
+	if queryCondition.Pn == "None" || queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	if order == "TRX正常品" || order == "TRX改制返工品" {
-		qaDefectsInfoList, err = QaStatisticDisplay.GetQaDefectsOrderInfoList(pn, startTime, endTime, order)
+	if queryCondition.WorkOrderType == "TRX正常品" || queryCondition.WorkOrderType == "TRX改制返工品" {
+		qaDefectsInfoList, err = QaStatisticDisplay.GetQaDefectsOrderInfoList(&queryCondition)
 	} else {
-		qaDefectsInfoList, err = QaStatisticDisplay.GetQaDefectsInfoList(pn, startTime, endTime)
+		qaDefectsInfoList, err = QaStatisticDisplay.GetQaDefectsInfoList(&queryCondition)
 	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

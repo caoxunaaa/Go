@@ -11,6 +11,7 @@ type QueryCondition struct {
 	BomId         string //BOM号
 	Process       string //工序
 	WorkOrderType string //工单类型
+	ErrorCode     string //错误代码
 	StartTime     string
 	EndTime       string
 }
@@ -51,7 +52,7 @@ from  superxon.autodt_spec_ate_new t JOIN SUPERXON.AUTODT_SPEC_MONITOR b ON t.ve
 where t.partnumber LIKE '%` + queryCondition.Pn + `%'
   and d.pch_tc like '%` + queryCondition.WorkOrderId + `%'
   and t.version like '%` + queryCondition.BomId + `%'
-  and t.dt_flag like '%` + queryCondition.Process + `%'
+  and t.dt_flag like '` + queryCondition.Process + `'
 order by t.version,t.dt_flag,t.temper_flag ASC`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {

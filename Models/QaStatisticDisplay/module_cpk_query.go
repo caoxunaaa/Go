@@ -31,7 +31,7 @@ func GetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[str
 	sqlStr := `select b.txaop,B.TXER,B.A2_IBIAS,B.EA_ABSORB,b.sigma,B.SMSR
 from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
 from superxon.autodt_process_log x
-WHERE x.pn like '%` + queryCondition.Pn + `%'
+WHERE x.pn like '` + queryCondition.Pn + `'
 and x.log_action like '` + queryCondition.Process + `'
 and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
@@ -165,8 +165,8 @@ func GetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[str
 d.calipoint4,d.calipoint5,d.calipoint6,d.calipoint7,d.calipoint8
 from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
 from superxon.autodt_process_log x
-WHERE x.pn like '%` + queryCondition.Pn + `%'
-and x.log_action like '%` + queryCondition.Process + `%'
+WHERE x.pn like '` + queryCondition.Pn + `'
+and x.log_action like '` + queryCondition.Process + `'
 and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
 ) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee

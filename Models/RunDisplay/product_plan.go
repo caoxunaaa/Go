@@ -32,6 +32,7 @@ type ProjectPlanInfo struct {
 func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "projectPlanInfoList"))
 	_ = json.Unmarshal(reBytes, &projectPlanInfoList)
+	fmt.Println(len(projectPlanInfoList), projectPlanInfoList)
 	if len(projectPlanInfoList) != 0 {
 		fmt.Println("使用redis")
 		return
@@ -54,7 +55,6 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 			&undoneProjectPlanInfo.PlanToPay)
 		undoneProjectPlanInfoList = append(undoneProjectPlanInfoList, undoneProjectPlanInfo)
 	}
-	fmt.Println(undoneProjectPlanInfoList)
 
 	doneProjectPlanInfoList := make([]DoneProjectPlanInfo, 0)
 	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
@@ -71,7 +71,6 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 			&doneProjectPlanInfo.DoneToPay)
 		doneProjectPlanInfoList = append(doneProjectPlanInfoList, doneProjectPlanInfo)
 	}
-	fmt.Println(doneProjectPlanInfoList)
 
 	if len(doneProjectPlanInfoList) != 0 {
 		for _, valueUndone := range undoneProjectPlanInfoList {
@@ -87,19 +86,15 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 		}
 	}
 
-	fmt.Println(projectPlanInfoList)
-
-	// 再进行一次redis的读取，避免读写冲突导致数据出错
-	reBytes, _ = redis.Bytes(Databases.RedisConn.Do("get", "projectPlanInfoList"))
-	_ = json.Unmarshal(reBytes, &projectPlanInfoList)
-	if len(projectPlanInfoList) != 0 {
-		fmt.Println("使用redis")
-		return
-	}
-
 	datas, _ := json.Marshal(projectPlanInfoList)
-	_, _ = Databases.RedisConn.Do("SET", "projectPlanInfoList", datas)
+	_, err = Databases.RedisConn.Do("SET", "projectPlanInfoList", datas)
+	if err != nil {
+		return nil, err
+	}
 	_, err = Databases.RedisConn.Do("expire", "projectPlanInfoList", 60*60*24)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -122,7 +117,6 @@ func CronGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 			&undoneProjectPlanInfo.PlanToPay)
 		undoneProjectPlanInfoList = append(undoneProjectPlanInfoList, undoneProjectPlanInfo)
 	}
-	fmt.Println(undoneProjectPlanInfoList)
 
 	doneProjectPlanInfoList := make([]DoneProjectPlanInfo, 0)
 	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
