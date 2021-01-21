@@ -11,7 +11,7 @@ type QaPn struct {
 }
 
 func GetQaPnList(queryCondition *QueryCondition) (qaPnList []QaPn, err error) {
-	sqlStr := `select distinct t.pn from superxon.autodt_process_log t where t.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')`
+	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE 'SO%' and t.pch_tc_date between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err

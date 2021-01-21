@@ -90,21 +90,22 @@ func CreateDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem) (
 	return
 }
 
-func UpdateDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem) (err error) {
+func UpdateDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem, id uint) (err error) {
 	//更新一个保养类型的保养项目，同时需要去判断此保养类型是否已经正在使用中
 	sqlStr := "UPDATE device_maintenance_items SET category=?, name=?, period=?, threshold=? WHERE id=?"
 	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
 		deviceMaintenanceItem.Category,
 		deviceMaintenanceItem.Name,
 		deviceMaintenanceItem.Period,
-		deviceMaintenanceItem.Threshold)
+		deviceMaintenanceItem.Threshold,
+		id)
 	if err != nil {
 		return err
 	}
 
 	var deviceMaintenanceCurrentInfoList []*DeviceMaintenanceCurrentInfo //找到所有绑定了此种保养类型的Sn
-	sqlStr = "select a.* from device_maintenance_current_infos a,(select DISTINCT device_sn from device_maintenance_current_infos where item_category = ?) b WHERE a.device_sn = b.device_sn"
-	err = Databases.SuperxonDbDevice.Select(&deviceMaintenanceCurrentInfoList, sqlStr, deviceMaintenanceItem.Category)
+	sqlStr = "select a.* from device_maintenance_current_infos a,(select DISTINCT device_sn from device_maintenance_current_infos where item_category = ?) b WHERE a.device_sn = b.device_sn and a.item_name = ?"
+	err = Databases.SuperxonDbDevice.Select(&deviceMaintenanceCurrentInfoList, sqlStr, deviceMaintenanceItem.Category, deviceMaintenanceItem.Name)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -122,6 +123,7 @@ func UpdateDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem) (
 				} else {
 					deviceMaintenanceCurrentInfo.StatusOfMaintenance = "保养超时"
 				}
+
 			}
 			_, _ = UpdateDeviceMaintenanceCurrentInfo(deviceMaintenanceCurrentInfo, deviceMaintenanceCurrentInfo.LastMaintenanceTime.Time.IsZero())
 		}
@@ -129,16 +131,16 @@ func UpdateDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem) (
 	return
 }
 
-func DeleteDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem) (err error) {
+func DeleteDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem, id uint) (err error) {
 	sqlStr := "DELETE FROM device_maintenance_items where id = ?"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, deviceMaintenanceItem.ID)
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, id)
 	if err != nil {
 		return
 	}
 
 	var deviceMaintenanceCurrentInfoList []*DeviceMaintenanceCurrentInfo //找到所有绑定了此种保养类型的所有Sn
-	sqlStr = "select a.* from device_maintenance_current_infos a,(select DISTINCT device_sn from device_maintenance_current_infos where item_category = ?) b WHERE a.device_sn = b.device_sn"
-	err = Databases.SuperxonDbDevice.Select(&deviceMaintenanceCurrentInfoList, sqlStr, deviceMaintenanceItem.Category)
+	sqlStr = "select a.* from device_maintenance_current_infos a,(select DISTINCT device_sn from device_maintenance_current_infos where item_category = ?) b WHERE a.device_sn = b.device_sn and a.item_name = ?"
+	err = Databases.SuperxonDbDevice.Select(&deviceMaintenanceCurrentInfoList, sqlStr, deviceMaintenanceItem.Category, deviceMaintenanceItem.Name)
 	if err != nil {
 		fmt.Println(err)
 		return err

@@ -8,14 +8,15 @@ import (
 )
 
 func GetModuleListHandler(c *gin.Context) {
-	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -10})
-	moduleList, err := RunDisplay.GetModuleList(startTimeStr, endTimeStr)
+	startTime, endTime := Utils.GetCurrentAndZeroTime()
+	startTime = c.DefaultQuery("startTime", startTime)
+	endTime = c.DefaultQuery("endTime", endTime)
+	moduleList, err := RunDisplay.GetModuleList(startTime, endTime)
 	//fmt.Println(moduleList)
 	var product []RunDisplay.Product
 	if moduleList != nil {
 		product = append(product, moduleList...)
 	}
-
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -24,9 +25,10 @@ func GetModuleListHandler(c *gin.Context) {
 }
 
 func GetOsaListHandler(c *gin.Context) {
-	startTimeStr, endTimeStr := Utils.GetAgoAndCurrentTime(Utils.Ago{Days: -100})
-	osaList, err := RunDisplay.GetOsaList(startTimeStr, endTimeStr)
-
+	startTime, endTime := Utils.GetCurrentAndZeroTime()
+	startTime = c.DefaultQuery("startTime", startTime)
+	endTime = c.DefaultQuery("endTime", endTime)
+	osaList, err := RunDisplay.GetOsaList(startTime, endTime)
 	var product []RunDisplay.Product
 	if osaList != nil {
 		product = append(product, osaList...)

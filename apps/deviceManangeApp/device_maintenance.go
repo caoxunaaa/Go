@@ -4,6 +4,7 @@ import (
 	"SuperxonWebSite/Models/DeviceManage"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 func GetAllDeviceMaintenanceCategoryListHandler(c *gin.Context) {
@@ -26,6 +27,66 @@ func GetDeviceMaintenanceItemOfCategoryHandler(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
 		c.JSON(http.StatusOK, deviceMaintenanceItems)
+	}
+}
+
+func CreateDeviceMaintenanceItemHandler(c *gin.Context) {
+	var deviceMaintenanceItem DeviceManage.DeviceMaintenanceItem
+	if err := c.ShouldBindJSON(&deviceMaintenanceItem); err == nil {
+		err = DeviceManage.CreateDeviceMaintenanceItem(&deviceMaintenanceItem)
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"MaintenanceName": deviceMaintenanceItem.Name,
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
+func UpdateDeviceMaintenanceItemHandler(c *gin.Context) {
+	var deviceMaintenanceItem DeviceManage.DeviceMaintenanceItem
+	id, ok := c.Params.Get("id")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
+		return
+	}
+	if err := c.ShouldBindJSON(&deviceMaintenanceItem); err == nil {
+		oldId, _ := strconv.Atoi(id)
+		err = DeviceManage.UpdateDeviceMaintenanceItem(&deviceMaintenanceItem, uint(oldId))
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"MaintenanceName": deviceMaintenanceItem.Name,
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
+func DeleteDeviceMaintenanceItemHandler(c *gin.Context) {
+	var deviceMaintenanceItem DeviceManage.DeviceMaintenanceItem
+	id, ok := c.Params.Get("id")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
+		return
+	}
+	if err := c.ShouldBindJSON(&deviceMaintenanceItem); err == nil {
+		oldId, _ := strconv.Atoi(id)
+		err = DeviceManage.DeleteDeviceMaintenanceItem(&deviceMaintenanceItem, uint(oldId))
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"MaintenanceName": deviceMaintenanceItem.Name,
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 }
 

@@ -4,9 +4,6 @@ import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"github.com/gomodule/redigo/redis"
 )
 
 type Product struct {
@@ -14,12 +11,6 @@ type Product struct {
 }
 
 func GetModuleList(startTime string, endTime string) (moduleList []Product, err error) {
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "moduleList"))
-	_ = json.Unmarshal(reBytes, &moduleList)
-	if len(moduleList) != 0 {
-		fmt.Println("使用redis")
-		return
-	}
 	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE 'SO%' and t.pch_tc_date between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss')`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
@@ -36,27 +27,10 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 			moduleList = append(moduleList, pn)
 		}
 	}
-
-	data, _ := json.Marshal(moduleList)
-	_, err = Databases.RedisConn.Do("SET", "moduleList", data)
-	if err != nil {
-		return nil, err
-	}
-	_, err = Databases.RedisConn.Do("expire", "moduleList", 60*60*24)
-	if err != nil {
-		return nil, err
-	}
-
 	return
 }
 
 func GetOsaList(startTime string, endTime string) (osaList []Product, err error) {
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "osaList"))
-	_ = json.Unmarshal(reBytes, &osaList)
-	if len(osaList) != 0 {
-		fmt.Println("使用redis")
-		return
-	}
 	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE '0%' and t.pch_tc_date between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss')`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
@@ -73,67 +47,6 @@ func GetOsaList(startTime string, endTime string) (osaList []Product, err error)
 			osaList = append(osaList, osa)
 		}
 	}
-
-	dataset, _ := json.Marshal(osaList)
-	_, err = Databases.RedisConn.Do("SET", "osaList", dataset)
-	if err != nil {
-		return nil, err
-	}
-	_, err = Databases.RedisConn.Do("expire", "osaList", 60*60*24)
-	if err != nil {
-		return nil, err
-	}
-	return
-}
-
-func CronGetModuleList(startTime string, endTime string) {
-	var moduleList []Product
-	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE 'SO%' and t.pch_tc_date between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss')`
-	rows, err := Databases.OracleDB.Query(sqlStr)
-	if err != nil {
-		return
-	}
-	defer rows.Close()
-	var pn Product
-	for rows.Next() {
-		err = rows.Scan(&pn.Name)
-		if err != nil {
-			return
-		}
-		if pn.Name.Valid == true {
-			moduleList = append(moduleList, pn)
-		}
-	}
-	fmt.Println("moduleList定时任务使用redis")
-	data, _ := json.Marshal(moduleList)
-	_, _ = Databases.RedisConn.Do("SET", "moduleList", data)
-	_, err = Databases.RedisConn.Do("expire", "moduleList", 60*60*24)
-
-	return
-}
-
-func CronGetOsaList(startTime string, endTime string) {
-	var osaList []Product
-	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE '0%' and t.pch_tc_date between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss')`
-	rows, err := Databases.OracleDB.Query(sqlStr)
-	if err != nil {
-		return
-	}
-	defer rows.Close()
-	var osa Product
-	for rows.Next() {
-		err = rows.Scan(&osa.Name)
-		if err != nil {
-			return
-		}
-		if osa.Name.Valid == true {
-			osaList = append(osaList, osa)
-		}
-	}
-	fmt.Println("osaList定时任务使用redis")
-	dataset, _ := json.Marshal(osaList)
-	_, _ = Databases.RedisConn.Do("SET", "osaList", dataset)
-	_, err = Databases.RedisConn.Do("expire", "osaList", 60*60*24)
 	return
 }
 
