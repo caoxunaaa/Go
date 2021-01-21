@@ -31,7 +31,7 @@ func GetAllDeviceTransmitInfoList() (deviceTransmitInfoList []*DeviceTransmitInf
 
 func GetDeviceTransmitInfo(sn string) (deviceTransmitInfo *DeviceTransmitInfo, err error) {
 	deviceTransmitInfo = new(DeviceTransmitInfo)
-	sqlStr := "select * from device_transmit_infos where sn = ?"
+	sqlStr := "select * from device_transmit_infos where device_sn= ?"
 	err = Databases.SuperxonDbDevice.Get(deviceTransmitInfo, sqlStr, sn)
 	if err != nil {
 		return nil, err

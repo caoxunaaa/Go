@@ -31,13 +31,21 @@ func Init() *gin.Engine {
 	}
 	v2 := r.Group("/qaStatisticBroad") //质量统计查询页面
 	{
+		v2.GET("/qaWorkOrderIdList", qaStatisticBroad.GetWorkOrderIdsHandler)
+		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)
+		v2.GET("/qaDefectsInfoByWorkOrderId", qaStatisticBroad.GetQaDefectsInfoByWorkOrderIdListHandler)
+		v2.GET("/qaDefectsDetailByWorkOrderId", qaStatisticBroad.GetQaDefectsDetailByWorkOrderIdHandler)
+
 		v2.GET("/qaPnList", qaStatisticBroad.GetQaPnListHandler)
 		v2.GET("/qaStatisticsInfo", qaStatisticBroad.GetQaStatisticInfoListHandler)
-		v2.GET("/qaDefectsInfo", qaStatisticBroad.GetQaDefectsInfoListHandler)
-		v2.GET("/pnSetParams", qaStatisticBroad.GetPnSetParamsListHandler)
 		v2.GET("/pnWorkOrderYields", qaStatisticBroad.GetPnWorkOrderYieldsListHandler)
+		v2.GET("/qaDefectsInfo", qaStatisticBroad.GetQaDefectsInfoListByPnHandler)
+		v2.GET("/qaDefectsDetailByPn", qaStatisticBroad.GetQaDefectsDetailByPnHandler)
+
 		v2.GET("/qaCpkInfo", qaStatisticBroad.GetQaCpkInfoListHandler)
 		v2.GET("/qaCpkRssi", qaStatisticBroad.GetQaCpkRssiListHandler)
+
+		v2.GET("/pnSetParams", qaStatisticBroad.GetPnSetParamsListHandler)
 	}
 	v3 := r.Group("/deviceManage") //设备管理页面
 	{
@@ -64,7 +72,7 @@ func Init() *gin.Engine {
 		v3.GET("/deviceMaintenanceItem", deviceManangeApp.GetAllDeviceMaintenanceCategoryListHandler)
 		v3.GET("/deviceMaintenanceItem/:category", deviceManangeApp.GetDeviceMaintenanceItemOfCategoryHandler)
 		v3.POST("/bindDeviceMaintenanceItem/:deviceSn", deviceManangeApp.BindDeviceMaintenanceItemHandler)
-		v3.GET("/unbindDeviceMaintenanceItem/:deviceSn", deviceManangeApp.UnBindDeviceMaintenanceItemHandler)
+		v3.POST("/unbindDeviceMaintenanceItem/:deviceSn", deviceManangeApp.UnBindDeviceMaintenanceItemHandler)
 
 		v3.GET("/deviceCurrentMaintenance", deviceManangeApp.GetAllDeviceMaintenanceCurrentInfoListHandler)
 		v3.GET("/deviceCurrentMaintenance/:snAssets", deviceManangeApp.GetDeviceMaintenanceCurrentInfoHandler)
