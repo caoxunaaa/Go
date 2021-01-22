@@ -2,9 +2,13 @@ package deviceManangeApp
 
 import (
 	"SuperxonWebSite/Models/DeviceManage"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
+	"time"
 )
 
 //保养计划表
@@ -237,17 +241,62 @@ func GetDeviceMaintenanceRecordOfItemNameHandler(c *gin.Context) {
 }
 
 func CreateDeviceMaintenanceRecordHandler(c *gin.Context) {
-	var deviceMaintenanceRecord DeviceManage.DeviceMaintenanceRecord
-	if err := c.ShouldBindJSON(&deviceMaintenanceRecord); err == nil {
-		err = DeviceManage.CreateDeviceMaintenanceRecord(&deviceMaintenanceRecord)
-		if err == nil {
-			c.JSON(http.StatusOK, gin.H{
-				"MaintenanceName": deviceMaintenanceRecord.DeviceName,
-			})
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		}
-	} else {
+	var deviceMaintenanceRecord *DeviceManage.DeviceMaintenanceRecord
+	deviceMaintenanceRecord = new(DeviceManage.DeviceMaintenanceRecord)
+
+	deviceMaintenanceRecord.DeviceName = c.PostForm("DeviceName")
+	deviceMaintenanceRecord.DeviceSn = c.PostForm("DeviceSn")
+	deviceMaintenanceRecord.DeviceAssets = c.PostForm("DeviceAssets")
+	deviceMaintenanceRecord.DeviceSort = c.PostForm("DeviceSort")
+	deviceMaintenanceRecord.ItemCategory = c.PostForm("ItemCategory")
+	deviceMaintenanceRecord.ItemName = c.PostForm("ItemName")
+	deviceMaintenanceRecord.MaintenanceTime, _ = time.ParseInLocation("2006-01-02 15:04:05", c.PostForm("MaintenanceTime"), time.Local)
+	deviceMaintenanceRecord.MaintenanceUser.String = c.PostForm("MaintenanceUser")
+	deviceMaintenanceRecord.Remark.String = c.PostForm("Remark")
+	maintenanceRecordFile, err := c.FormFile("maintenanceRecordFile")
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fileName := maintenanceRecordFile.Filename
+	fmt.Println("fileName", fileName)
+
+	nameSplit := strings.Split(fileName, ".")
+	dir := nameSplit[len(nameSplit)-1]
+
+	deviceMaintenanceRecord.FilePath.String = "./assets/" + dir + "/" + fileName
+
+	_, err = os.Stat("./assets")
+	if os.IsNotExist(err) {
+		fmt.Println("目录不存在,创建目录")
+		err = os.Mkdir("./assets", 0777)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+	_, err = os.Stat("./assets/" + dir)
+	if os.IsNotExist(err) {
+		fmt.Println("文件不存在,创建目录")
+		err = os.Mkdir("./assets/"+dir, 0777)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	err = c.SaveUploadedFile(maintenanceRecordFile, "./assets/"+dir+"/"+fileName)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = DeviceManage.CreateDeviceMaintenanceRecord(deviceMaintenanceRecord)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	} else {
+		c.JSON(http.StatusOK, gin.H{"message": fileName + "已经成功上传"})
 	}
 }
