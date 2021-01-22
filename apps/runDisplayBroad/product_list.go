@@ -8,7 +8,7 @@ import (
 )
 
 func GetModuleListHandler(c *gin.Context) {
-	startTime, endTime := Utils.GetCurrentAndZeroTime()
+	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
 	startTime = c.DefaultQuery("startTime", startTime)
 	endTime = c.DefaultQuery("endTime", endTime)
 	moduleList, err := RunDisplay.GetModuleList(startTime, endTime)
@@ -25,7 +25,7 @@ func GetModuleListHandler(c *gin.Context) {
 }
 
 func GetOsaListHandler(c *gin.Context) {
-	startTime, endTime := Utils.GetCurrentAndZeroTime()
+	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
 	startTime = c.DefaultQuery("startTime", startTime)
 	endTime = c.DefaultQuery("endTime", endTime)
 	osaList, err := RunDisplay.GetOsaList(startTime, endTime)

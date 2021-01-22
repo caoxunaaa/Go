@@ -31,10 +31,11 @@ func UploadVideoFileHandler(c *gin.Context) {
 	}
 	videoInfo.Name = videoFile.Filename
 	fmt.Println("fileName", videoInfo.Name)
-	videoInfo.StorePath = "/assets/mp4/" + videoInfo.Name
 
 	nameSplit := strings.Split(videoInfo.Name, ".")
 	dir := nameSplit[len(nameSplit)-1]
+
+	videoInfo.StorePath = "./assets/" + dir + "/" + videoInfo.Name
 
 	_, err = os.Stat("./assets")
 	if os.IsNotExist(err) {
@@ -55,7 +56,8 @@ func UploadVideoFileHandler(c *gin.Context) {
 		}
 	}
 
-	err = c.SaveUploadedFile(videoFile, "./assets/mp4/"+videoInfo.Name)
+	err = c.SaveUploadedFile(videoFile, "./assets/"+dir+"/"+videoInfo.Name)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

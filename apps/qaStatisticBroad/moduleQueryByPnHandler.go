@@ -10,11 +10,11 @@ func GetQaPnListHandler(c *gin.Context) {
 	var queryCondition QaStatisticDisplay.QueryCondition
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
+
 	if queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-
 	qaPnList, err := QaStatisticDisplay.GetQaPnList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

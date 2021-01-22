@@ -35,7 +35,7 @@ type DeviceMaintenanceRecord struct {
 	DeviceSn        string         `db:"device_sn"`
 	DeviceAssets    string         `db:"device_assets"`
 	DeviceSort      string         `db:"device_sort"`
-	ItemCategory    sql.NullString `db:"item_category"`
+	ItemCategory    string         `db:"item_category"`
 	ItemName        string         `db:"item_name"`
 	MaintenanceTime time.Time      `db:"maintenance_time"`
 	MaintenanceUser sql.NullString `db:"maintenance_user"`
@@ -123,7 +123,6 @@ func UpdateDeviceMaintenanceItem(deviceMaintenanceItem *DeviceMaintenanceItem, i
 				} else {
 					deviceMaintenanceCurrentInfo.StatusOfMaintenance = "保养超时"
 				}
-
 			}
 			_, _ = UpdateDeviceMaintenanceCurrentInfo(deviceMaintenanceCurrentInfo, deviceMaintenanceCurrentInfo.LastMaintenanceTime.Time.IsZero())
 		}
@@ -239,7 +238,7 @@ func UpdateDeviceMaintenanceCurrentInfo(deviceMaintenanceCurrentInfoList *Device
 			deviceMaintenanceCurrentInfoList.DeviceName,
 			deviceMaintenanceCurrentInfoList.DeviceSn,
 			deviceMaintenanceCurrentInfoList.DeviceAssets,
-			deviceMaintenanceCurrentInfoList.DeviceSort,
+			deviceMaintenanceCurrentInfoList.DeviceSort.String,
 			deviceMaintenanceCurrentInfoList.DeviceOwner,
 			deviceMaintenanceCurrentInfoList.StatusOfMaintenance,
 			deviceMaintenanceCurrentInfoList.ID)
@@ -255,10 +254,10 @@ func UpdateDeviceMaintenanceCurrentInfo(deviceMaintenanceCurrentInfoList *Device
 			deviceMaintenanceCurrentInfoList.DeviceName,
 			deviceMaintenanceCurrentInfoList.DeviceSn,
 			deviceMaintenanceCurrentInfoList.DeviceAssets,
-			deviceMaintenanceCurrentInfoList.DeviceSort,
+			deviceMaintenanceCurrentInfoList.DeviceSort.String,
 			deviceMaintenanceCurrentInfoList.DeviceOwner,
-			deviceMaintenanceCurrentInfoList.LastMaintenanceTime,
-			deviceMaintenanceCurrentInfoList.Deadline,
+			deviceMaintenanceCurrentInfoList.LastMaintenanceTime.Time,
+			deviceMaintenanceCurrentInfoList.Deadline.Time,
 			deviceMaintenanceCurrentInfoList.StatusOfMaintenance,
 			deviceMaintenanceCurrentInfoList.ID)
 		if err != nil {
@@ -297,5 +296,54 @@ func GetDeviceMaintenanceRecords(snAssets string, itemName string) (deviceMainte
 		fmt.Println(err)
 		return nil, err
 	}
+	return
+}
+
+func CreateDeviceMaintenanceRecord(deviceMaintenanceRecord *DeviceMaintenanceRecord) (err error) {
+	//创建一条保养记录，并把保养当前信息中的最后一次保养信息更新
+	sqlStr := "INSERT INTO device_maintenance_records(device_name, device_sn, device_assets, device_sort, item_category, item_name, maintenance_time, maintenance_user, remark, file_path) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+		deviceMaintenanceRecord.DeviceName,
+		deviceMaintenanceRecord.DeviceSn,
+		deviceMaintenanceRecord.DeviceAssets,
+		deviceMaintenanceRecord.DeviceSort,
+		deviceMaintenanceRecord.ItemCategory,
+		deviceMaintenanceRecord.ItemName,
+		deviceMaintenanceRecord.MaintenanceTime,
+		deviceMaintenanceRecord.MaintenanceUser,
+		deviceMaintenanceRecord.Remark,
+		deviceMaintenanceRecord.FilePath)
+	if err != nil {
+		return err
+	}
+
+	//找到保养当前信息 更新对象
+	var deviceMaintenanceCurrentInfo DeviceMaintenanceCurrentInfo
+	sqlStr = "select * from device_maintenance_current_infos where device_sn = ? and item_category = ? and item_name=?"
+	err = Databases.SuperxonDbDevice.Get(&deviceMaintenanceCurrentInfo, sqlStr, deviceMaintenanceRecord.DeviceSn, deviceMaintenanceRecord.ItemCategory, deviceMaintenanceRecord.ItemName)
+	if err != nil {
+		return err
+	}
+
+	//找到保养的项目-》计算到期时间
+	var deviceMaintenanceItem DeviceMaintenanceItem
+	sqlStr = "select * from device_maintenance_items where category = ? and Name=?"
+	err = Databases.SuperxonDbDevice.Get(&deviceMaintenanceItem, sqlStr, deviceMaintenanceRecord.ItemCategory, deviceMaintenanceRecord.ItemName)
+	if err != nil {
+		return err
+	}
+	fmt.Println(deviceMaintenanceItem)
+
+	deviceMaintenanceCurrentInfo.LastMaintenanceTime.Time = deviceMaintenanceRecord.MaintenanceTime
+	deviceMaintenanceCurrentInfo.Deadline.Time = deviceMaintenanceCurrentInfo.LastMaintenanceTime.Time.AddDate(0, 0, int(deviceMaintenanceItem.Period))
+	if deviceMaintenanceCurrentInfo.Deadline.Time.After(time.Now()) {
+		deviceMaintenanceCurrentInfo.StatusOfMaintenance = "正常"
+	} else if deviceMaintenanceCurrentInfo.LastMaintenanceTime.Time.AddDate(0, 0, int(deviceMaintenanceItem.Period-deviceMaintenanceItem.Threshold)).After(time.Now()) {
+		deviceMaintenanceCurrentInfo.StatusOfMaintenance = "待保养"
+	} else {
+		deviceMaintenanceCurrentInfo.StatusOfMaintenance = "保养超时"
+	}
+	fmt.Println(deviceMaintenanceCurrentInfo)
+	_, _ = UpdateDeviceMaintenanceCurrentInfo(&deviceMaintenanceCurrentInfo, false)
 	return
 }

@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+//保养计划表
 func GetAllDeviceMaintenanceCategoryListHandler(c *gin.Context) {
 	deviceMaintenanceItemCategoryList, err := DeviceManage.GetAllDeviceMaintenanceCategoryList()
 	if err != nil {
@@ -90,6 +91,47 @@ func DeleteDeviceMaintenanceItemHandler(c *gin.Context) {
 	}
 }
 
+//绑定保养项目
+func BindDeviceMaintenanceItemHandler(c *gin.Context) {
+	var deviceMaintenanceItems []*DeviceManage.DeviceMaintenanceItem
+	deviceSn, ok := c.Params.Get("deviceSn")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})
+		return
+	}
+	if err := c.ShouldBindJSON(&deviceMaintenanceItems); err == nil {
+		err = DeviceManage.BindDeviceMaintenanceItem(deviceSn, deviceMaintenanceItems)
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"DeviceSn":         deviceSn,
+				"MaintenanceItems": deviceMaintenanceItems,
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
+//解绑保养项目
+func UnBindDeviceMaintenanceItemHandler(c *gin.Context) {
+	deviceSn, ok := c.Params.Get("deviceSn")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})
+		return
+	}
+	err := DeviceManage.UnBindDeviceMaintenanceItem(deviceSn)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"DeviceSn": deviceSn,
+		})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
+//保养当前信息
 func GetAllDeviceMaintenanceCurrentInfoListHandler(c *gin.Context) {
 	deviceMaintenanceCurrentInfoList, err := DeviceManage.GetAllDeviceMaintenanceCurrentInfoList()
 	if err != nil {
@@ -113,6 +155,29 @@ func GetDeviceMaintenanceCurrentInfoHandler(c *gin.Context) {
 	}
 }
 
+//func UpdateDeviceMaintenanceCurrentInfoHandler(c *gin.Context) {
+//	var deviceMaintenanceCurrentInfoList DeviceManage.DeviceMaintenanceCurrentInfo
+//	id, ok := c.Params.Get("id")
+//	if !ok {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
+//		return
+//	}
+//	if err := c.ShouldBindJSON(&deviceMaintenanceCurrentInfoList); err == nil {
+//		oldId, _ := strconv.Atoi(id)
+//		_, err = DeviceManage.UpdateDeviceMaintenanceCurrentInfo(&deviceMaintenanceCurrentInfoList, uint(oldId), false)
+//		if err == nil {
+//			c.JSON(http.StatusOK, gin.H{
+//				"MaintenanceName": deviceMaintenanceCurrentInfoList.DeviceName,
+//			})
+//		} else {
+//			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//		}
+//	} else {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//	}
+//}
+
+//保养记录
 func GetAllDeviceMaintenanceAllRecordsHandler(c *gin.Context) {
 	deviceMaintenanceRecords, err := DeviceManage.GetAllDeviceMaintenanceRecords("")
 	if err != nil {
@@ -171,39 +236,17 @@ func GetDeviceMaintenanceRecordOfItemNameHandler(c *gin.Context) {
 	}
 }
 
-func BindDeviceMaintenanceItemHandler(c *gin.Context) {
-	var deviceMaintenanceItems []*DeviceManage.DeviceMaintenanceItem
-	deviceSn, ok := c.Params.Get("deviceSn")
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})
-		return
-	}
-	if err := c.ShouldBindJSON(&deviceMaintenanceItems); err == nil {
-		err = DeviceManage.BindDeviceMaintenanceItem(deviceSn, deviceMaintenanceItems)
+func CreateDeviceMaintenanceRecordHandler(c *gin.Context) {
+	var deviceMaintenanceRecord DeviceManage.DeviceMaintenanceRecord
+	if err := c.ShouldBindJSON(&deviceMaintenanceRecord); err == nil {
+		err = DeviceManage.CreateDeviceMaintenanceRecord(&deviceMaintenanceRecord)
 		if err == nil {
 			c.JSON(http.StatusOK, gin.H{
-				"DeviceSn":         deviceSn,
-				"MaintenanceItems": deviceMaintenanceItems,
+				"MaintenanceName": deviceMaintenanceRecord.DeviceName,
 			})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-}
-
-func UnBindDeviceMaintenanceItemHandler(c *gin.Context) {
-	deviceSn, ok := c.Params.Get("deviceSn")
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的Sn"})
-		return
-	}
-	err := DeviceManage.UnBindDeviceMaintenanceItem(deviceSn)
-	if err == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"DeviceSn": deviceSn,
-		})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
