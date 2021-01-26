@@ -3,7 +3,9 @@ package QaStatisticDisplay
 import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
+	"encoding/json"
 	"fmt"
+	"github.com/gomodule/redigo/redis"
 	"strconv"
 	"time"
 )
@@ -60,6 +62,29 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 		qaCpkInfoList = append(qaCpkInfoList, qaCpkInfo)
 	}
 	result, err = GetQaCpkResult(qaCpkInfoList...)
+	return
+}
+
+func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", key))
+	_ = json.Unmarshal(reBytes, &result)
+	fmt.Println(len(result), result)
+	if len(result) != 0 {
+		fmt.Println("使用redis")
+		return
+	}
+	result, _ = GetQaCpkInfoList(queryCondition)
+	return
+}
+
+func CronGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	result, _ = GetQaCpkInfoList(queryCondition)
+	fmt.Println("projectPlanInfoList定时任务使用redis")
+	datas, _ := json.Marshal(result)
+	_, _ = Databases.RedisConn.Do("SET", key, datas)
+	_, err = Databases.RedisConn.Do("expire", key, 60*60*24)
 	return
 }
 
@@ -128,7 +153,7 @@ func CpkDataHandle(slice []float64, segmentInterval float64, dst map[string]uint
 		for indexAxis, _ := range AxisSlice {
 			if indexAxis < (len(AxisSlice) - 1) {
 				if value > AxisSlice[indexAxis] && value < AxisSlice[indexAxis+1] {
-					dst[strconv.FormatFloat(AxisSlice[indexAxis], 'f', 1, 64)+"-"+strconv.FormatFloat(AxisSlice[indexAxis+1], 'f', 1, 64)] += 1
+					dst[strconv.FormatFloat(AxisSlice[indexAxis], 'f', 1, 64)+"_"+strconv.FormatFloat(AxisSlice[indexAxis+1], 'f', 1, 64)] += 1
 					break
 				}
 			}
@@ -166,7 +191,7 @@ d.calipoint4,d.calipoint5,d.calipoint6,d.calipoint7,d.calipoint8
 from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
 from superxon.autodt_process_log x
 WHERE x.pn like '` + queryCondition.Pn + `'
-and x.log_action like '` + queryCondition.Process + `'
+and x.log_action like '` + queryCondition.Process + `%'
 and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
 ) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee
@@ -277,7 +302,7 @@ func CpkRssiDataHandle(slice []float64, segmentInterval float64, dst map[string]
 		for indexAxis, _ := range AxisSlice {
 			if indexAxis < (len(AxisSlice) - 1) {
 				if value < AxisSlice[indexAxis] && value > AxisSlice[indexAxis+1] {
-					dst[strconv.FormatFloat(AxisSlice[indexAxis], 'f', 1, 64)+"-"+strconv.FormatFloat(AxisSlice[indexAxis+1], 'f', 1, 64)] += 1
+					dst[strconv.FormatFloat(AxisSlice[indexAxis], 'f', 1, 64)+"_"+strconv.FormatFloat(AxisSlice[indexAxis+1], 'f', 1, 64)] += 1
 					break
 				}
 			}

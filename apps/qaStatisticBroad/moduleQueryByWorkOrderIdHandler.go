@@ -43,12 +43,13 @@ func GetWorkOrderIdsHandler(c *gin.Context) {
 	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
+	isFinish := c.DefaultQuery("isFinish", "yes")
 
 	if queryCondition.Pn == "None" || queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少参数"})
 		return
 	}
-	qaWorkOrderIdList, err := QaStatisticDisplay.GetWorkOrderIds(&queryCondition)
+	qaWorkOrderIdList, err := QaStatisticDisplay.GetWorkOrderIds(&queryCondition, isFinish)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

@@ -4,12 +4,11 @@ import (
 	"SuperxonWebSite/Databases"
 	"database/sql"
 	"fmt"
-	"time"
 )
 
 type DeviceBaseInfo struct {
 	ID                  uint           `gorm:"primary_key" db:"id"`
-	StorageTime         time.Time      `db:"storage_time"`
+	StorageTime         string         `db:"storage_time"`
 	Name                string         `db:"name"`
 	Sort                sql.NullString `db:"sort"`
 	Sn                  string         `gorm:"unique;not null" db:"sn"`
@@ -63,7 +62,7 @@ func CreateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo) (err error) {
 	sqlStr := "INSERT INTO device_base_infos(name, sort, sn, assets, category_root, category_child, owner, internal_coding, calibration_type, supplier, storage_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
 		deviceBaseInfo.Name,
-		deviceBaseInfo.Sort,
+		deviceBaseInfo.Sort.String,
 		deviceBaseInfo.Sn,
 		deviceBaseInfo.Assets,
 		deviceBaseInfo.CategoryRoot,

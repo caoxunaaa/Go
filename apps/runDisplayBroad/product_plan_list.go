@@ -7,8 +7,7 @@ import (
 )
 
 func GetProjectPlanListHandler(c *gin.Context) {
-	projectPlanInfoList, err := RunDisplay.GetProjectPlanList()
-
+	projectPlanInfoList, err := RunDisplay.RedisGetProjectPlanList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

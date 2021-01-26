@@ -68,7 +68,7 @@ FROM (select t.*,dense_rank()over(partition by T.PARTNUMBER,T.BOSA_SN order by T
 when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 from superxon.sgd_scdd_trx t) d
 where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-and ( b.pn LIKE  '%` + queryCondition.Pn + `%' /*and b.log_action like '&工序%'*/ AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%')
+and ( b.pn LIKE  '` + queryCondition.Pn + `' /*and b.log_action like '&工序%'*/ AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%')
 and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
 and b.log_action not like 'MODULE_SN')
@@ -172,7 +172,7 @@ func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInf
 			from superxon.sgd_scdd_trx t) d
 			where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
 			and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
-			and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '%` + queryCondition.Pn + `%' AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%')
+			and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `' AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%')
 			select e.* from (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序,h.SVERSION,
 			count(sn)over(partition by h.log_action,h.PN,h.SVERSION)总输入,
 			sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN,h.SVERSION)最终良品,
@@ -518,9 +518,9 @@ func GetPnSetParams(queryCondition *QueryCondition) (pnSetParamList []PnSetParam
 from  superxon.autodt_spec_ate_new t JOIN SUPERXON.AUTODT_SPEC_MONITOR b ON t.version=b.version AND T.DT_FLAG=B.DT_FLAG AND T.TEMPER_FLAG=B.TEMPER_FLAG
                                      join superxon.autodt_spec_image c on t.partnumber=c.partnumber and t.version=c.version
                                      join superxon.sgd_scdd_trx d on t.partnumber=d.partnumber and t.version=d.version
-where t.partnumber LIKE '%` + queryCondition.Pn + `%'
-  and d.pch_tc like '%` + queryCondition.WorkOrderId + `%'
-  and t.version like '%` + queryCondition.BomId + `%'
+where t.partnumber LIKE '` + queryCondition.Pn + `'
+  and d.pch_tc like '` + queryCondition.WorkOrderId + `'
+  and t.version like '` + queryCondition.BomId + `%'
   and t.dt_flag like '` + queryCondition.Process + `'
 order by t.version,t.dt_flag,t.temper_flag ASC`
 	rows, err := Databases.OracleDB.Query(sqlStr)

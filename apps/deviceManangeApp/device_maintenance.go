@@ -264,7 +264,7 @@ func CreateDeviceMaintenanceRecordHandler(c *gin.Context) {
 	nameSplit := strings.Split(fileName, ".")
 	dir := nameSplit[len(nameSplit)-1]
 
-	deviceMaintenanceRecord.FilePath.String = "./assets/" + dir + "/" + fileName
+	deviceMaintenanceRecord.FilePath.String = "/assets/" + dir + "/" + fileName
 
 	_, err = os.Stat("./assets")
 	if os.IsNotExist(err) {

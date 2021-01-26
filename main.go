@@ -37,6 +37,9 @@ func main() {
 	Databases.RedisInit()
 	defer Databases.RedisClose()
 
+	Databases.InitMongoDb()
+	defer Databases.CloseMongoDb()
+
 	Services.InitCron()
 	defer Services.CloseCron()
 

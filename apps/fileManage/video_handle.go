@@ -35,7 +35,7 @@ func UploadVideoFileHandler(c *gin.Context) {
 	nameSplit := strings.Split(videoInfo.Name, ".")
 	dir := nameSplit[len(nameSplit)-1]
 
-	videoInfo.StorePath = "./assets/" + dir + "/" + videoInfo.Name
+	videoInfo.StorePath = "/assets/" + dir + "/" + videoInfo.Name
 
 	_, err = os.Stat("./assets")
 	if os.IsNotExist(err) {

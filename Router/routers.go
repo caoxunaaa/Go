@@ -17,6 +17,15 @@ func Init() *gin.Engine {
 	//r.StaticFS("/assets", http.Dir("assets"))
 	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
 	r.Use(Middlewares.Cors())
+
+	//使用vue 生成的index和static
+	//r.Static("/static", "./assets/html/static")
+	//r.LoadHTMLFiles("./assets/html/index.html")
+	//v7 := r.Group("/index")
+	//{
+	//	v7.GET("", index.MyIndexHandler)
+	//}
+
 	v1 := r.Group("/runDisplayBroad") //实时运行看板页面
 	{
 		v1.GET("/moduleList", runDisplayBroad.GetModuleListHandler)
@@ -103,5 +112,6 @@ func Init() *gin.Engine {
 		v6.POST("/videoInfo", fileManage.UploadVideoFileHandler)
 		v6.DELETE("/videoInfo/:id", fileManage.DeleteVideoInfoHandler)
 	}
+
 	return r
 }
