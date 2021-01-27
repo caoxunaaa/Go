@@ -35,8 +35,10 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 */
 func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	undoneProjectPlanInfoList := make([]UndoneProjectPlanInfo, 0)
-	stmt, _ := Databases.SqliteDbEntry.Prepare("SELECT * from ProjectPlanInfo")
-	rowsUndone, err := stmt.Query()
+	rowsUndone, err := Databases.SqliteDbEntry.Query("SELECT * from ProjectPlanInfo")
+	if err != nil {
+		return
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -82,15 +84,6 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 			projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, DoneProjectPlanInfo{Pn: valueUndone.Pn, DoneToPay: 0}})
 		}
 	}
-	//datas, _ := json.Marshal(projectPlanInfoList)
-	//_, err = Databases.RedisConn.Do("SET", "projectPlanInfoList", datas)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//_, err = Databases.RedisConn.Do("expire", "projectPlanInfoList", 60*60*24)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return
 }
 
@@ -106,7 +99,11 @@ func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error
 		fmt.Println("使用redis")
 		return
 	}
-	projectPlanInfoList, _ = GetProjectPlanList()
+	projectPlanInfoList, err = GetProjectPlanList()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	return
 }
 
@@ -119,6 +116,6 @@ func CronGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(projectPlanInfoList)
 	_, _ = Databases.RedisConn.Do("SET", "projectPlanInfoList", datas)
-	_, err = Databases.RedisConn.Do("expire", "projectPlanInfoList", 60*60*24)
+	_, err = Databases.RedisConn.Do("expire", "projectPlanInfoList", 60*60*30)
 	return
 }

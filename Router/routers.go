@@ -30,10 +30,10 @@ func Init() *gin.Engine {
 	{
 		v1.GET("/moduleList", runDisplayBroad.GetModuleListHandler)
 		v1.GET("/moduleInfo/:pn", runDisplayBroad.GetModuleInfoListHandler)
-		v1.GET("/osaList", runDisplayBroad.GetOsaListHandler)
-		v1.GET("/osaInfo/:pn", runDisplayBroad.GetOsaInfoListHandler)
+		//v1.GET("/osaList", runDisplayBroad.GetOsaListHandler)
+		//v1.GET("/osaInfo/:pn", runDisplayBroad.GetOsaInfoListHandler)
 		v1.GET("/moduleYesterdayInfo/:pn", runDisplayBroad.GetYesterdayModuleInfoListHandler)
-		v1.GET("/osaYesterdayInfo/:pn", runDisplayBroad.GetYesterdayOsaInfoListHandler)
+		//v1.GET("/osaYesterdayInfo/:pn", runDisplayBroad.GetYesterdayOsaInfoListHandler)
 		v1.GET("/stationStatus", runDisplayBroad.GetStationStatusHandler)
 		v1.GET("/projectPlanList", runDisplayBroad.GetProjectPlanListHandler)
 		v1.GET("/wipInfoList/:pn", runDisplayBroad.GetWipInfoListHandler)
@@ -56,6 +56,10 @@ func Init() *gin.Engine {
 
 		v2.GET("/pnSetParams", qaStatisticBroad.GetPnSetParamsListHandler)
 	}
+	//v3Permission := r.Group("/deviceManage").Use(Middlewares.JWTAuthMiddleware()) //加入用户验证中间件
+	//{
+	//	v3Permission.GET("/deviceBaseInfo", deviceManangeApp.GetAllDeviceBaseInfoListHandler)
+	//}
 	v3 := r.Group("/deviceManage") //设备管理页面
 	{
 		v3.GET("/deviceRootCategory", deviceManangeApp.GetAllDeviceCategoryRootListHandler)
@@ -100,7 +104,7 @@ func Init() *gin.Engine {
 	v4 := r.Group("/userHandle")
 	{
 		v4.GET("/profile", userHandleApp.GetAllProfileListHandler)
-		v4.POST("/auth", userHandleApp.AuthJwtHandler)
+		v4.POST("/login", userHandleApp.AuthJwtHandler)
 	}
 	v5 := r.Group("/home").Use(Middlewares.JWTAuthMiddleware())
 	{

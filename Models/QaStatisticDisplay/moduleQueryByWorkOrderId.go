@@ -205,7 +205,7 @@ func CronGetQaDefectsInfoByWorkOrderIdList(queryCondition *QueryCondition) (qaDe
 	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(qaDefectsInfoByWorkOrderIdList)
 	_, _ = Databases.RedisConn.Do("SET", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, datas)
-	_, err = Databases.RedisConn.Do("expire", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*24)
+	_, err = Databases.RedisConn.Do("expire", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*30)
 	return
 }
 
@@ -348,6 +348,6 @@ func CronGetQaDefectsDetailByWorkOrderId(queryCondition *QueryCondition) (qaDefe
 	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(qaDefectsDetailInfoList)
 	_, _ = Databases.RedisConn.Do("SET", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, datas)
-	_, err = Databases.RedisConn.Do("expire", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*24)
+	_, err = Databases.RedisConn.Do("expire", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*30)
 	return
 }

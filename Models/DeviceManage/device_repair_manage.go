@@ -35,7 +35,7 @@ func GetAllDeviceRepairInfoList() (deviceRepairInfoList []*DeviceRepairInfo, err
 }
 
 func GetDeviceRepairInfo(sn string) (deviceRepairInfo []*DeviceRepairInfo, err error) {
-	sqlStr := "select * from device_repair_infos where sn = ? order by finish_time"
+	sqlStr := "select * from device_repair_infos where sn = ? order by send_to_repair_time DESC"
 	err = Databases.SuperxonDbDevice.Select(&deviceRepairInfo, sqlStr, sn)
 	if err != nil {
 		return nil, err

@@ -28,6 +28,30 @@ type QaCpkInfoResult struct {
 	Smsr     []float64
 }
 
+type Process struct {
+	Name string
+}
+
+func GetAllProcessOfTRX() (processList []Process, err error) {
+	sqlStr := `select distinct t."processname" from superxon.workstage t where  t."workshop" like '%TRX%'`
+	rows, err := Databases.OracleDB.Query(sqlStr)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var process Process
+	for rows.Next() {
+		err = rows.Scan(
+			&process.Name,
+		)
+		if err != nil {
+			return nil, err
+		}
+		processList = append(processList, process)
+	}
+	return
+}
+
 func GetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	var qaCpkInfoList []QaCpkInfo
 	sqlStr := `select b.txaop,B.TXER,B.A2_IBIAS,B.EA_ABSORB,b.sigma,B.SMSR
@@ -80,11 +104,11 @@ func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]ma
 
 func CronGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	fmt.Println(key + "存入redis")
 	result, _ = GetQaCpkInfoList(queryCondition)
-	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(result)
 	_, _ = Databases.RedisConn.Do("SET", key, datas)
-	_, err = Databases.RedisConn.Do("expire", key, 60*60*24)
+	_, err = Databases.RedisConn.Do("expire", key, 60*60*30)
 	return
 }
 
@@ -126,7 +150,7 @@ func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]ui
 			qaCpkInfoResult.Smsr[index] = qaCpkInfo.Smsr
 		}
 	}
-	startT := time.Now()
+	//startT := time.Now()
 	c := make(chan bool, 6)
 	defer close(c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxAop), 0.5, result["TxAop"], c)
@@ -138,7 +162,7 @@ func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]ui
 	for i := 0; i < 6; i++ {
 		<-c
 	}
-	fmt.Println(time.Since(startT))
+	//fmt.Println(time.Since(startT))
 	return
 }
 
@@ -221,6 +245,29 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 		qaCpkRssiList = append(qaCpkRssiList, qaCpkRssi)
 	}
 	result, err = GetQaCpkRssiResult(qaCpkRssiList...)
+	return
+}
+
+func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", key))
+	_ = json.Unmarshal(reBytes, &result)
+	fmt.Println(len(result), result)
+	if len(result) != 0 {
+		fmt.Println("使用redis")
+		return
+	}
+	result, _ = GetQaCpkRssiList(queryCondition)
+	return
+}
+
+func CronGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	fmt.Println(key + "存入redis")
+	result, _ = GetQaCpkRssiList(queryCondition)
+	datas, _ := json.Marshal(result)
+	_, _ = Databases.RedisConn.Do("SET", key, datas)
+	_, err = Databases.RedisConn.Do("expire", key, 60*60*30)
 	return
 }
 
