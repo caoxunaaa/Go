@@ -1,13 +1,13 @@
-package qaStatisticBroad
+package qaModuleStatisticBroad
 
 import (
-	"SuperxonWebSite/Models/QaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetQaPnListHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
 
@@ -15,7 +15,7 @@ func GetQaPnListHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaPnList, err := QaStatisticDisplay.GetQaPnList(&queryCondition)
+	qaPnList, err := ModuleQaStatisticDisplay.GetQaPnList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -25,8 +25,8 @@ func GetQaPnListHandler(c *gin.Context) {
 
 func GetQaStatisticInfoListHandler(c *gin.Context) {
 	var err error
-	var queryCondition QaStatisticDisplay.QueryCondition
-	var qaStatisticInfoList []QaStatisticDisplay.QaStatisticInfo
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+	var qaStatisticInfoList []ModuleQaStatisticDisplay.QaStatisticInfo
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
@@ -36,9 +36,9 @@ func GetQaStatisticInfoListHandler(c *gin.Context) {
 		return
 	}
 	if queryCondition.WorkOrderType == "TRX正常品" || queryCondition.WorkOrderType == "TRX改制返工品" {
-		qaStatisticInfoList, err = QaStatisticDisplay.GetQaStatisticOrderInfoList(&queryCondition)
+		qaStatisticInfoList, err = ModuleQaStatisticDisplay.GetQaStatisticOrderInfoList(&queryCondition)
 	} else {
-		qaStatisticInfoList, err = QaStatisticDisplay.GetQaStatisticInfoList(&queryCondition)
+		qaStatisticInfoList, err = ModuleQaStatisticDisplay.GetQaStatisticInfoList(&queryCondition)
 	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -49,8 +49,8 @@ func GetQaStatisticInfoListHandler(c *gin.Context) {
 
 func GetQaDefectsInfoListByPnHandler(c *gin.Context) {
 	var err error
-	var queryCondition QaStatisticDisplay.QueryCondition
-	var qaDefectsInfoList []QaStatisticDisplay.QaDefectsInfoByPn
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+	var qaDefectsInfoList []ModuleQaStatisticDisplay.QaDefectsInfoByPn
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
@@ -60,9 +60,9 @@ func GetQaDefectsInfoListByPnHandler(c *gin.Context) {
 		return
 	}
 	if queryCondition.WorkOrderType == "TRX正常品" || queryCondition.WorkOrderType == "TRX改制返工品" {
-		qaDefectsInfoList, err = QaStatisticDisplay.GetQaDefectsOrderInfoListByPn(&queryCondition)
+		qaDefectsInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsOrderInfoListByPn(&queryCondition)
 	} else {
-		qaDefectsInfoList, err = QaStatisticDisplay.GetQaDefectsInfoListByPn(&queryCondition)
+		qaDefectsInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsInfoListByPn(&queryCondition)
 	}
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -73,8 +73,8 @@ func GetQaDefectsInfoListByPnHandler(c *gin.Context) {
 
 func GetQaDefectsDetailByPnHandler(c *gin.Context) {
 	var err error
-	var queryCondition QaStatisticDisplay.QueryCondition
-	var qaDefectsDetailInfoList []QaStatisticDisplay.QaDefectsDetailInfo
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+	var qaDefectsDetailInfoList []ModuleQaStatisticDisplay.QaDefectsDetailInfo
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
@@ -85,7 +85,7 @@ func GetQaDefectsDetailByPnHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaDefectsDetailInfoList, err = QaStatisticDisplay.GetQaDefectsDetailByPn(&queryCondition)
+	qaDefectsDetailInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsDetailByPn(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

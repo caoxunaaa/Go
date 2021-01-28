@@ -1,4 +1,4 @@
-package QaStatisticDisplay
+package ModuleQaStatisticDisplay
 
 import (
 	"SuperxonWebSite/Databases"
@@ -68,7 +68,7 @@ FROM (select t.*,dense_rank()over(partition by T.PARTNUMBER,T.BOSA_SN order by T
 when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 from superxon.sgd_scdd_trx t) d
 where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-and ( b.pn LIKE  '` + queryCondition.Pn + `' /*and b.log_action like '&工序%'*/ AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%')
+and ( b.pn LIKE  '` + queryCondition.Pn + `' /*and b.log_action like '&工序%'*/ AND D.LOT_TYPE LIKE '%` + queryCondition.WorkOrderType + `%')
 and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
 and b.log_action not like 'MODULE_SN')
@@ -172,7 +172,7 @@ func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInf
 			from superxon.sgd_scdd_trx t) d
 			where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
 			and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
-			and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `' AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%')
+			and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `' AND D.LOT_TYPE LIKE '%` + queryCondition.WorkOrderType + `%')
 			select e.* from (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序,h.SVERSION,
 			count(sn)over(partition by h.log_action,h.PN,h.SVERSION)总输入,
 			sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN,h.SVERSION)最终良品,
@@ -229,7 +229,7 @@ func GetQaDefectsInfoListByPn(queryCondition *QueryCondition) (qaDefectsInfoList
 				where x.sn=y.opticssn and x.resultsid =y.id and y.errorcode <> '0')              
 				select d.* from (select distinct g.PN as PN,g.log_action as 工序,g.ERRORCODE,
 				count(G.sn)over(partition by g.log_action,g.ERRORCODE)不良数量,
-				ROUND((count(G.sn)over(partition by g.ERRORCODE)/(sum(case g.p_value when 'FAIL' then 1 else 0 end)over(partition by g.PN))*100),2)||'%' 不良比重
+				ROUND((count(G.sn)over(partition by g.ERRORCODE, g.log_action)/(sum(case g.p_value when 'FAIL' then 1 else 0 end)over(partition by g.PN))*100),2)||'%' 不良比重
 				from TRX g where g.rr=1)d`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
@@ -265,7 +265,7 @@ func GetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefectsInf
 				when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 				from superxon.sgd_scdd_trx t)d
 				where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-				and b.pn = '` + queryCondition.Pn + `' and D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%' 
+				and b.pn = '` + queryCondition.Pn + `' and D.LOT_TYPE LIKE '%` + queryCondition.WorkOrderType + `%' 
 				and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 				and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss'))x,superxon.autodt_results_ate_new y
 				where x.sn=y.opticssn and x.resultsid =y.id and y.errorcode <> '0')
@@ -394,7 +394,7 @@ func GetQaDefectsDetailByPn(queryCondition *QueryCondition) (qaDefectsDetailInfo
 				when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
 				from superxon.sgd_scdd_trx t) d
 				where d.pch_tc=c.manufacture_group and c.partnumber=d.partnumber
-				and d.LOT_TYPE like '` + queryCondition.WorkOrderType + `%'
+				and d.LOT_TYPE like '%` + queryCondition.WorkOrderType + `%'
 				and a.rr=1 AND C.EE=1`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {

@@ -1,4 +1,4 @@
-package RunDisplay
+package ModuleRunDisplay
 
 import (
 	"SuperxonWebSite/Databases"

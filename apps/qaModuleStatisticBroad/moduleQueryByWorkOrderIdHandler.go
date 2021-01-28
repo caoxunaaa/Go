@@ -1,20 +1,20 @@
-package qaStatisticBroad
+package qaModuleStatisticBroad
 
 import (
-	"SuperxonWebSite/Models/QaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
 	"SuperxonWebSite/Utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetPnSetParamsListHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	queryCondition.Pn = c.DefaultQuery("pn", "")
 	queryCondition.WorkOrderId = c.DefaultQuery("workOrderId", "")
 	queryCondition.BomId = c.DefaultQuery("bomId", "")
 	queryCondition.Process = c.DefaultQuery("process", "")
 
-	resultList, err := QaStatisticDisplay.GetPnSetParams(&queryCondition)
+	resultList, err := ModuleQaStatisticDisplay.GetPnSetParams(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -23,13 +23,13 @@ func GetPnSetParamsListHandler(c *gin.Context) {
 }
 
 func GetPnWorkOrderYieldsListHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	StartTime, EndTime := Utils.GetCurrentAndZeroTime()
 	queryCondition.Pn = c.DefaultQuery("pn", "")
 	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "")
 	queryCondition.StartTime = c.DefaultQuery("startTime", StartTime)
 	queryCondition.EndTime = c.DefaultQuery("endTime", EndTime)
-	resultList, err := QaStatisticDisplay.GetWorkOrderYieldsByPn(&queryCondition)
+	resultList, err := ModuleQaStatisticDisplay.GetWorkOrderYieldsByPn(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -38,7 +38,7 @@ func GetPnWorkOrderYieldsListHandler(c *gin.Context) {
 }
 
 func GetWorkOrderIdsHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
@@ -49,7 +49,7 @@ func GetWorkOrderIdsHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少参数"})
 		return
 	}
-	qaWorkOrderIdList, err := QaStatisticDisplay.GetWorkOrderIds(&queryCondition, isFinish)
+	qaWorkOrderIdList, err := ModuleQaStatisticDisplay.GetWorkOrderIds(&queryCondition, isFinish)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -58,14 +58,14 @@ func GetWorkOrderIdsHandler(c *gin.Context) {
 }
 
 func GetWorkOrderYieldsByWorkOrderIdListHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	queryCondition.WorkOrderId = c.DefaultQuery("workOrderId", "None")
 	if queryCondition.WorkOrderId == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
 
-	workOrderYieldList, err := QaStatisticDisplay.GetWorkOrderYieldsByWorkOrderId(&queryCondition)
+	workOrderYieldList, err := ModuleQaStatisticDisplay.GetWorkOrderYieldsByWorkOrderId(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -74,14 +74,14 @@ func GetWorkOrderYieldsByWorkOrderIdListHandler(c *gin.Context) {
 }
 
 func GetQaDefectsInfoByWorkOrderIdListHandler(c *gin.Context) {
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	queryCondition.WorkOrderId = c.DefaultQuery("workOrderId", "None")
 	if queryCondition.WorkOrderId == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
 
-	workOrderYieldList, err := QaStatisticDisplay.GetQaDefectsInfoByWorkOrderIdList(&queryCondition)
+	workOrderYieldList, err := ModuleQaStatisticDisplay.GetQaDefectsInfoByWorkOrderIdList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -91,8 +91,8 @@ func GetQaDefectsInfoByWorkOrderIdListHandler(c *gin.Context) {
 
 func GetQaDefectsDetailByWorkOrderIdHandler(c *gin.Context) {
 	var err error
-	var queryCondition QaStatisticDisplay.QueryCondition
-	var qaDefectsDetailInfoList []QaStatisticDisplay.QaDefectsDetailInfo
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+	var qaDefectsDetailInfoList []ModuleQaStatisticDisplay.QaDefectsDetailInfo
 	queryCondition.WorkOrderId = c.DefaultQuery("workOrderId", "None")
 	queryCondition.Process = c.DefaultQuery("process", "None")
 	queryCondition.ErrorCode = c.DefaultQuery("errorCode", "None")
@@ -100,7 +100,7 @@ func GetQaDefectsDetailByWorkOrderIdHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少参数"})
 		return
 	}
-	qaDefectsDetailInfoList, err = QaStatisticDisplay.GetQaDefectsDetailByWorkOrderId(&queryCondition)
+	qaDefectsDetailInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsDetailByWorkOrderId(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

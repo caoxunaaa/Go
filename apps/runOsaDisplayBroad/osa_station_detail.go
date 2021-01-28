@@ -1,13 +1,13 @@
-package runDisplayBroad
+package runOsaDisplayBroad
 
 import (
-	"SuperxonWebSite/Models/RunDisplay"
+	"SuperxonWebSite/Models/OsaRunDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetStationStatusHandler(c *gin.Context) {
-	stationStatusList, err := RunDisplay.GetStationStatus()
+	stationStatusList, err := OsaRunDisplay.GetStationStatus()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

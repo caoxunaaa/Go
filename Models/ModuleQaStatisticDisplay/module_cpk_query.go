@@ -1,4 +1,4 @@
-package QaStatisticDisplay
+package ModuleQaStatisticDisplay
 
 import (
 	"SuperxonWebSite/Databases"
@@ -90,6 +90,7 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 }
 
 func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	result = make(map[string]map[string]uint)
 	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
 	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", key))
 	_ = json.Unmarshal(reBytes, &result)
@@ -103,6 +104,7 @@ func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]ma
 }
 
 func CronGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	result = make(map[string]map[string]uint)
 	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
 	fmt.Println(key + "存入redis")
 	result, _ = GetQaCpkInfoList(queryCondition)
@@ -249,6 +251,7 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 }
 
 func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	result = make(map[string]map[string]uint)
 	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
 	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", key))
 	_ = json.Unmarshal(reBytes, &result)
@@ -262,6 +265,7 @@ func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]ma
 }
 
 func CronGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	result = make(map[string]map[string]uint)
 	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
 	fmt.Println(key + "存入redis")
 	result, _ = GetQaCpkRssiList(queryCondition)

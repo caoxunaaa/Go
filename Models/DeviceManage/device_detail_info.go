@@ -48,6 +48,7 @@ func GetDeviceBaseInfo(snAssetsIc string) (deviceBaseInfo *DeviceBaseInfo, err e
 	return
 }
 
+//删除设备信息时，所有数据库相关的数据同时删除（危险操作需要确认清楚）
 func DeleteDeviceBaseInfo(deviceSn string) (length int64, err error) {
 	sqlStr := "DELETE FROM device_base_infos where sn = ?"
 	res, err := Databases.SuperxonDbDevice.Exec(sqlStr, deviceSn)
@@ -55,6 +56,28 @@ func DeleteDeviceBaseInfo(deviceSn string) (length int64, err error) {
 		return length, err
 	}
 	length, err = res.RowsAffected()
+
+	sqlStr = "DELETE FROM device_transmit_infos where device_sn = ?"
+	res, err = Databases.SuperxonDbDevice.Exec(sqlStr, deviceSn)
+	if err != nil {
+		return length, err
+	}
+	length, err = res.RowsAffected()
+
+	sqlStr = "DELETE FROM device_repair_infos where sn = ?"
+	res, err = Databases.SuperxonDbDevice.Exec(sqlStr, deviceSn)
+	if err != nil {
+		return length, err
+	}
+	length, err = res.RowsAffected()
+
+	sqlStr = "DELETE FROM device_maintenance_current_infos where device_sn = ?"
+	res, err = Databases.SuperxonDbDevice.Exec(sqlStr, deviceSn)
+	if err != nil {
+		return length, err
+	}
+	length, err = res.RowsAffected()
+
 	return
 }
 

@@ -1,7 +1,7 @@
-package qaStatisticBroad
+package qaModuleStatisticBroad
 
 import (
-	"SuperxonWebSite/Models/QaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
 	"SuperxonWebSite/Utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -9,13 +9,13 @@ import (
 
 func GetQaCpkInfoListHandler(c *gin.Context) {
 	var err error
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	StartTime, EndTime := Utils.GetCurrentAndZeroTime()
 	queryCondition.Pn = c.DefaultQuery("pn", "")
 	queryCondition.Process = c.DefaultQuery("process", "")
 	queryCondition.StartTime = c.DefaultQuery("startTime", StartTime)
 	queryCondition.EndTime = c.DefaultQuery("endTime", EndTime)
-	result, err := QaStatisticDisplay.RedisGetQaCpkInfoList(&queryCondition)
+	result, err := ModuleQaStatisticDisplay.RedisGetQaCpkInfoList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -25,13 +25,13 @@ func GetQaCpkInfoListHandler(c *gin.Context) {
 
 func GetQaCpkRssiListHandler(c *gin.Context) {
 	var err error
-	var queryCondition QaStatisticDisplay.QueryCondition
+	var queryCondition ModuleQaStatisticDisplay.QueryCondition
 	StartTime, EndTime := Utils.GetCurrentAndZeroTime()
 	queryCondition.Pn = c.DefaultQuery("pn", "")
 	queryCondition.Process = c.DefaultQuery("process", "")
 	queryCondition.StartTime = c.DefaultQuery("startTime", StartTime)
 	queryCondition.EndTime = c.DefaultQuery("endTime", EndTime)
-	result, err := QaStatisticDisplay.RedisGetQaCpkRssiList(&queryCondition)
+	result, err := ModuleQaStatisticDisplay.RedisGetQaCpkRssiList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
