@@ -92,7 +92,7 @@ func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error
 获取redis缓存中的projectPlanInfoList，如果没有就重新在数据库中查询
 */
 func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "projectPlanInfoList"))
+	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", "projectPlanInfoList"))
 	_ = json.Unmarshal(reBytes, &projectPlanInfoList)
 	fmt.Println(len(projectPlanInfoList), projectPlanInfoList)
 	if len(projectPlanInfoList) != 0 {
@@ -115,7 +115,7 @@ func CronGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 	projectPlanInfoList, _ = GetProjectPlanList()
 	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(projectPlanInfoList)
-	_, _ = Databases.RedisConn.Do("SET", "projectPlanInfoList", datas)
-	_, err = Databases.RedisConn.Do("expire", "projectPlanInfoList", 60*60*30)
+	_, _ = Databases.RedisPool.Get().Do("SET", "projectPlanInfoList", datas)
+	_, err = Databases.RedisPool.Get().Do("expire", "projectPlanInfoList", 60*60*30)
 	return
 }

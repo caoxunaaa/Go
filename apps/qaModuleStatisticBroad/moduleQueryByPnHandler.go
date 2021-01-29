@@ -30,16 +30,13 @@ func GetQaStatisticInfoListHandler(c *gin.Context) {
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
-	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "None")
+	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "")
 	if queryCondition.Pn == "None" || queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	if queryCondition.WorkOrderType == "TRX正常品" || queryCondition.WorkOrderType == "TRX改制返工品" {
-		qaStatisticInfoList, err = ModuleQaStatisticDisplay.GetQaStatisticOrderInfoList(&queryCondition)
-	} else {
-		qaStatisticInfoList, err = ModuleQaStatisticDisplay.GetQaStatisticInfoList(&queryCondition)
-	}
+	qaStatisticInfoList, err = ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(&queryCondition)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -54,16 +51,13 @@ func GetQaDefectsInfoListByPnHandler(c *gin.Context) {
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
-	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "None")
+	queryCondition.WorkOrderType = c.DefaultQuery("workOrderType", "")
 	if queryCondition.Pn == "None" || queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	if queryCondition.WorkOrderType == "TRX正常品" || queryCondition.WorkOrderType == "TRX改制返工品" {
-		qaDefectsInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsOrderInfoListByPn(&queryCondition)
-	} else {
-		qaDefectsInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsInfoListByPn(&queryCondition)
-	}
+	qaDefectsInfoList, err = ModuleQaStatisticDisplay.RedisGetQaDefectsOrderInfoListByPn(&queryCondition)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

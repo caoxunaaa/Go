@@ -86,7 +86,7 @@ func JWTSuperuserMiddleware() func(c *gin.Context) {
 			return
 		}
 
-		if mc.Username != "管理者" {
+		if mc.Username != "管理员" {
 			c.JSON(http.StatusForbidden, gin.H{
 				"code": 2006,
 				"msg":  "需要更高的权限",

@@ -183,7 +183,7 @@ func RedisGetQaDefectsInfoByWorkOrderIdList(queryCondition *QueryCondition) (qaD
 获取redis缓存中的qaDefectsInfoByWorkOrderIdList，如果没有就重新在数据库中查询
 */
 func RedisGetQaDefectsInfoByWorkOrderIdList(queryCondition *QueryCondition) (qaDefectsInfoByWorkOrderIdList []QaDefectsInfoByWorkOrderId, err error) {
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime))
+	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime))
 	_ = json.Unmarshal(reBytes, &qaDefectsInfoByWorkOrderIdList)
 	fmt.Println(len(qaDefectsInfoByWorkOrderIdList), qaDefectsInfoByWorkOrderIdList)
 	if len(qaDefectsInfoByWorkOrderIdList) != 0 {
@@ -202,8 +202,8 @@ func CronGetQaDefectsInfoByWorkOrderIdList(queryCondition *QueryCondition) (qaDe
 	qaDefectsInfoByWorkOrderIdList, _ = GetQaDefectsInfoByWorkOrderIdList(queryCondition)
 	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(qaDefectsInfoByWorkOrderIdList)
-	_, _ = Databases.RedisConn.Do("SET", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, datas)
-	_, err = Databases.RedisConn.Do("expire", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*30)
+	_, _ = Databases.RedisPool.Get().Do("SET", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, datas)
+	_, err = Databases.RedisPool.Get().Do("expire", "qaDefectsInfoByWorkOrderIdList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*30)
 	return
 }
 
@@ -326,7 +326,7 @@ func RedisGetQaDefectsDetailByWorkOrderId(queryCondition *QueryCondition) (qaDef
 获取redis缓存中的qaDefectsInfoByWorkOrderIdList，如果没有就重新在数据库中查询
 */
 func RedisGetQaDefectsDetailByWorkOrderId(queryCondition *QueryCondition) (qaDefectsDetailInfoList []QaDefectsDetailInfo, err error) {
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime))
+	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime))
 	_ = json.Unmarshal(reBytes, &qaDefectsDetailInfoList)
 	fmt.Println(len(qaDefectsDetailInfoList), qaDefectsDetailInfoList)
 	if len(qaDefectsDetailInfoList) != 0 {
@@ -345,7 +345,7 @@ func CronGetQaDefectsDetailByWorkOrderId(queryCondition *QueryCondition) (qaDefe
 	qaDefectsDetailInfoList, _ = GetQaDefectsDetailByWorkOrderId(queryCondition)
 	fmt.Println("projectPlanInfoList定时任务使用redis")
 	datas, _ := json.Marshal(qaDefectsDetailInfoList)
-	_, _ = Databases.RedisConn.Do("SET", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, datas)
-	_, err = Databases.RedisConn.Do("expire", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*30)
+	_, _ = Databases.RedisPool.Get().Do("SET", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, datas)
+	_, err = Databases.RedisPool.Get().Do("expire", "qaDefectsDetailInfoList"+queryCondition.StartTime+queryCondition.EndTime, 60*60*30)
 	return
 }

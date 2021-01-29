@@ -92,14 +92,34 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	result = make(map[string]map[string]uint)
 	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", key))
-	_ = json.Unmarshal(reBytes, &result)
-	fmt.Println(len(result), result)
-	if len(result) != 0 {
-		fmt.Println("使用redis")
-		return
+	reBytes, err := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
+	if len(reBytes) != 0 {
+		_ = json.Unmarshal(reBytes, &result)
+		if len(result) != 0 {
+			fmt.Println("使用redis")
+			return
+		}
 	}
+
 	result, _ = GetQaCpkInfoList(queryCondition)
+
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.StartTime, time.Local)
+	startTime = startTime.AddDate(0, 0, 7)
+	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.EndTime, time.Local)
+	if !startTime.After(endTime) {
+		datas, _ := json.Marshal(result)
+		_, err = Databases.RedisPool.Get().Do("SET", key, datas)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
 	return
 }
 
@@ -109,11 +129,119 @@ func CronGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map
 	fmt.Println(key + "存入redis")
 	result, _ = GetQaCpkInfoList(queryCondition)
 	datas, _ := json.Marshal(result)
-	_, _ = Databases.RedisConn.Do("SET", key, datas)
-	_, err = Databases.RedisConn.Do("expire", key, 60*60*30)
+	_, _ = Databases.RedisPool.Get().Do("SET", key, datas)
+	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
 	return
 }
 
+type QaCpkRssi struct {
+	CP1 float64
+	CP2 float64
+	CP3 float64
+	CP4 float64
+	CP5 float64
+	CP6 float64
+	CP7 float64
+	CP8 float64
+}
+
+type QaCpkRssiResult struct {
+	CP1 []float64
+	CP2 []float64
+	CP3 []float64
+	CP4 []float64
+	CP5 []float64
+	CP6 []float64
+	CP7 []float64
+	CP8 []float64
+}
+
+func GetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	var qaCpkRssiList []QaCpkRssi
+	sqlStr := `select d.calipoint1,d.calipoint2,d.calipoint3,
+d.calipoint4,d.calipoint5,d.calipoint6,d.calipoint7,d.calipoint8
+from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
+from superxon.autodt_process_log x
+WHERE x.pn like '` + queryCondition.Pn + `'
+and x.log_action like '` + queryCondition.Process + `%'
+and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
+) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee
+from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
+ join superxon.autodt_results_monitor d on a.sn=d.opticssn and a.ACTION_TIME=d.testdate
+ where a.rr=1 AND C.EE=1 `
+	rows, err := Databases.OracleDB.Query(sqlStr)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var qaCpkRssi QaCpkRssi
+	for rows.Next() {
+		err = rows.Scan(
+			&qaCpkRssi.CP1,
+			&qaCpkRssi.CP2,
+			&qaCpkRssi.CP3,
+			&qaCpkRssi.CP4,
+			&qaCpkRssi.CP5,
+			&qaCpkRssi.CP6,
+			&qaCpkRssi.CP7,
+			&qaCpkRssi.CP8,
+		)
+		if err != nil {
+			return nil, err
+		}
+		qaCpkRssiList = append(qaCpkRssiList, qaCpkRssi)
+	}
+	result, err = GetQaCpkRssiResult(qaCpkRssiList...)
+	return
+}
+
+func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	result = make(map[string]map[string]uint)
+	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	reBytes, err := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
+	if len(reBytes) != 0 {
+		_ = json.Unmarshal(reBytes, &result)
+		if len(result) != 0 {
+			fmt.Println("使用redis")
+			return
+		}
+	}
+
+	result, _ = GetQaCpkRssiList(queryCondition)
+
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.StartTime, time.Local)
+	startTime = startTime.AddDate(0, 0, 7)
+	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.EndTime, time.Local)
+	if !startTime.After(endTime) {
+		datas, _ := json.Marshal(result)
+		_, err = Databases.RedisPool.Get().Do("SET", key, datas)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
+	return
+}
+
+func CronGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
+	result = make(map[string]map[string]uint)
+	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
+	fmt.Println(key + "存入redis")
+	result, _ = GetQaCpkRssiList(queryCondition)
+	datas, _ := json.Marshal(result)
+	_, _ = Databases.RedisPool.Get().Do("SET", key, datas)
+	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+	return
+}
+
+//获得CpkInfo，QaCpkRssi的分布函数
 func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]uint, err error) {
 	result = make(map[string]map[string]uint)
 	result["TxAop"] = make(map[string]uint)
@@ -188,93 +316,6 @@ func CpkDataHandle(slice []float64, segmentInterval float64, dst map[string]uint
 	c <- true
 }
 
-type QaCpkRssi struct {
-	CP1 float64
-	CP2 float64
-	CP3 float64
-	CP4 float64
-	CP5 float64
-	CP6 float64
-	CP7 float64
-	CP8 float64
-}
-
-type QaCpkRssiResult struct {
-	CP1 []float64
-	CP2 []float64
-	CP3 []float64
-	CP4 []float64
-	CP5 []float64
-	CP6 []float64
-	CP7 []float64
-	CP8 []float64
-}
-
-func GetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
-	var qaCpkRssiList []QaCpkRssi
-	sqlStr := `select d.calipoint1,d.calipoint2,d.calipoint3,
-d.calipoint4,d.calipoint5,d.calipoint6,d.calipoint7,d.calipoint8
-from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
-from superxon.autodt_process_log x
-WHERE x.pn like '` + queryCondition.Pn + `'
-and x.log_action like '` + queryCondition.Process + `%'
-and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
-and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
-) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee
-from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
- join superxon.autodt_results_monitor d on a.sn=d.opticssn and a.ACTION_TIME=d.testdate
- where a.rr=1 AND C.EE=1 `
-	rows, err := Databases.OracleDB.Query(sqlStr)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var qaCpkRssi QaCpkRssi
-	for rows.Next() {
-		err = rows.Scan(
-			&qaCpkRssi.CP1,
-			&qaCpkRssi.CP2,
-			&qaCpkRssi.CP3,
-			&qaCpkRssi.CP4,
-			&qaCpkRssi.CP5,
-			&qaCpkRssi.CP6,
-			&qaCpkRssi.CP7,
-			&qaCpkRssi.CP8,
-		)
-		if err != nil {
-			return nil, err
-		}
-		qaCpkRssiList = append(qaCpkRssiList, qaCpkRssi)
-	}
-	result, err = GetQaCpkRssiResult(qaCpkRssiList...)
-	return
-}
-
-func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
-	result = make(map[string]map[string]uint)
-	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	reBytes, _ := redis.Bytes(Databases.RedisConn.Do("get", key))
-	_ = json.Unmarshal(reBytes, &result)
-	fmt.Println(len(result), result)
-	if len(result) != 0 {
-		fmt.Println("使用redis")
-		return
-	}
-	result, _ = GetQaCpkRssiList(queryCondition)
-	return
-}
-
-func CronGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
-	result = make(map[string]map[string]uint)
-	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	fmt.Println(key + "存入redis")
-	result, _ = GetQaCpkRssiList(queryCondition)
-	datas, _ := json.Marshal(result)
-	_, _ = Databases.RedisConn.Do("SET", key, datas)
-	_, err = Databases.RedisConn.Do("expire", key, 60*60*30)
-	return
-}
-
 func GetQaCpkRssiResult(qaCpkRssiList ...QaCpkRssi) (result map[string]map[string]uint, err error) {
 	result = make(map[string]map[string]uint)
 	result["CP1"] = make(map[string]uint)
@@ -324,7 +365,6 @@ func GetQaCpkRssiResult(qaCpkRssiList ...QaCpkRssi) (result map[string]map[strin
 		}
 
 	}
-	startT := time.Now()
 	c := make(chan bool, 8)
 	defer close(c)
 	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP1), 0.5, result["CP1"], c)
@@ -338,7 +378,6 @@ func GetQaCpkRssiResult(qaCpkRssiList ...QaCpkRssi) (result map[string]map[strin
 	for i := 0; i < 8; i++ {
 		<-c
 	}
-	fmt.Println(time.Since(startT))
 	return
 }
 

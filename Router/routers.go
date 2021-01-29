@@ -41,7 +41,7 @@ func Init() *gin.Engine {
 		v1.GET("/osaYesterdayInfo/:pn", runOsaDisplayBroad.GetYesterdayOsaInfoListHandler)
 		v1.GET("/osaStationDetail", runOsaDisplayBroad.GetStationStatusHandler)
 	}
-	v2 := r.Group("/qaStatisticBroad").Use(Middlewares.JWTAuthMiddleware()) //质量统计查询页面
+	v2 := r.Group("/qaStatisticBroad") //.Use(Middlewares.JWTAuthMiddleware()) //质量统计查询页面
 	{
 		v2.GET("/qaWorkOrderIdList", qaModuleStatisticBroad.GetWorkOrderIdsHandler)
 		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaModuleStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)

@@ -32,6 +32,7 @@ func GetAgoAndCurrentTime(date Ago) (AgoTimeStr string, currentTimeStr string) {
 
 func GetAgoAndCurrentTimeZero(date Ago) (AgoTimeStr string, currentTimeStr string) {
 	currentTime := time.Now()
+	//currentTimeStr = currentTime.Format("2006-01-02 15:04:05")
 	currentTimeStr = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, currentTime.Location()).Format("2006-01-02 15:04:05")
 	AgoTime := currentTime.AddDate(date.Years, date.Months, date.Days)
 	AgoTimeStr = time.Date(AgoTime.Year(), AgoTime.Month(), AgoTime.Day(), 0, 0, 0, 0, AgoTime.Location()).Format("2006-01-02 15:04:05")
