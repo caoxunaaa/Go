@@ -5,6 +5,7 @@ import (
 	"SuperxonWebSite/apps/deviceManangeApp"
 	"SuperxonWebSite/apps/fileManage"
 	"SuperxonWebSite/apps/qaModuleStatisticBroad"
+	"SuperxonWebSite/apps/qaOsaStatisticBroad"
 	"SuperxonWebSite/apps/runModuleDisplayBroad"
 	"SuperxonWebSite/apps/runOsaDisplayBroad"
 	"SuperxonWebSite/apps/userHandleApp"
@@ -27,7 +28,8 @@ func Init() *gin.Engine {
 	//	v7.GET("", index.MyIndexHandler)
 	//}
 
-	v1 := r.Group("/runDisplayBroad").Use(Middlewares.JWTAuthMiddleware()) //实时运行看板页面
+	//实时运行看板页面
+	v1 := r.Group("/runDisplayBroad").Use(Middlewares.JWTAuthMiddleware())
 	{
 		v1.GET("/moduleList", runModuleDisplayBroad.GetModuleListHandler)
 		v1.GET("/moduleInfo/:pn", runModuleDisplayBroad.GetModuleInfoListHandler)
@@ -40,8 +42,10 @@ func Init() *gin.Engine {
 		v1.GET("/osaInfoList/:pn", runOsaDisplayBroad.GetOsaInfoListHandler)
 		v1.GET("/osaYesterdayInfo/:pn", runOsaDisplayBroad.GetYesterdayOsaInfoListHandler)
 		v1.GET("/osaStationDetail", runOsaDisplayBroad.GetStationStatusHandler)
+		v1.GET("/osaWipInfoList/:pn", runOsaDisplayBroad.GetOsaWipInfoListHandler)
 	}
-	v2 := r.Group("/qaStatisticBroad") //.Use(Middlewares.JWTAuthMiddleware()) //质量统计查询页面
+	//模块质量统计查询页面
+	v2 := r.Group("/qaStatisticBroad").Use(Middlewares.JWTAuthMiddleware())
 	{
 		v2.GET("/qaWorkOrderIdList", qaModuleStatisticBroad.GetWorkOrderIdsHandler)
 		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaModuleStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)
@@ -59,8 +63,15 @@ func Init() *gin.Engine {
 
 		v2.GET("/pnSetParams", qaModuleStatisticBroad.GetPnSetParamsListHandler)
 	}
-
-	v3 := r.Group("/deviceManage").Use(Middlewares.JWTAuthMiddleware()) //v3设备管理页面
+	//OSA质量统计查询页面
+	v2Osa := r.Group("/qaOsaStatisticBroad")
+	{
+		v2Osa.GET("/qaOsaPnList", qaOsaStatisticBroad.GetQaOsaPnListHandler)
+		v2Osa.GET("/qaOsaStatisticsInfo", qaOsaStatisticBroad.GetQaOsaStatisticInfoListHandler)
+		v2Osa.GET("/qaOsaDefectsInfo", qaOsaStatisticBroad.GetQaOsaDefectsInfoListByPnHandler)
+	}
+	//v3设备管理页面
+	v3 := r.Group("/deviceManage").Use(Middlewares.JWTAuthMiddleware())
 	{
 		v3.GET("/deviceRootCategory", deviceManangeApp.GetAllDeviceCategoryRootListHandler)
 		v3.GET("/deviceChildCategory/:rootCategory", deviceManangeApp.GetAllDeviceCategoryChildListHandler)
@@ -86,7 +97,8 @@ func Init() *gin.Engine {
 		v3.GET("/deviceMaintenanceRecordOfDevice/:snAssets", deviceManangeApp.GetDeviceMaintenanceRecordsHandler)
 		v3.GET("/deviceMaintenanceRecordOfDevice/:snAssets/:itemName", deviceManangeApp.GetDeviceMaintenanceRecordOfItemNameHandler)
 	}
-	v3Permission := r.Group("/deviceManage").Use(Middlewares.JWTSuperuserMiddleware()) //v3设备管理页面用户权限
+	//v3设备管理页面用户权限
+	v3Permission := r.Group("/deviceManage").Use(Middlewares.JWTSuperuserMiddleware())
 	{
 		v3Permission.POST("/deviceChildCategory", deviceManangeApp.CreateDeviceCategoryChildHandler)
 
@@ -109,6 +121,7 @@ func Init() *gin.Engine {
 
 		v3Permission.POST("/deviceMaintenanceRecord", deviceManangeApp.CreateDeviceMaintenanceRecordHandler)
 	}
+	//用户页面
 	v4 := r.Group("/userHandle")
 	{
 		v4.GET("/profile", userHandleApp.GetAllProfileListHandler)
@@ -119,15 +132,14 @@ func Init() *gin.Engine {
 	{
 		v5.GET("/home", userHandleApp.HomeHandler)
 	}
-	v6 := r.Group("/fileManage").Use(Middlewares.JWTAuthMiddleware()) //视频管理页面
+	//视频管理页面
+	v6 := r.Group("/fileManage").Use(Middlewares.JWTAuthMiddleware())
 	{
 		v6.GET("/videoInfo", fileManage.GetVideoInfoListHandler)
-		//v6.POST("/videoInfo", fileManage.UploadVideoFileHandler)
-		//v6.DELETE("/videoInfo/:id", fileManage.DeleteVideoInfoHandler)
 	}
-	v6Permission := r.Group("/fileManage").Use(Middlewares.JWTSuperuserMiddleware()) //视频管理页面
+	//视频管理页面
+	v6Permission := r.Group("/fileManage").Use(Middlewares.JWTSuperuserMiddleware())
 	{
-		//v6Permission.GET("/videoInfo", fileManage.GetVideoInfoListHandler)
 		v6Permission.POST("/videoInfo", fileManage.UploadVideoFileHandler)
 		v6Permission.DELETE("/videoInfo/:id", fileManage.DeleteVideoInfoHandler)
 	}

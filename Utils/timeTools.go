@@ -4,12 +4,15 @@ import (
 	"time"
 )
 
+//当天0点到当前的时间
 func GetCurrentAndZeroTime() (zeroTimeStr string, currentTimeStr string) {
 	currentTime := time.Now()
 	currentTimeStr = currentTime.Format("2006-01-02 15:04:05")
 	zeroTimeStr = time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, currentTime.Location()).Format("2006-01-02 15:04:05")
 	return
 }
+
+//当月第一天0点到当前时间
 func GetCurrentAndZeroDayTime() (zeroTimeStr string, currentTimeStr string) {
 	currentTime := time.Now()
 	currentTimeStr = currentTime.Format("2006-01-02 15:04:05")
@@ -23,6 +26,7 @@ type Ago struct {
 	Days   int
 }
 
+//Ago之前的当前时分秒到当前时间
 func GetAgoAndCurrentTime(date Ago) (AgoTimeStr string, currentTimeStr string) {
 	currentTime := time.Now()
 	currentTimeStr = currentTime.Format("2006-01-02 15:04:05")
@@ -30,6 +34,7 @@ func GetAgoAndCurrentTime(date Ago) (AgoTimeStr string, currentTimeStr string) {
 	return
 }
 
+//Ago之前的0点到当天的0点
 func GetAgoAndCurrentTimeZero(date Ago) (AgoTimeStr string, currentTimeStr string) {
 	currentTime := time.Now()
 	//currentTimeStr = currentTime.Format("2006-01-02 15:04:05")

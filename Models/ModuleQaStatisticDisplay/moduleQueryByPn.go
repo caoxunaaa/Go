@@ -128,17 +128,6 @@ func RedisGetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatist
 			return
 		}
 	}
-
-	return
-}
-
-func CronGetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInfoList []QaStatisticInfo, err error) {
-	key := "ModuleInfo" + queryCondition.Pn + queryCondition.WorkOrderType + queryCondition.StartTime + queryCondition.EndTime
-	fmt.Println(key + "存入redis")
-	qaStatisticInfoList, _ = GetQaStatisticOrderInfoList(queryCondition)
-	datas, _ := json.Marshal(qaStatisticInfoList)
-	_, _ = Databases.RedisPool.Get().Do("SET", key, datas)
-	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
 	return
 }
 
@@ -228,16 +217,6 @@ func RedisGetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefec
 		}
 	}
 
-	return
-}
-
-func CronGetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefectsInfoList []QaDefectsInfoByPn, err error) {
-	key := "ModuleDefects" + queryCondition.Pn + queryCondition.WorkOrderType + queryCondition.StartTime + queryCondition.EndTime
-	fmt.Println(key + "存入redis")
-	qaDefectsInfoList, _ = GetQaDefectsOrderInfoListByPn(queryCondition)
-	datas, _ := json.Marshal(qaDefectsInfoList)
-	_, _ = Databases.RedisPool.Get().Do("SET", key, datas)
-	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
 	return
 }
 

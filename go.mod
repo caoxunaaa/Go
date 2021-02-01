@@ -3,6 +3,7 @@ module SuperxonWebSite
 go 1.15
 
 require (
+	github.com/Shopify/sarama v1.27.2 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
@@ -28,5 +29,5 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	//gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+//gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )

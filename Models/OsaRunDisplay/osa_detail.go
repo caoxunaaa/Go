@@ -3,6 +3,8 @@ package OsaRunDisplay
 import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
+	"database/sql"
+	"fmt"
 )
 
 type Osa struct {
@@ -35,7 +37,7 @@ func GetOsaList(osaQueryCondition *OsaQueryCondition) (osaList []Osa, err error)
 }
 
 type OsaInfo struct {
-	Pn              string
+	Pn              sql.NullString
 	Sort            string
 	Sequence        string
 	Process         string
@@ -161,6 +163,7 @@ func GetOsaInfoList(osaQueryCondition *OsaQueryCondition) (osaInfoList []OsaInfo
 			&osaInfo.AccBad,
 			&osaInfo.AccPassRate)
 		if err != nil {
+			fmt.Println(err)
 			return nil, err
 		}
 		osaInfoList = append(osaInfoList, osaInfo)
