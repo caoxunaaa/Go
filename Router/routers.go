@@ -45,7 +45,7 @@ func Init() *gin.Engine {
 		v1.GET("/osaWipInfoList/:pn", runOsaDisplayBroad.GetOsaWipInfoListHandler)
 	}
 	//模块质量统计查询页面
-	v2 := r.Group("/qaStatisticBroad").Use(Middlewares.JWTAuthMiddleware())
+	v2 := r.Group("/qaStatisticBroad") //.Use(Middlewares.JWTAuthMiddleware())
 	{
 		v2.GET("/qaWorkOrderIdList", qaModuleStatisticBroad.GetWorkOrderIdsHandler)
 		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaModuleStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)

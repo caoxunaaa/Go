@@ -90,9 +90,9 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 }
 
 func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
-	result = make(map[string]map[string]uint)
+	//result = make(map[string]map[string]uint)
 	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	reBytes, err := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
+	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
 	if len(reBytes) != 0 {
 		_ = json.Unmarshal(reBytes, &result)
 		if len(result) != 0 {
@@ -119,7 +119,6 @@ func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]ma
 			return
 		}
 	}
-
 	return
 }
 
@@ -199,7 +198,7 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	result = make(map[string]map[string]uint)
 	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	reBytes, err := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
+	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
 	if len(reBytes) != 0 {
 		_ = json.Unmarshal(reBytes, &result)
 		if len(result) != 0 {
