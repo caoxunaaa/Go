@@ -216,7 +216,6 @@ func RedisGetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefec
 			return
 		}
 	}
-
 	return
 }
 

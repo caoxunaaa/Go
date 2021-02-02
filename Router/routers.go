@@ -69,6 +69,7 @@ func Init() *gin.Engine {
 		v2Osa.GET("/qaOsaPnList", qaOsaStatisticBroad.GetQaOsaPnListHandler)
 		v2Osa.GET("/qaOsaStatisticsInfo", qaOsaStatisticBroad.GetQaOsaStatisticInfoListHandler)
 		v2Osa.GET("/qaOsaDefectsInfo", qaOsaStatisticBroad.GetQaOsaDefectsInfoListByPnHandler)
+		v2Osa.GET("/qaOsaStatisticsInfoByWorkOrderId", qaOsaStatisticBroad.GetQaOsaStatisticInfoListByWorkOrderIdHandler)
 	}
 	//v3设备管理页面
 	v3 := r.Group("/deviceManage").Use(Middlewares.JWTAuthMiddleware())

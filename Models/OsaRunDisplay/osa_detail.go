@@ -12,14 +12,15 @@ type Osa struct {
 }
 
 type OsaQueryCondition struct {
-	Pn        string
-	StartTime string
-	EndTime   string
+	Pn          string
+	StartTime   string
+	EndTime     string
+	WorkOrderId string
 }
 
 //某段时间下单的OSA列表
 func GetOsaList(osaQueryCondition *OsaQueryCondition) (osaList []Osa, err error) {
-	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE '0%' and t.pch_tc_date between to_date('` + osaQueryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + osaQueryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')`
+	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE '0%' and t.state like '开工' and t.pch_tc_date between to_date('` + osaQueryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + osaQueryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err

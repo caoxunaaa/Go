@@ -22,7 +22,7 @@ func InitCron() {
 	timedGetQaDefectsOrderInfoListByPn(01, "3", 5)
 
 	spec3 := "0 0 */6 * * ?" //每隔6小时执行任务
-	_ = timedTask.AddFunc(spec3, func() { _, _ = ModuleRunDisplay.CronGetProjectPlanList() })
+	_ = timedTask.AddFunc(spec3, func() { _, _ = ModuleRunDisplay.RedisGetProjectPlanList() })
 	timedTask.Start()
 }
 

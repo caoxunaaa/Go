@@ -39,7 +39,7 @@ func GetQaOsaPnList(osaQueryCondition *OsaRunDisplay.OsaQueryCondition) (osaPnLi
 	return
 }
 
-func RedisGetQaOsaStatisticInfoList(osaQueryCondition *OsaRunDisplay.OsaQueryCondition) (qaOsaStatisticInfoList []OsaRunDisplay.OsaInfo, err error) {
+func RedisGetQaOsaStatisticInfoListByPn(osaQueryCondition *OsaRunDisplay.OsaQueryCondition) (qaOsaStatisticInfoList []OsaRunDisplay.OsaInfo, err error) {
 	key := "OsaInfo" + osaQueryCondition.Pn + osaQueryCondition.StartTime + osaQueryCondition.EndTime
 	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
 	if len(reBytes) != 0 {

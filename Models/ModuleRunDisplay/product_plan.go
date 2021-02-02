@@ -10,12 +10,12 @@ import (
 
 // 计划中的产品情况
 type UndoneProjectPlanInfo struct {
-	Id        int
-	Type      string
-	Customers string
-	Code      string
-	Pn        string
-	PlanToPay int //计划交付数量
+	Id        int    `gorm:"primary_key" db:"id"`
+	Type      string `db:"type"`
+	Customers string `db:"customers"`
+	Code      string `gorm:"unique;not null" db:"code"`
+	Pn        string `gorm:"unique;not null" db:"pn"`
+	PlanToPay int    `db:"plan_to_pay"` //计划交付数量
 }
 
 //已经完成的产品
@@ -35,29 +35,15 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 */
 func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	undoneProjectPlanInfoList := make([]UndoneProjectPlanInfo, 0)
-	rowsUndone, err := Databases.SqliteDbEntry.Query("SELECT * from ProjectPlanInfo")
-	if err != nil {
-		return
-	}
+	sqlStr := `SELECT * from project_plan_infos`
+	err = Databases.SuperxonDbDevice.Select(&undoneProjectPlanInfoList, sqlStr)
 	if err != nil {
 		return nil, err
-	}
-	defer rowsUndone.Close()
-	var undoneProjectPlanInfo UndoneProjectPlanInfo
-	for rowsUndone.Next() {
-		_ = rowsUndone.Scan(
-			&undoneProjectPlanInfo.Id,
-			&undoneProjectPlanInfo.Type,
-			&undoneProjectPlanInfo.Customers,
-			&undoneProjectPlanInfo.Code,
-			&undoneProjectPlanInfo.Pn,
-			&undoneProjectPlanInfo.PlanToPay)
-		undoneProjectPlanInfoList = append(undoneProjectPlanInfoList, undoneProjectPlanInfo)
 	}
 
 	doneProjectPlanInfoList := make([]DoneProjectPlanInfo, 0)
 	startTime, endTime := Utils.GetCurrentAndZeroDayTime()
-	sqlStr := `select model, count(*) from superxon.storagemanage_main a where a.shipmenttime between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss') group by a.model`
+	sqlStr = `select model, count(*) from superxon.storagemanage_main a where a.shipmenttime between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss') group by a.model`
 	rowsDone, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -92,30 +78,29 @@ func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error
 获取redis缓存中的projectPlanInfoList，如果没有就重新在数据库中查询
 */
 func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
-	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", "projectPlanInfoList"))
-	_ = json.Unmarshal(reBytes, &projectPlanInfoList)
-	fmt.Println(len(projectPlanInfoList), projectPlanInfoList)
-	if len(projectPlanInfoList) != 0 {
-		fmt.Println("使用redis")
-		return
+	key := "projectPlanInfoList"
+	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
+	if len(reBytes) != 0 {
+		_ = json.Unmarshal(reBytes, &projectPlanInfoList)
+		if len(projectPlanInfoList) != 0 {
+			fmt.Println("使用redis")
+			return
+		}
 	}
+
 	projectPlanInfoList, err = GetProjectPlanList()
+
+	datas, _ := json.Marshal(projectPlanInfoList)
+	_, err = Databases.RedisPool.Get().Do("SET", key, datas)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	return
-}
+	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-/*
-func CronGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
-定时从数据库中查询产品计划结果，并存入redis缓存中
-*/
-func CronGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
-	projectPlanInfoList, _ = GetProjectPlanList()
-	fmt.Println("projectPlanInfoList定时任务使用redis")
-	datas, _ := json.Marshal(projectPlanInfoList)
-	_, _ = Databases.RedisPool.Get().Do("SET", "projectPlanInfoList", datas)
-	_, err = Databases.RedisPool.Get().Do("expire", "projectPlanInfoList", 60*60*30)
 	return
 }

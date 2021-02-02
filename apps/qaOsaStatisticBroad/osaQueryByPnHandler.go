@@ -34,7 +34,7 @@ func GetQaOsaStatisticInfoListHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaOsaStatisticInfoList, err := OsaQaStatisticDisplay.RedisGetQaOsaStatisticInfoList(&osaQueryCondition)
+	qaOsaStatisticInfoList, err := OsaQaStatisticDisplay.RedisGetQaOsaStatisticInfoListByPn(&osaQueryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

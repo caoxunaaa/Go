@@ -4,6 +4,7 @@ import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Models/DeviceManage"
 	"SuperxonWebSite/Models/FileManage"
+	"SuperxonWebSite/Models/ModuleRunDisplay"
 	"SuperxonWebSite/Models/User"
 	"SuperxonWebSite/Router"
 	"SuperxonWebSite/Services"
@@ -13,9 +14,6 @@ import (
 func main() {
 	Databases.InitOracle()
 	defer Databases.CloseOracle()
-
-	Databases.InitSqlite3()
-	defer Databases.CloseSqlite3()
 
 	Databases.InitMysql()
 	defer Databases.CloseMysql()
@@ -29,6 +27,7 @@ func main() {
 		&DeviceManage.DeviceTransmitInfo{},
 		&DeviceManage.DeviceCategory{},
 		&DeviceManage.SelfTest{},
+		&ModuleRunDisplay.UndoneProjectPlanInfo{},
 		&User.Profile{},
 		&FileManage.VideoInfo{},
 	)
