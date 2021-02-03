@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func InitCommonIni(path string) (cfg *ini.File, err error) {
+func InitIni(path string) (cfg *ini.File, err error) {
 	cfg, err = ini.Load(path)
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
@@ -18,13 +18,24 @@ func InitCommonIni(path string) (cfg *ini.File, err error) {
 
 func GetCommonPnList() (pnList []string, err error) {
 	dir, _ := os.Getwd()
-	fmt.Println(dir)
-	cfg, err := InitCommonIni(dir + "\\Services\\Common.ini")
+	cfg, err := InitIni(dir + "\\Services\\Common.ini")
 	if err != nil {
 		fmt.Printf("Fail to read file: %v", err)
 		os.Exit(1)
 		return
 	}
 	pnList = strings.Split(cfg.Section("PnForCpkRedis").Key("PnList").String(), ",")
+	return
+}
+
+func GetErrorCodeDescribe(errorCode string) (errorCodeDescribe string, err error) {
+	dir, _ := os.Getwd()
+	cfg, err := InitIni(dir + "\\Services\\ErrorCodeDescribe.ini")
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
+		return
+	}
+	errorCodeDescribe = cfg.Section("ErrorCode").Key(errorCode).String()
 	return
 }

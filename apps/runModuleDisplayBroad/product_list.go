@@ -38,6 +38,17 @@ func GetModuleInfoListHandler(c *gin.Context) {
 	}
 }
 
+func GetAllModuleInfoListHandler(c *gin.Context) {
+	startTimeStr, endTimeStr := Utils.GetCurrentAndZeroTime()
+	moduleInfoList, err := ModuleRunDisplay.GetAllModuleInfoList(startTimeStr, endTimeStr)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, moduleInfoList)
+	}
+}
+
 func GetYesterdayModuleInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {

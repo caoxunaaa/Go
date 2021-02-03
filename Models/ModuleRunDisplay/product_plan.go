@@ -29,6 +29,53 @@ type ProjectPlanInfo struct {
 	DoneProjectPlanInfo
 }
 
+func GetUndoneProjectPlanInfoList() (undoneProjectPlanInfoList []*UndoneProjectPlanInfo, err error) {
+	sqlStr := "SELECT * from project_plan_infos"
+	err = Databases.SuperxonDbDevice.Select(&undoneProjectPlanInfoList, sqlStr)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func CreateUndoneProjectPlanInfo(undoneProjectPlanInfo *UndoneProjectPlanInfo) (err error) {
+	sqlStr := "INSERT INTO project_plan_infos(type, customers, code, pn, plan_to_pay) values (?, ?, ?, ?, ?)"
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+		undoneProjectPlanInfo.Type,
+		undoneProjectPlanInfo.Customers,
+		undoneProjectPlanInfo.Code,
+		undoneProjectPlanInfo.Pn,
+		undoneProjectPlanInfo.PlanToPay)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+func DeleteUndoneProjectPlanInfo(id int) (err error) {
+	sqlStr := "DELETE FROM project_plan_infos where id = ?"
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, id)
+	if err != nil {
+		return err
+	}
+	return
+}
+
+func UpdateUndoneProjectPlanInfo(undoneProjectPlanInfo *UndoneProjectPlanInfo, id int) (err error) {
+	sqlStr := "UPDATE project_plan_infos SET type=?, customers=?, code=?, pn=?, plan_to_pay=? WHERE id=?"
+	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+		undoneProjectPlanInfo.Type,
+		undoneProjectPlanInfo.Customers,
+		undoneProjectPlanInfo.Code,
+		undoneProjectPlanInfo.Pn,
+		undoneProjectPlanInfo.PlanToPay,
+		id)
+	if err != nil {
+		return err
+	}
+	return
+}
+
 /*
 func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 从数据库中查询产品计划结果并返回

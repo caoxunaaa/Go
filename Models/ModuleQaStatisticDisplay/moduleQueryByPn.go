@@ -136,6 +136,7 @@ type QaDefectsInfoByPn struct {
 	Sequence       string
 	Version        string
 	ErrorCode      string
+	ErrorDescribe  string
 	ErrorCount     uint32
 	ErrorRate      string
 	ErrorInputRate string
@@ -182,6 +183,7 @@ func GetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefectsInf
 		if err != nil {
 			return nil, err
 		}
+		qaDefectsInfo.ErrorDescribe, _ = Utils.GetErrorCodeDescribe(qaDefectsInfo.ErrorCode)
 		qaDefectsInfoList = append(qaDefectsInfoList, qaDefectsInfo)
 	}
 	return

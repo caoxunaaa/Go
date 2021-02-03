@@ -15,6 +15,7 @@ import (
 // 初始化
 func Init() *gin.Engine {
 	r := gin.Default()
+	//pprof.Register(r)
 	r.Static("/assets", "./assets")
 	//r.StaticFS("/assets", http.Dir("assets"))
 	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
@@ -29,10 +30,11 @@ func Init() *gin.Engine {
 	//}
 
 	//实时运行看板页面
-	v1 := r.Group("/runDisplayBroad").Use(Middlewares.JWTAuthMiddleware())
+	v1 := r.Group("/runDisplayBroad")
 	{
 		v1.GET("/moduleList", runModuleDisplayBroad.GetModuleListHandler)
 		v1.GET("/moduleInfo/:pn", runModuleDisplayBroad.GetModuleInfoListHandler)
+		v1.GET("/allModuleInfo", runModuleDisplayBroad.GetAllModuleInfoListHandler)
 		v1.GET("/moduleYesterdayInfo/:pn", runModuleDisplayBroad.GetYesterdayModuleInfoListHandler)
 		v1.GET("/moduleStationStatus", runModuleDisplayBroad.GetStationStatusHandler)
 		v1.GET("/moduleProjectPlanList", runModuleDisplayBroad.GetProjectPlanListHandler)
@@ -44,8 +46,15 @@ func Init() *gin.Engine {
 		v1.GET("/osaStationDetail", runOsaDisplayBroad.GetStationStatusHandler)
 		v1.GET("/osaWipInfoList/:pn", runOsaDisplayBroad.GetOsaWipInfoListHandler)
 	}
+	v1Permission := r.Group("/runDisplayBroad").Use(Middlewares.JWTSuperuserMiddleware())
+	{
+		v1Permission.GET("/UndoneProjectPlanList", runModuleDisplayBroad.GetUndoneProjectPlanInfoListHandler)
+		v1Permission.POST("/UndoneProjectPlanList", runModuleDisplayBroad.CreateUndoneProjectPlanInfoHandler)
+		v1Permission.PUT("/UndoneProjectPlanList/:id", runModuleDisplayBroad.UpdateUndoneProjectPlanInfoHandler)
+		v1Permission.DELETE("/UndoneProjectPlanList/:id", runModuleDisplayBroad.DeleteUndoneProjectPlanInfoHandler)
+	}
 	//模块质量统计查询页面
-	v2 := r.Group("/qaStatisticBroad") //.Use(Middlewares.JWTAuthMiddleware())
+	v2 := r.Group("/qaStatisticBroad").Use(Middlewares.JWTAuthMiddleware())
 	{
 		v2.GET("/qaWorkOrderIdList", qaModuleStatisticBroad.GetWorkOrderIdsHandler)
 		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaModuleStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)
@@ -64,7 +73,7 @@ func Init() *gin.Engine {
 		v2.GET("/pnSetParams", qaModuleStatisticBroad.GetPnSetParamsListHandler)
 	}
 	//OSA质量统计查询页面
-	v2Osa := r.Group("/qaOsaStatisticBroad")
+	v2Osa := r.Group("/qaOsaStatisticBroad").Use(Middlewares.JWTAuthMiddleware())
 	{
 		v2Osa.GET("/qaOsaPnList", qaOsaStatisticBroad.GetQaOsaPnListHandler)
 		v2Osa.GET("/qaOsaStatisticsInfo", qaOsaStatisticBroad.GetQaOsaStatisticInfoListHandler)
