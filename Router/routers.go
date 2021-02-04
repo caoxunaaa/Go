@@ -34,10 +34,13 @@ func Init() *gin.Engine {
 	{
 		v1.GET("/moduleList", runModuleDisplayBroad.GetModuleListHandler)
 		v1.GET("/moduleInfo/:pn", runModuleDisplayBroad.GetModuleInfoListHandler)
+
 		v1.GET("/allModuleInfo", runModuleDisplayBroad.GetAllModuleInfoListHandler)
+
 		v1.GET("/moduleYesterdayInfo/:pn", runModuleDisplayBroad.GetYesterdayModuleInfoListHandler)
 		v1.GET("/moduleStationStatus", runModuleDisplayBroad.GetStationStatusHandler)
 		v1.GET("/moduleProjectPlanList", runModuleDisplayBroad.GetProjectPlanListHandler)
+		v1.GET("/UndoneProjectPlanList", runModuleDisplayBroad.GetUndoneProjectPlanInfoListHandler)
 		v1.GET("/moduleWipInfoList/:pn", runModuleDisplayBroad.GetWipInfoListHandler)
 
 		v1.GET("/osaList", runOsaDisplayBroad.GetOsaListHandler)
@@ -48,7 +51,7 @@ func Init() *gin.Engine {
 	}
 	v1Permission := r.Group("/runDisplayBroad").Use(Middlewares.JWTSuperuserMiddleware())
 	{
-		v1Permission.GET("/UndoneProjectPlanList", runModuleDisplayBroad.GetUndoneProjectPlanInfoListHandler)
+
 		v1Permission.POST("/UndoneProjectPlanList", runModuleDisplayBroad.CreateUndoneProjectPlanInfoHandler)
 		v1Permission.PUT("/UndoneProjectPlanList/:id", runModuleDisplayBroad.UpdateUndoneProjectPlanInfoHandler)
 		v1Permission.DELETE("/UndoneProjectPlanList/:id", runModuleDisplayBroad.DeleteUndoneProjectPlanInfoHandler)

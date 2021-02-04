@@ -6,6 +6,7 @@ import (
 	"SuperxonWebSite/Utils"
 	"github.com/robfig/cron"
 	"strconv"
+	"time"
 )
 
 var timedTask *cron.Cron
@@ -19,7 +20,9 @@ func InitCron() {
 
 	timedGetQaStatisticOrderInfo(30, "2", 5)
 
-	timedGetQaDefectsOrderInfoListByPn(01, "3", 5)
+	timedGetQaDefectsOrderInfoListByPn(1, "3", 5)
+
+	timedInsertChartDataList(0, "3", 5)
 
 	spec3 := "0 0 */6 * * ?" //每隔6小时执行任务
 	_ = timedTask.AddFunc(spec3, func() { _, _ = ModuleRunDisplay.RedisGetProjectPlanList() })
@@ -28,6 +31,26 @@ func InitCron() {
 
 func CloseCron() {
 	timedTask.Stop()
+}
+
+func timedInsertChartDataList(min int, hour string, interval int) {
+	pnList, _ := Utils.GetChartsPnList()
+	for indexPn, pn := range pnList {
+		pnTemp := pn
+		spec := strconv.Itoa(indexPn%60) + " " + strconv.Itoa(indexPn/60) + " " + hour + " * * ?"
+		_ = timedTask.AddFunc(spec, func() {
+			yesterday, today := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -1})
+			temp := &ModuleRunDisplay.ChartQueryCondition{
+				Pn:        pnTemp,
+				StartTime: yesterday,
+				EndTime:   today}
+			//todo 获取某个PN某段时间的总良率 PassRate
+			totalPassRate, _ := ModuleRunDisplay.GetPnTotalPassRate(temp)
+			NeedDateTime, _ := time.ParseInLocation("2006-01-02 15:04:05", yesterday, time.Local)
+			pnChartData := &ModuleRunDisplay.PnChartData{Pn: pnTemp, DateTime: NeedDateTime, PassRate: totalPassRate}
+			_ = ModuleRunDisplay.CreatePnChartData(pnChartData)
+		})
+	}
 }
 
 /*

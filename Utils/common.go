@@ -28,6 +28,18 @@ func GetCommonPnList() (pnList []string, err error) {
 	return
 }
 
+func GetChartsPnList() (pnList []string, err error) {
+	dir, _ := os.Getwd()
+	cfg, err := InitIni(dir + "\\Services\\Common.ini")
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
+		return
+	}
+	pnList = strings.Split(cfg.Section("PnForCharts").Key("PnList").String(), ",")
+	return
+}
+
 func GetErrorCodeDescribe(errorCode string) (errorCodeDescribe string, err error) {
 	dir, _ := os.Getwd()
 	cfg, err := InitIni(dir + "\\Services\\ErrorCodeDescribe.ini")

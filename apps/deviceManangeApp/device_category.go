@@ -1,3 +1,7 @@
+// @Title  device_category.go
+// @Description  设备类型的查询和添加app
+// @Author  曹迅 (时间 2021/01/01  12:00)
+// @Update  曹迅 (时间 2021/02/03  12:00)
 package deviceManangeApp
 
 import (
@@ -6,6 +10,7 @@ import (
 	"net/http"
 )
 
+//获取设备类型一级目录
 func GetAllDeviceCategoryRootListHandler(c *gin.Context) {
 	deviceCategoryRootNameList, err := DeviceManage.GetAllDeviceCategoryRootList()
 	if err != nil {
@@ -15,6 +20,7 @@ func GetAllDeviceCategoryRootListHandler(c *gin.Context) {
 	}
 }
 
+//获取一级设备类型下的所有二级设备类型目录
 func GetAllDeviceCategoryChildListHandler(c *gin.Context) {
 	rootCategory, ok := c.Params.Get("rootCategory")
 	if !ok {
@@ -29,6 +35,7 @@ func GetAllDeviceCategoryChildListHandler(c *gin.Context) {
 	}
 }
 
+//创建一个设备类型
 func CreateDeviceCategoryChildHandler(c *gin.Context) {
 	var deviceCategory DeviceManage.DeviceCategory
 	if err := c.BindJSON(&deviceCategory); err == nil {

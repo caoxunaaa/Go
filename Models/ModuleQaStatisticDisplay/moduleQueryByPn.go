@@ -68,7 +68,7 @@ func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInf
         where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and D.LOT_TYPE like '%` + queryCondition.WorkOrderType + `%'
         and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
         and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
-        and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn = '` + queryCondition.Pn + `')
+        and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `')
         select e.pn,e.序列,e.工序,e.总输入,e.最终良品,e.最终不良品,round(e.最终良品/e.总输入*100,2)||'%' 最终良率
         from
         (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序 ,

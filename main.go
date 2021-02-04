@@ -28,6 +28,7 @@ func main() {
 		&DeviceManage.DeviceCategory{},
 		&DeviceManage.SelfTest{},
 		&ModuleRunDisplay.UndoneProjectPlanInfo{},
+		&ModuleRunDisplay.PnChartData{},
 		&User.Profile{},
 		&FileManage.VideoInfo{},
 	)
@@ -36,8 +37,8 @@ func main() {
 	Databases.RedisInit()
 	defer Databases.RedisClose()
 
-	Databases.InitMongoDb()
-	defer Databases.CloseMongoDb()
+	//Databases.InitMongoDb()
+	//defer Databases.CloseMongoDb()
 
 	Services.InitCron()
 	defer Services.CloseCron()

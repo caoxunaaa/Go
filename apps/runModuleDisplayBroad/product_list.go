@@ -49,6 +49,29 @@ func GetAllModuleInfoListHandler(c *gin.Context) {
 	}
 }
 
+//正常品
+//func GetAllModuleInfoListHandler(c *gin.Context) {
+//	startTimeStr, endTimeStr := Utils.GetCurrentAndZeroTime()
+//	var err error
+//	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+//	queryCondition.Pn = "%%"
+//	queryCondition.StartTime = startTimeStr
+//	queryCondition.EndTime = endTimeStr
+//	queryCondition.WorkOrderType = "TRX正常品"
+//
+//	if queryCondition.Pn == "None" || queryCondition.StartTime == "None" || queryCondition.EndTime == "None" {
+//		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
+//		return
+//	}
+//	moduleInfoList, err := ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(&queryCondition)
+//
+//	if err != nil {
+//		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+//	} else {
+//		c.JSON(http.StatusOK, moduleInfoList)
+//	}
+//}
+
 func GetYesterdayModuleInfoListHandler(c *gin.Context) {
 	pn, ok := c.Params.Get("pn")
 	if !ok {

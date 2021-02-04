@@ -1,3 +1,7 @@
+// @Title  device_maintenance.go
+// @Description  设备保养相关app
+// @Author  曹迅 (时间 2021/01/01  12:00)
+// @Update  曹迅 (时间 2021/02/03  12:00)
 package deviceManangeApp
 
 import (
@@ -11,7 +15,7 @@ import (
 	"time"
 )
 
-//保养计划表
+//获取保养计划表所有类型
 func GetAllDeviceMaintenanceCategoryListHandler(c *gin.Context) {
 	deviceMaintenanceItemCategoryList, err := DeviceManage.GetAllDeviceMaintenanceCategoryList()
 	if err != nil {
@@ -21,6 +25,7 @@ func GetAllDeviceMaintenanceCategoryListHandler(c *gin.Context) {
 	}
 }
 
+//获取保养计划表某个类型下的所有项目
 func GetDeviceMaintenanceItemOfCategoryHandler(c *gin.Context) {
 	category, ok := c.Params.Get("category")
 	if !ok {
@@ -35,6 +40,7 @@ func GetDeviceMaintenanceItemOfCategoryHandler(c *gin.Context) {
 	}
 }
 
+//创建一个保养计划的项目
 func CreateDeviceMaintenanceItemHandler(c *gin.Context) {
 	var deviceMaintenanceItem DeviceManage.DeviceMaintenanceItem
 	if err := c.ShouldBindJSON(&deviceMaintenanceItem); err == nil {
@@ -51,6 +57,7 @@ func CreateDeviceMaintenanceItemHandler(c *gin.Context) {
 	}
 }
 
+//更新一个保养计划的项目
 func UpdateDeviceMaintenanceItemHandler(c *gin.Context) {
 	var deviceMaintenanceItem DeviceManage.DeviceMaintenanceItem
 	id, ok := c.Params.Get("id")
@@ -73,6 +80,7 @@ func UpdateDeviceMaintenanceItemHandler(c *gin.Context) {
 	}
 }
 
+//删除一个保养计划的项目
 func DeleteDeviceMaintenanceItemHandler(c *gin.Context) {
 	var deviceMaintenanceItem DeviceManage.DeviceMaintenanceItem
 	id, ok := c.Params.Get("id")
@@ -95,7 +103,7 @@ func DeleteDeviceMaintenanceItemHandler(c *gin.Context) {
 	}
 }
 
-//绑定保养项目
+//为某个设备绑定保养类型的所有项目
 func BindDeviceMaintenanceItemHandler(c *gin.Context) {
 	var deviceMaintenanceItems []*DeviceManage.DeviceMaintenanceItem
 	deviceSn, ok := c.Params.Get("deviceSn")
@@ -118,7 +126,7 @@ func BindDeviceMaintenanceItemHandler(c *gin.Context) {
 	}
 }
 
-//解绑保养项目
+//为某个设备解绑保养计划
 func UnBindDeviceMaintenanceItemHandler(c *gin.Context) {
 	deviceSn, ok := c.Params.Get("deviceSn")
 	if !ok {
@@ -135,7 +143,7 @@ func UnBindDeviceMaintenanceItemHandler(c *gin.Context) {
 	}
 }
 
-//保养当前信息
+//获取所有设备的当前所有保养信息
 func GetAllDeviceMaintenanceCurrentInfoListHandler(c *gin.Context) {
 	deviceMaintenanceCurrentInfoList, err := DeviceManage.GetAllDeviceMaintenanceCurrentInfoList()
 	if err != nil {
@@ -145,6 +153,7 @@ func GetAllDeviceMaintenanceCurrentInfoListHandler(c *gin.Context) {
 	}
 }
 
+//获取某个设备的当前所有保养信息
 func GetDeviceMaintenanceCurrentInfoHandler(c *gin.Context) {
 	snAssets, ok := c.Params.Get("snAssets")
 	if !ok {
@@ -159,29 +168,7 @@ func GetDeviceMaintenanceCurrentInfoHandler(c *gin.Context) {
 	}
 }
 
-//func UpdateDeviceMaintenanceCurrentInfoHandler(c *gin.Context) {
-//	var deviceMaintenanceCurrentInfoList DeviceManage.DeviceMaintenanceCurrentInfo
-//	id, ok := c.Params.Get("id")
-//	if !ok {
-//		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的id"})
-//		return
-//	}
-//	if err := c.ShouldBindJSON(&deviceMaintenanceCurrentInfoList); err == nil {
-//		oldId, _ := strconv.Atoi(id)
-//		_, err = DeviceManage.UpdateDeviceMaintenanceCurrentInfo(&deviceMaintenanceCurrentInfoList, uint(oldId), false)
-//		if err == nil {
-//			c.JSON(http.StatusOK, gin.H{
-//				"MaintenanceName": deviceMaintenanceCurrentInfoList.DeviceName,
-//			})
-//		} else {
-//			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//		}
-//	} else {
-//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//	}
-//}
-
-//保养记录
+//获取所有设备的历史保养记录
 func GetAllDeviceMaintenanceAllRecordsHandler(c *gin.Context) {
 	deviceMaintenanceRecords, err := DeviceManage.GetAllDeviceMaintenanceRecords("")
 	if err != nil {
@@ -191,6 +178,7 @@ func GetAllDeviceMaintenanceAllRecordsHandler(c *gin.Context) {
 	}
 }
 
+//获取所有设备某个保养项目的历史保养记录
 func GetAllDeviceMaintenanceRecordsOfItemNameHandler(c *gin.Context) {
 	itemName, ok := c.Params.Get("itemName")
 	if !ok {
@@ -205,6 +193,7 @@ func GetAllDeviceMaintenanceRecordsOfItemNameHandler(c *gin.Context) {
 	}
 }
 
+//获取某个设备的历史保养记录
 func GetDeviceMaintenanceRecordsHandler(c *gin.Context) {
 	snAssets, ok := c.Params.Get("snAssets")
 	if !ok {
@@ -220,6 +209,7 @@ func GetDeviceMaintenanceRecordsHandler(c *gin.Context) {
 	}
 }
 
+//获取某个设备的某个保养项目的历史记录
 func GetDeviceMaintenanceRecordOfItemNameHandler(c *gin.Context) {
 	snAssets, ok := c.Params.Get("snAssets")
 	if !ok {
@@ -240,6 +230,7 @@ func GetDeviceMaintenanceRecordOfItemNameHandler(c *gin.Context) {
 	}
 }
 
+//创建一条保养记录
 func CreateDeviceMaintenanceRecordHandler(c *gin.Context) {
 	var deviceMaintenanceRecord *DeviceManage.DeviceMaintenanceRecord
 	deviceMaintenanceRecord = new(DeviceManage.DeviceMaintenanceRecord)

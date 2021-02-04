@@ -1,3 +1,7 @@
+// @Title  device_detail_info.go
+// @Description  设备基本信息的增删改查app
+// @Author  曹迅 (时间 2021/01/01  12:00)
+// @Update  曹迅 (时间 2021/02/03  12:00)
 package deviceManangeApp
 
 import (
@@ -7,6 +11,7 @@ import (
 	"strconv"
 )
 
+//获取所有设备基本信息
 func GetAllDeviceBaseInfoListHandler(c *gin.Context) {
 	deviceBaseInfoList, err := DeviceManage.GetAllDeviceBaseInfoList()
 	if err != nil {
@@ -16,6 +21,7 @@ func GetAllDeviceBaseInfoListHandler(c *gin.Context) {
 	}
 }
 
+//获取某个sn对应的设备基本信息
 func GetDeviceBaseInfoHandler(c *gin.Context) {
 	snAssetsIc, ok := c.Params.Get("snAssetsIc")
 	if !ok {
@@ -30,6 +36,7 @@ func GetDeviceBaseInfoHandler(c *gin.Context) {
 	}
 }
 
+//创建一个设备基本信息
 func CreateDeviceBaseInfoHandler(c *gin.Context) {
 	var deviceBaseInfo DeviceManage.DeviceBaseInfo
 	if err := c.ShouldBindJSON(&deviceBaseInfo); err == nil {
@@ -47,6 +54,7 @@ func CreateDeviceBaseInfoHandler(c *gin.Context) {
 	}
 }
 
+//删除一个设备基本信息
 func DeleteDeviceBaseInfoHandler(c *gin.Context) {
 	deviceSn, ok := c.Params.Get("deviceSn")
 	if !ok {
@@ -61,6 +69,7 @@ func DeleteDeviceBaseInfoHandler(c *gin.Context) {
 	}
 }
 
+//更新一个设备基本信息
 func UpdateDeviceBaseInfoHandler(c *gin.Context) {
 	var deviceBaseInfo DeviceManage.DeviceBaseInfo
 	deviceSn, ok := c.Params.Get("deviceSn")

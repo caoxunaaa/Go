@@ -195,7 +195,7 @@ func UnBindDeviceMaintenanceItem(deviceSn string) (err error) {
 
 //保养当前信息
 func GetAllDeviceMaintenanceCurrentInfoList() (deviceMaintenanceCurrentInfoList []*DeviceMaintenanceCurrentInfo, err error) {
-	sqlStr := "select * from device_maintenance_current_infos ORDER BY (CASE StatusOfMaintenance  WHEN '保养超时' THEN 1 WHEN '待保养' THEN 2 WHEN '未绑定' THEN 3 ELSE 4 END) ASC"
+	sqlStr := "select * from device_maintenance_current_infos ORDER BY (CASE status_of_Maintenance  WHEN '保养超时' THEN 1 WHEN '待保养' THEN 2 WHEN '未绑定' THEN 3 ELSE 4 END) ASC"
 	err = Databases.SuperxonDbDevice.Select(&deviceMaintenanceCurrentInfoList, sqlStr)
 	if err != nil {
 		return nil, err
