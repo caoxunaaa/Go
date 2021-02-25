@@ -9,6 +9,7 @@ import (
 	"SuperxonWebSite/apps/runModuleDisplayBroad"
 	"SuperxonWebSite/apps/runOsaDisplayBroad"
 	"SuperxonWebSite/apps/userHandleApp"
+	"SuperxonWebSite/apps/waringDisplayBroad"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,6 +30,12 @@ func Init() *gin.Engine {
 	//	v7.GET("", index.MyIndexHandler)
 	//}
 
+	//趋势图表
+	vCharts := r.Group("/TrendChart")
+	{
+		vCharts.GET("/warningCharts", waringDisplayBroad.GetWarningCountChartDataListHandler)
+	}
+
 	//实时运行看板页面
 	v1 := r.Group("/runDisplayBroad")
 	{
@@ -36,6 +43,7 @@ func Init() *gin.Engine {
 		v1.GET("/moduleInfo/:pn", runModuleDisplayBroad.GetModuleInfoListHandler)
 
 		v1.GET("/allModuleInfo", runModuleDisplayBroad.GetAllModuleInfoListHandler)
+		v1.GET("/allOsaInfo", runOsaDisplayBroad.GetAllOsaInfoListHandler)
 
 		v1.GET("/moduleYesterdayInfo/:pn", runModuleDisplayBroad.GetYesterdayModuleInfoListHandler)
 		v1.GET("/moduleStationStatus", runModuleDisplayBroad.GetStationStatusHandler)

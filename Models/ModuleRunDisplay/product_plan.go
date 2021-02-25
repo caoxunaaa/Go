@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
+	"strconv"
 )
 
 // 计划中的产品情况
@@ -27,6 +28,7 @@ type DoneProjectPlanInfo struct {
 type ProjectPlanInfo struct {
 	UndoneProjectPlanInfo
 	DoneProjectPlanInfo
+	DoneRate string
 }
 
 func GetUndoneProjectPlanInfoList() (undoneProjectPlanInfoList []*UndoneProjectPlanInfo, err error) {
@@ -105,16 +107,22 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	}
 
 	if len(doneProjectPlanInfoList) != 0 {
+		var doneCount int
 		for _, valueUndone := range undoneProjectPlanInfoList {
+			undone := valueUndone
 			for _, valueDone := range doneProjectPlanInfoList {
-				if valueUndone.Pn == valueDone.Pn {
-					projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, valueDone})
+				done := valueDone
+				doneCount = 0
+				if undone.Pn == done.Pn {
+					doneCount = done.DoneToPay
+					break
 				}
 			}
+			projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, DoneProjectPlanInfo{Pn: valueUndone.Pn, DoneToPay: doneCount}, strconv.Itoa(doneCount*100/valueUndone.PlanToPay) + "%"})
 		}
 	} else {
 		for _, valueUndone := range undoneProjectPlanInfoList {
-			projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, DoneProjectPlanInfo{Pn: valueUndone.Pn, DoneToPay: 0}})
+			projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, DoneProjectPlanInfo{Pn: valueUndone.Pn, DoneToPay: 0}, "0%"})
 		}
 	}
 	return
@@ -143,7 +151,7 @@ func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error
 		fmt.Println(err)
 		return
 	}
-	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*6)
 	if err != nil {
 		fmt.Println(err)
 		return

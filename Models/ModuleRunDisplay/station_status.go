@@ -2,7 +2,6 @@ package ModuleRunDisplay
 
 import (
 	"SuperxonWebSite/Databases"
-	"SuperxonWebSite/Utils"
 )
 
 type StationStatus struct {
@@ -18,8 +17,7 @@ type StationStatus struct {
 // @description 获取设备工位的状态信息和当天生产产品的对应良率
 // @auth xun.cao
 // @return []StationStatus
-func GetStationStatus() (stationStatusList []StationStatus, err error) {
-	startTime, endTime := Utils.GetCurrentAndZeroTime()
+func GetStationStatus(startTime, endTime string) (stationStatusList []StationStatus, err error) {
 	//lotType := "TRX正常品"
 	sqlStr := `with TRX AS (select y.errorcode,x.* from (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,
 (case when substr(b.softversion,length(b.softversion)-4) like '%验证软件' then substr(b.softversion,0,length(b.softversion)-5) 

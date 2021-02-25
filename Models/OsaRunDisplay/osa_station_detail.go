@@ -2,7 +2,6 @@ package OsaRunDisplay
 
 import (
 	"SuperxonWebSite/Databases"
-	"SuperxonWebSite/Utils"
 )
 
 type StationStatus struct {
@@ -14,8 +13,7 @@ type StationStatus struct {
 	PassRate  string
 }
 
-func GetStationStatus() (stationStatusList []StationStatus, err error) {
-	startTime, endTime := Utils.GetCurrentAndZeroTime()
+func GetStationStatus(startTime, endTime string) (stationStatusList []StationStatus, err error) {
 	sqlStr := `with osa as (select x.* from (SELECT distinct b.LOTNO,d.LOT_TYPE,
 (case when substr(a.softversion,length(a.softversion)-4) like '%验证软件' then substr(a.softversion,0,length(a.softversion)-5)
 when substr(a.softversion,length(a.softversion)-1) LIKE '%*_'escape '*' then substr(a.softversion,0,length(a.softversion)-1) else a.SOFTVERSION END) as SVERSION,a.*,

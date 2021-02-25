@@ -6,6 +6,7 @@ import (
 	"SuperxonWebSite/Models/FileManage"
 	"SuperxonWebSite/Models/ModuleRunDisplay"
 	"SuperxonWebSite/Models/User"
+	"SuperxonWebSite/Models/WaringDisplay"
 	"SuperxonWebSite/Router"
 	"SuperxonWebSite/Services"
 	"fmt"
@@ -28,7 +29,8 @@ func main() {
 		&DeviceManage.DeviceCategory{},
 		&DeviceManage.SelfTest{},
 		&ModuleRunDisplay.UndoneProjectPlanInfo{},
-		&ModuleRunDisplay.PnChartData{},
+		&WaringDisplay.PnPassRateChartData{},
+		&WaringDisplay.WarningCountChartData{},
 		&User.Profile{},
 		&FileManage.VideoInfo{},
 	)

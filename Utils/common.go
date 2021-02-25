@@ -51,3 +51,15 @@ func GetErrorCodeDescribe(errorCode string) (errorCodeDescribe string, err error
 	errorCodeDescribe = cfg.Section("ErrorCode").Key(errorCode).String()
 	return
 }
+
+func GetWarningClassificationList() (warningClassificationList []string, err error) {
+	dir, _ := os.Getwd()
+	cfg, err := InitIni(dir + "\\Services\\Common.ini")
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
+		return
+	}
+	warningClassificationList = strings.Split(cfg.Section("WarningClassification").Key("Classification").String(), ",")
+	return
+}

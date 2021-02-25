@@ -49,7 +49,7 @@ func GetAllModuleInfoListHandler(c *gin.Context) {
 	}
 }
 
-//正常品
+//所有正常品的良率，用于告警面板
 //func GetAllModuleInfoListHandler(c *gin.Context) {
 //	startTimeStr, endTimeStr := Utils.GetCurrentAndZeroTime()
 //	var err error

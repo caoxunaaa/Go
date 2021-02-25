@@ -3,6 +3,7 @@ package Services
 import (
 	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
 	"SuperxonWebSite/Models/ModuleRunDisplay"
+	"SuperxonWebSite/Models/WaringDisplay"
 	"SuperxonWebSite/Utils"
 	"github.com/robfig/cron"
 	"strconv"
@@ -22,9 +23,11 @@ func InitCron() {
 
 	timedGetQaDefectsOrderInfoListByPn(1, "3", 5)
 
-	timedInsertChartDataList(0, "3", 5)
+	timedInsertChartDataList(0, "4", 5)
 
-	spec3 := "0 0 */6 * * ?" //每隔6小时执行任务
+	timedInsertWarningCountChartDataList(30, "4", 5)
+
+	spec3 := "0 50 */1 * * ?" //每隔1小时执行任务
 	_ = timedTask.AddFunc(spec3, func() { _, _ = ModuleRunDisplay.RedisGetProjectPlanList() })
 	timedTask.Start()
 }
@@ -33,22 +36,44 @@ func CloseCron() {
 	timedTask.Stop()
 }
 
+//定时新增每天总量率的作图数据
 func timedInsertChartDataList(min int, hour string, interval int) {
 	pnList, _ := Utils.GetChartsPnList()
 	for indexPn, pn := range pnList {
 		pnTemp := pn
-		spec := strconv.Itoa(indexPn%60) + " " + strconv.Itoa(indexPn/60) + " " + hour + " * * ?"
+		spec := strconv.Itoa(indexPn%60) + " " + strconv.Itoa(min+indexPn/60) + " " + hour + " * * ?"
 		_ = timedTask.AddFunc(spec, func() {
 			yesterday, today := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -1})
-			temp := &ModuleRunDisplay.ChartQueryCondition{
+			temp := &WaringDisplay.ChartQueryCondition{
 				Pn:        pnTemp,
 				StartTime: yesterday,
 				EndTime:   today}
 			//todo 获取某个PN某段时间的总良率 PassRate
-			totalPassRate, _ := ModuleRunDisplay.GetPnTotalPassRate(temp)
+			totalPassRate, _ := WaringDisplay.GetPnTotalPassRate(temp)
 			NeedDateTime, _ := time.ParseInLocation("2006-01-02 15:04:05", yesterday, time.Local)
-			pnChartData := &ModuleRunDisplay.PnChartData{Pn: pnTemp, DateTime: NeedDateTime, PassRate: totalPassRate}
-			_ = ModuleRunDisplay.CreatePnChartData(pnChartData)
+			pnChartData := &WaringDisplay.PnPassRateChartData{Pn: pnTemp, DateTime: NeedDateTime, PassRate: totalPassRate}
+			_ = WaringDisplay.CreatePnChartData(pnChartData)
+		})
+	}
+}
+
+//定时新增每天总量率的作图数据
+func timedInsertWarningCountChartDataList(min int, hour string, interval int) {
+	warningClassificationList, _ := Utils.GetWarningClassificationList()
+	for indexWarningClassification, warningClassification := range warningClassificationList {
+		warningClassificationTemp := warningClassification
+		spec := strconv.Itoa(indexWarningClassification%60) + " " + strconv.Itoa(min+indexWarningClassification/60) + " " + hour + " * * ?"
+		_ = timedTask.AddFunc(spec, func() {
+			yesterday, today := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -1})
+			temp := &WaringDisplay.ChartQueryCondition{
+				Classification: warningClassificationTemp,
+				StartTime:      yesterday,
+				EndTime:        today}
+			//todo 获取某个PN某段时间的总良率 PassRate
+			warningCount, warningTotal, _ := WaringDisplay.GetWaningCount(temp)
+			NeedDateTime, _ := time.ParseInLocation("2006-01-02 15:04:05", yesterday, time.Local)
+			warningCountChartData := &WaringDisplay.WarningCountChartData{DateTime: NeedDateTime, Classification: warningClassificationTemp, Count: warningCount, Total: warningTotal}
+			_ = WaringDisplay.CreateWarningCountChartData(warningCountChartData)
 		})
 	}
 }
@@ -74,27 +99,27 @@ func timedGetCpkInfo(min int, hour string, interval int) {
 				_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkInfoList(temp1)
 			})
 
-			spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec2, func() {
-				halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
-				temp2 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:        pnTemp,
-					StartTime: halfMonthAgo,
-					EndTime:   now,
-					Process:   processTemp.Name}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkInfoList(temp2)
-			})
+			//spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec2, func() {
+			//	halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
+			//	temp2 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:        pnTemp,
+			//		StartTime: halfMonthAgo,
+			//		EndTime:   now,
+			//		Process:   processTemp.Name}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkInfoList(temp2)
+			//})
 
-			spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec3, func() {
-				oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
-				temp3 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:        pnTemp,
-					StartTime: oneMonthAgo,
-					EndTime:   now,
-					Process:   processTemp.Name}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkInfoList(temp3)
-			})
+			//spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec3, func() {
+			//	oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
+			//	temp3 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:        pnTemp,
+			//		StartTime: oneMonthAgo,
+			//		EndTime:   now,
+			//		Process:   processTemp.Name}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkInfoList(temp3)
+			//})
 		}
 	}
 }
@@ -122,27 +147,27 @@ func timedGetCpkRssi(min int, hour string, interval int) {
 				_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkRssiList(temp1)
 			})
 
-			spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec2, func() {
-				halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
-				temp2 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:        pnTemp,
-					StartTime: halfMonthAgo,
-					EndTime:   now,
-					Process:   processTemp.Name}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkRssiList(temp2)
-			})
+			//spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec2, func() {
+			//	halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
+			//	temp2 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:        pnTemp,
+			//		StartTime: halfMonthAgo,
+			//		EndTime:   now,
+			//		Process:   processTemp.Name}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkRssiList(temp2)
+			//})
 
-			spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec3, func() {
-				oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
-				temp3 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:        pnTemp,
-					StartTime: oneMonthAgo,
-					EndTime:   now,
-					Process:   processTemp.Name}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkRssiList(temp3)
-			})
+			//spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec3, func() {
+			//	oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
+			//	temp3 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:        pnTemp,
+			//		StartTime: oneMonthAgo,
+			//		EndTime:   now,
+			//		Process:   processTemp.Name}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaCpkRssiList(temp3)
+			//})
 		}
 	}
 }
@@ -170,27 +195,27 @@ func timedGetQaStatisticOrderInfo(min int, hour string, interval int) {
 				_, _ = ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(temp1)
 			})
 
-			spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec2, func() {
-				halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
-				temp2 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:            pnTemp,
-					StartTime:     halfMonthAgo,
-					EndTime:       now,
-					WorkOrderType: processTemp}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(temp2)
-			})
+			//spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec2, func() {
+			//	halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
+			//	temp2 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:            pnTemp,
+			//		StartTime:     halfMonthAgo,
+			//		EndTime:       now,
+			//		WorkOrderType: processTemp}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(temp2)
+			//})
 
-			spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec3, func() {
-				oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
-				temp3 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:            pnTemp,
-					StartTime:     oneMonthAgo,
-					EndTime:       now,
-					WorkOrderType: processTemp}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(temp3)
-			})
+			//spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec3, func() {
+			//	oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
+			//	temp3 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:            pnTemp,
+			//		StartTime:     oneMonthAgo,
+			//		EndTime:       now,
+			//		WorkOrderType: processTemp}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaStatisticOrderInfoList(temp3)
+			//})
 		}
 	}
 }
@@ -217,27 +242,27 @@ func timedGetQaDefectsOrderInfoListByPn(min int, hour string, interval int) {
 				_, _ = ModuleQaStatisticDisplay.RedisGetQaDefectsOrderInfoListByPn(temp1)
 			})
 
-			spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec2, func() {
-				halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
-				temp2 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:            pnTemp,
-					StartTime:     halfMonthAgo,
-					EndTime:       now,
-					WorkOrderType: processTemp}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaDefectsOrderInfoListByPn(temp2)
-			})
+			//spec2 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec2, func() {
+			//	halfMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -15})
+			//	temp2 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:            pnTemp,
+			//		StartTime:     halfMonthAgo,
+			//		EndTime:       now,
+			//		WorkOrderType: processTemp}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaDefectsOrderInfoListByPn(temp2)
+			//})
 
-			spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
-			_ = timedTask.AddFunc(spec3, func() {
-				oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
-				temp3 := &ModuleQaStatisticDisplay.QueryCondition{
-					Pn:            pnTemp,
-					StartTime:     oneMonthAgo,
-					EndTime:       now,
-					WorkOrderType: processTemp}
-				_, _ = ModuleQaStatisticDisplay.RedisGetQaDefectsOrderInfoListByPn(temp3)
-			})
+			//spec3 := strconv.Itoa(indexProcess%60) + " " + strconv.Itoa(min+interval*2+indexProcess/60+indexPn%60) + " " + hour + " * * ?"
+			//_ = timedTask.AddFunc(spec3, func() {
+			//	oneMonthAgo, now := Utils.GetAgoAndCurrentTimeZero(Utils.Ago{Years: 0, Months: 0, Days: -30})
+			//	temp3 := &ModuleQaStatisticDisplay.QueryCondition{
+			//		Pn:            pnTemp,
+			//		StartTime:     oneMonthAgo,
+			//		EndTime:       now,
+			//		WorkOrderType: processTemp}
+			//	_, _ = ModuleQaStatisticDisplay.RedisGetQaDefectsOrderInfoListByPn(temp3)
+			//})
 		}
 	}
 }

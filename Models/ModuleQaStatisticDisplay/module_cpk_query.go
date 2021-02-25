@@ -108,12 +108,7 @@ func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]ma
 	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.EndTime, time.Local)
 	if !startTime.After(endTime) {
 		datas, _ := json.Marshal(result)
-		_, err = Databases.RedisPool.Get().Do("SET", key, datas)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+		_, err = Databases.RedisPool.Get().Do("SET", key, datas, "NX", "EX", 60*60*23+60*50)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -214,12 +209,7 @@ func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]ma
 	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.EndTime, time.Local)
 	if !startTime.After(endTime) {
 		datas, _ := json.Marshal(result)
-		_, err = Databases.RedisPool.Get().Do("SET", key, datas)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*30)
+		_, err = Databases.RedisPool.Get().Do("SET", key, datas, "NX", "EX", 60*60*23+60*50)
 		if err != nil {
 			fmt.Println(err)
 			return
