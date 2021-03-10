@@ -41,7 +41,7 @@ func main() {
 
 	//Databases.InitMongoDb()
 	//defer Databases.CloseMongoDb()
-
+	//_, _ = ModuleQaStatisticDisplay.Get10GLineIOSummaryInfoList(&ModuleQaStatisticDisplay.QueryCondition{StartTime: "2021-03-10 00:00:00", EndTime: "2021-03-11 00:00:00"})
 	Services.InitCron()
 	defer Services.CloseCron()
 

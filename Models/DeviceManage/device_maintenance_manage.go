@@ -345,5 +345,31 @@ func CreateDeviceMaintenanceRecord(deviceMaintenanceRecord *DeviceMaintenanceRec
 	}
 	fmt.Println(deviceMaintenanceCurrentInfo)
 	_, _ = UpdateDeviceMaintenanceCurrentInfo(&deviceMaintenanceCurrentInfo, false)
+
 	return
+}
+
+//每天定时更新所有当前保养状态
+func CronUpdateDeviceMainenanceStatus() error {
+	//更新所有当前保养状态
+	deviceMaintenanceCurrentInfoList, err := GetAllDeviceMaintenanceCurrentInfoList()
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(deviceMaintenanceCurrentInfoList); i++ {
+		if deviceMaintenanceCurrentInfoList[i].StatusOfMaintenance == "保养超时" {
+			continue
+		}
+		if deviceMaintenanceCurrentInfoList[i].Deadline.Time.Before(time.Now()) {
+			deviceMaintenanceCurrentInfoList[i].StatusOfMaintenance = "保养超时"
+
+		} else if deviceMaintenanceCurrentInfoList[i].Deadline.Time.AddDate(0, 0, -7).Before(time.Now()) {
+			deviceMaintenanceCurrentInfoList[i].StatusOfMaintenance = "待保养"
+		}
+		_, err = UpdateDeviceMaintenanceCurrentInfo(deviceMaintenanceCurrentInfoList[i], false)
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }

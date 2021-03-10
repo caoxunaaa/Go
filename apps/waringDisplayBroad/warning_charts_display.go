@@ -2,6 +2,7 @@ package waringDisplayBroad
 
 import (
 	"SuperxonWebSite/Models/WaringDisplay"
+	"SuperxonWebSite/Utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,4 +23,13 @@ func GetWarningCountChartDataListHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, warningCountChartData)
 	}
 
+}
+
+func GetWarningToPersonListHandler(c *gin.Context) {
+	personToPnManage, err := Utils.GetWarningToPersonList()
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, personToPnManage)
+	}
 }

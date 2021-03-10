@@ -1,6 +1,7 @@
 package Services
 
 import (
+	"SuperxonWebSite/Models/DeviceManage"
 	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
 	"SuperxonWebSite/Models/ModuleRunDisplay"
 	"SuperxonWebSite/Models/WaringDisplay"
@@ -19,9 +20,9 @@ func InitCron() {
 
 	timedGetCpkRssi(1, "2", 5)
 
-	timedGetQaStatisticOrderInfo(30, "2", 5)
+	//timedGetQaStatisticOrderInfo(30, "2", 5)
 
-	timedGetQaDefectsOrderInfoListByPn(1, "3", 5)
+	//timedGetQaDefectsOrderInfoListByPn(1, "3", 5)
 
 	timedInsertChartDataList(0, "4", 5)
 
@@ -29,6 +30,24 @@ func InitCron() {
 
 	spec3 := "0 50 */1 * * ?" //每隔1小时执行任务
 	_ = timedTask.AddFunc(spec3, func() { _, _ = ModuleRunDisplay.RedisGetProjectPlanList() })
+	//timedTask.Start()
+
+	spec4 := "0 0 5 * * ?" //每天5点执行保养更新任务
+	_ = timedTask.AddFunc(spec4, func() {
+		err := DeviceManage.CronUpdateDeviceMainenanceStatus()
+		if err != nil {
+			return
+		}
+	})
+
+	spec5 := "0 30 5 * * ?" //每天5点30执行保养更新任务
+	_ = timedTask.AddFunc(spec5, func() {
+		err := DeviceManage.CronUpdateDeviceBaseMainenanceInfo()
+		if err != nil {
+			return
+		}
+	})
+
 	timedTask.Start()
 }
 

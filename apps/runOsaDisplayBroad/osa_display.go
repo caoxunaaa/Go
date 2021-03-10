@@ -48,6 +48,18 @@ func GetAllOsaInfoListHandler(c *gin.Context) {
 	}
 }
 
+func GetAllOsaTxCoupleInfoListHandler(c *gin.Context) {
+	var osaQueryCondition OsaRunDisplay.OsaQueryCondition
+	osaQueryCondition.StartTime, osaQueryCondition.EndTime = Utils.GetCurrentAndZeroTime()
+	osaTxCoupleInfoList, err := OsaRunDisplay.GetAllOsaTxCoupleInfoList(&osaQueryCondition)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, osaTxCoupleInfoList)
+	}
+}
+
 func GetYesterdayOsaInfoListHandler(c *gin.Context) {
 	var osaQueryCondition OsaRunDisplay.OsaQueryCondition
 	var ok bool

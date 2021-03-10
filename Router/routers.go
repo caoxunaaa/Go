@@ -22,14 +22,6 @@ func Init() *gin.Engine {
 	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
 	r.Use(Middlewares.Cors())
 
-	//使用vue 生成的index和static
-	//r.Static("/static", "./assets/html/static")
-	//r.LoadHTMLFiles("./assets/html/index.html")
-	//v7 := r.Group("/index")
-	//{
-	//	v7.GET("", index.MyIndexHandler)
-	//}
-
 	//趋势图表
 	vCharts := r.Group("/TrendChart")
 	{
@@ -44,6 +36,8 @@ func Init() *gin.Engine {
 
 		v1.GET("/allModuleInfo", runModuleDisplayBroad.GetAllModuleInfoListHandler)
 		v1.GET("/allOsaInfo", runOsaDisplayBroad.GetAllOsaInfoListHandler)
+		v1.GET("/allOsaTxCoupleInfo", runOsaDisplayBroad.GetAllOsaTxCoupleInfoListHandler)
+		v1.GET("/warningCorrespondingTable", waringDisplayBroad.GetWarningToPersonListHandler)
 
 		v1.GET("/moduleYesterdayInfo/:pn", runModuleDisplayBroad.GetYesterdayModuleInfoListHandler)
 		v1.GET("/moduleStationStatus", runModuleDisplayBroad.GetStationStatusHandler)
@@ -59,7 +53,6 @@ func Init() *gin.Engine {
 	}
 	v1Permission := r.Group("/runDisplayBroad").Use(Middlewares.JWTSuperuserMiddleware())
 	{
-
 		v1Permission.POST("/UndoneProjectPlanList", runModuleDisplayBroad.CreateUndoneProjectPlanInfoHandler)
 		v1Permission.PUT("/UndoneProjectPlanList/:id", runModuleDisplayBroad.UpdateUndoneProjectPlanInfoHandler)
 		v1Permission.DELETE("/UndoneProjectPlanList/:id", runModuleDisplayBroad.DeleteUndoneProjectPlanInfoHandler)
@@ -67,6 +60,8 @@ func Init() *gin.Engine {
 	//模块质量统计查询页面
 	v2 := r.Group("/qaStatisticBroad").Use(Middlewares.JWTAuthMiddleware())
 	{
+		v2.GET("/ioSummary", qaModuleStatisticBroad.Get10GLineIOSummaryInfoListHandler)
+
 		v2.GET("/qaWorkOrderIdList", qaModuleStatisticBroad.GetWorkOrderIdsHandler)
 		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaModuleStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)
 		v2.GET("/qaDefectsInfoByWorkOrderId", qaModuleStatisticBroad.GetQaDefectsInfoByWorkOrderIdListHandler)

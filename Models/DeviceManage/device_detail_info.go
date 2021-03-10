@@ -124,3 +124,47 @@ func UpdateDeviceBaseInfo(deviceBaseInfo *DeviceBaseInfo, oldSn string) (length 
 	length, err = res.RowsAffected()
 	return
 }
+
+//定时更新设备的总览信息中的保养状态
+func CronUpdateDeviceBaseMainenanceInfo() error {
+	deviceBaseInfoList, err := GetAllDeviceBaseInfoList()
+	if err != nil {
+		return err
+	}
+
+	for idxDeviceBaseInfo := 0; idxDeviceBaseInfo < len(deviceBaseInfoList); idxDeviceBaseInfo++ {
+		if deviceBaseInfoList[idxDeviceBaseInfo].StatusOfMaintenance == "未绑定" {
+			continue
+		}
+		deviceMaintenanceCurrentInfo, err := GetDeviceMaintenanceCurrentInfo(deviceBaseInfoList[idxDeviceBaseInfo].Sn)
+		if err != nil {
+			continue
+		}
+		if len(deviceMaintenanceCurrentInfo) > 0 {
+			finalStatus := "正常"
+			//判断基础信息中非未绑定的SN在当前保养信息中的各个计划项目的状态，以此更新基础信息台账的保养状态
+			for idx := 0; idx < len(deviceMaintenanceCurrentInfo); idx++ {
+				if finalStatus == "正常" {
+					if deviceMaintenanceCurrentInfo[idx].StatusOfMaintenance == "待保养" {
+						finalStatus = "待保养"
+					} else if deviceMaintenanceCurrentInfo[idx].StatusOfMaintenance == "保养超时" {
+						finalStatus = "保养超时"
+						break
+					}
+				} else if finalStatus == "待保养" {
+					if deviceMaintenanceCurrentInfo[idx].StatusOfMaintenance == "保养超时" {
+						finalStatus = "保养超时"
+						break
+					}
+				}
+			}
+			deviceBaseInfoList[idxDeviceBaseInfo].StatusOfMaintenance = finalStatus
+			fmt.Println(deviceBaseInfoList[idxDeviceBaseInfo])
+			_, err = UpdateDeviceBaseInfo(deviceBaseInfoList[idxDeviceBaseInfo], deviceBaseInfoList[idxDeviceBaseInfo].Sn)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return err
+}

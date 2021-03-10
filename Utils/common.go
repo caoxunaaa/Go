@@ -63,3 +63,31 @@ func GetWarningClassificationList() (warningClassificationList []string, err err
 	warningClassificationList = strings.Split(cfg.Section("WarningClassification").Key("Classification").String(), ",")
 	return
 }
+
+func GetWarningToPersonList() (map[string][]string, error) {
+	personToPnManage := make(map[string][]string)
+	dir, _ := os.Getwd()
+	cfg, err := InitIni(dir + "\\Services\\Common.ini")
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
+		return nil, nil
+	}
+	People := cfg.Section("WarningToPerson").KeyStrings()
+	for _, person := range People {
+		personToPnManage[person] = strings.Split(cfg.Section("WarningToPerson").Key(person).String(), ",")
+	}
+	return personToPnManage, err
+}
+
+func GetIOSummaryList(pn string) (pnCode string, err error) {
+	dir, _ := os.Getwd()
+	cfg, err := InitIni(dir + "\\Services\\Common.ini")
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
+		return
+	}
+	pnCode = cfg.Section("10GLine").Key(pn).String()
+	return
+}
