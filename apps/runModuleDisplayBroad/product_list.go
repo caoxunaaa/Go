@@ -86,3 +86,12 @@ func GetYesterdayModuleInfoListHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, moduleInfo)
 	}
 }
+
+func GetWarningThresholdListHandler(c *gin.Context) {
+	res, err := Utils.GetWarningThresholdList()
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, res)
+	}
+}

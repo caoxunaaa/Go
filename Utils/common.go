@@ -1,9 +1,11 @@
 package Utils
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/ini.v1"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -90,4 +92,48 @@ func GetIOSummaryList(pn string) (pnCode string, err error) {
 	}
 	pnCode = cfg.Section("10GLine").Key(pn).String()
 	return
+}
+
+func GetWarningThresholdList() ([]interface{}, error) {
+	res := make([]interface{}, 0)
+
+	dir, _ := os.Getwd()
+	cfg, err := InitIni(dir + "\\Services\\Common.ini")
+	if err != nil {
+		fmt.Printf("Fail to read file: %v", err)
+		os.Exit(1)
+		return nil, nil
+	}
+	keys := cfg.Section("WarningThreshold").KeyStrings()
+	for i := 0; i < len(keys); i++ {
+		var WarningThreshold map[string]interface{}
+		WarningThreshold = make(map[string]interface{})
+		tempKey := keys[i]
+		tempKeyList := strings.Split(tempKey, "/")
+		WarningThreshold["Pn"] = tempKeyList[0]
+		WarningThreshold["Process"] = tempKeyList[1]
+		tempValueList := strings.Split(cfg.Section("WarningThreshold").Key(tempKey).String(), ",")
+		if len(tempValueList) != 2 {
+			return nil, errors.New("配置文件中[WarningThreshold]不符合规范")
+		}
+		for _, value := range tempValueList {
+			if ok := strings.Contains(value, "R"); ok {
+				temp, err := strconv.Atoi(value[1:])
+				if err != nil {
+					return nil, errors.New("配置文件中[WarningThreshold]不符合规范")
+				}
+				WarningThreshold["R"] = temp
+			}
+			if ok := strings.Contains(value, "Y"); ok {
+				temp, err := strconv.Atoi(value[1:])
+				if err != nil {
+					return nil, errors.New("配置文件中[WarningThreshold]不符合规范")
+				}
+				WarningThreshold["Y"] = temp
+			}
+		}
+		res = append(res, WarningThreshold)
+		fmt.Println(res)
+	}
+	return res, nil
 }

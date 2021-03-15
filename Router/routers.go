@@ -26,6 +26,7 @@ func Init() *gin.Engine {
 	vCharts := r.Group("/TrendChart")
 	{
 		vCharts.GET("/warningCharts", waringDisplayBroad.GetWarningCountChartDataListHandler)
+		vCharts.GET("/ioSummary", qaModuleStatisticBroad.Get10GLineIOSummaryInfoListHandler)
 	}
 
 	//实时运行看板页面
@@ -38,6 +39,7 @@ func Init() *gin.Engine {
 		v1.GET("/allOsaInfo", runOsaDisplayBroad.GetAllOsaInfoListHandler)
 		v1.GET("/allOsaTxCoupleInfo", runOsaDisplayBroad.GetAllOsaTxCoupleInfoListHandler)
 		v1.GET("/warningCorrespondingTable", waringDisplayBroad.GetWarningToPersonListHandler)
+		v1.GET("/warningThresholdIni", runModuleDisplayBroad.GetWarningThresholdListHandler)
 
 		v1.GET("/moduleYesterdayInfo/:pn", runModuleDisplayBroad.GetYesterdayModuleInfoListHandler)
 		v1.GET("/moduleStationStatus", runModuleDisplayBroad.GetStationStatusHandler)
@@ -58,10 +60,8 @@ func Init() *gin.Engine {
 		v1Permission.DELETE("/UndoneProjectPlanList/:id", runModuleDisplayBroad.DeleteUndoneProjectPlanInfoHandler)
 	}
 	//模块质量统计查询页面
-	v2 := r.Group("/qaStatisticBroad").Use(Middlewares.JWTAuthMiddleware())
+	v2 := r.Group("/qaStatisticBroad") // .Use(Middlewares.JWTAuthMiddleware())
 	{
-		v2.GET("/ioSummary", qaModuleStatisticBroad.Get10GLineIOSummaryInfoListHandler)
-
 		v2.GET("/qaWorkOrderIdList", qaModuleStatisticBroad.GetWorkOrderIdsHandler)
 		v2.GET("/qaWorkOrderYieldsByWorkOrderId", qaModuleStatisticBroad.GetWorkOrderYieldsByWorkOrderIdListHandler)
 		v2.GET("/qaDefectsInfoByWorkOrderId", qaModuleStatisticBroad.GetQaDefectsInfoByWorkOrderIdListHandler)

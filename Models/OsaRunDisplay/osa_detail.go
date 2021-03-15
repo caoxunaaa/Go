@@ -403,26 +403,12 @@ from OSA c where c.zz=1)d ORDER BY d.序列  asc`
 
 //获取零点到当前时间所有OSA 发端耦合的良率信息
 func GetAllOsaTxCoupleInfoList(osaQueryCondition *OsaQueryCondition) (osaTxCoupleInfoList []OsaTxCoupleInfo, err error) {
-	osaList, err := RedisGetOsaList()
-	if err != nil {
-		return
-	}
 	osaQueryCondition.StartTime, osaQueryCondition.EndTime = Utils.GetCurrentAndZeroTime()
-	ch := make(chan bool, 5)
-	for i := 0; i < len(osaList); i++ {
-		go func(num int) {
-			osaQueryCondition.Pn = osaList[num].Name
-			osaTxCoupleInfoListTemp, err := GetOsaTxCoupleInfoList(osaQueryCondition)
-			if err != nil {
-				return
-			}
-			osaTxCoupleInfoList = append(osaTxCoupleInfoList, osaTxCoupleInfoListTemp...)
-			ch <- true
-		}(i)
+	osaTxCoupleInfoListTemp, err := GetOsaTxCoupleInfoList(osaQueryCondition)
+	if err != nil {
+		return nil, err
 	}
-	for i := 0; i < len(osaList); i++ {
-		<-ch
-	}
-	close(ch)
+	osaTxCoupleInfoList = append(osaTxCoupleInfoList, osaTxCoupleInfoListTemp...)
+
 	return
 }
