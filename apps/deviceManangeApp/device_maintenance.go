@@ -244,6 +244,18 @@ func CreateDeviceMaintenanceRecordHandler(c *gin.Context) {
 	deviceMaintenanceRecord.MaintenanceTime, _ = time.ParseInLocation("2006-01-02 15:04:05", c.PostForm("MaintenanceTime"), time.Local)
 	deviceMaintenanceRecord.MaintenanceUser.String = c.PostForm("MaintenanceUser")
 	deviceMaintenanceRecord.Remark.String = c.PostForm("Remark")
+	exists := c.PostForm("FileExists")
+	if exists == "false" {
+		fmt.Println("没有文件")
+		err := DeviceManage.CreateDeviceMaintenanceRecord(deviceMaintenanceRecord)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, gin.H{})
+
+		}
+		return
+	}
 	maintenanceRecordFile, err := c.FormFile("maintenanceRecordFile")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

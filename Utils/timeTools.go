@@ -43,3 +43,19 @@ func GetAgoAndCurrentTimeZero(date Ago) (AgoTimeStr string, currentTimeStr strin
 	AgoTimeStr = time.Date(AgoTime.Year(), AgoTime.Month(), AgoTime.Day(), 0, 0, 0, 0, AgoTime.Location()).Format("2006-01-02 15:04:05")
 	return
 }
+
+//获取当前日期和时段
+func GetCurrentDateAndHour() (date string, hour int) {
+	currentTime := time.Now()
+	date = currentTime.Format("2006-01-02")
+	hour = currentTime.Hour()
+	return
+}
+
+//获取当前日期和时段
+func GetCurrentTimeAndOneHourAgo() (oneHourAgoStr string, currentTimeStr string) {
+	currentTime := time.Now()
+	currentTimeStr = currentTime.Format("2006-01-02 15:04:05")
+	oneHourAgoStr = currentTime.Add(-time.Hour * 1).Format("2006-01-02 15:04:05")
+	return
+}

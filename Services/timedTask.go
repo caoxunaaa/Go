@@ -6,8 +6,10 @@ import (
 	"SuperxonWebSite/Models/ModuleRunDisplay"
 	"SuperxonWebSite/Models/WaringDisplay"
 	"SuperxonWebSite/Utils"
+	"fmt"
 	"github.com/robfig/cron"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,13 +42,16 @@ func InitCron() {
 		}
 	})
 
-	spec5 := "0 30 5 * * ?" //每天5点30执行保养更新任务
+	spec5 := "0 10 6 * * ?" //每天5点30执行保养更新任务
 	_ = timedTask.AddFunc(spec5, func() {
 		err := DeviceManage.CronUpdateDeviceBaseMainenanceInfo()
 		if err != nil {
 			return
 		}
 	})
+
+	spec6 := "0 0 */1 * * ?" //每隔1小时执行任务
+	_ = timedTask.AddFunc(spec6, func() { TimedUpdateStationWarningStatistic() })
 
 	timedTask.Start()
 }
@@ -94,6 +99,46 @@ func timedInsertWarningCountChartDataList(min int, hour string, interval int) {
 			warningCountChartData := &WaringDisplay.WarningCountChartData{DateTime: NeedDateTime, Classification: warningClassificationTemp, Count: warningCount, Total: warningTotal}
 			_ = WaringDisplay.CreateWarningCountChartData(warningCountChartData)
 		})
+	}
+}
+
+//定时更新工位告警的个数
+func TimedUpdateStationWarningStatistic() {
+	currentDate, hour := Utils.GetCurrentDateAndHour()
+	oneHourAgoStr, currentTimeStr := Utils.GetCurrentTimeAndOneHourAgo()
+	stationWarningList, err := ModuleRunDisplay.GetStationWarningFlag(&ModuleRunDisplay.QueryCondition{StartTime: oneHourAgoStr, EndTime: currentTimeStr})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//如果当天的没有则先Create,否则Update
+	for index := 0; index < len(stationWarningList); index++ {
+		stationWarningStatisticList, err := ModuleRunDisplay.GetStationWarningStatisticFindOne(&ModuleRunDisplay.QueryCondition{StationId: stationWarningList[index].StationId.String, StartTime: currentDate})
+		fmt.Println(stationWarningStatisticList, err)
+		if len(stationWarningStatisticList) <= 0 {
+			fmt.Println(err)
+			statisticsEachHour := strconv.Itoa(stationWarningList[index].Count) + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1"
+			err = ModuleRunDisplay.CreateStationWarningStatistic(&ModuleRunDisplay.StationWarningStatistic{StationId: stationWarningList[index].StationId.String, RecordDate: currentDate, StatisticsEachHour: statisticsEachHour})
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else {
+			fmt.Println("更新")
+			stationWarningStatisticTemp := stationWarningStatisticList[0]
+			//更新statisticsEachHour字符串
+			count := stationWarningList[index].Count
+			temp := stationWarningStatisticTemp.StatisticsEachHour
+			stHourList := strings.Split(temp, ",")
+			stHourList[hour] = strconv.Itoa(count)
+			stationWarningStatisticTemp.StatisticsEachHour = strings.Join(stHourList, ",")
+			fmt.Println(stationWarningStatisticTemp)
+			err = ModuleRunDisplay.UpdateStationWarningStatistic(stationWarningStatisticTemp)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
 	}
 }
 

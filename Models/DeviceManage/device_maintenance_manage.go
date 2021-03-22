@@ -346,6 +346,35 @@ func CreateDeviceMaintenanceRecord(deviceMaintenanceRecord *DeviceMaintenanceRec
 	fmt.Println(deviceMaintenanceCurrentInfo)
 	_, _ = UpdateDeviceMaintenanceCurrentInfo(&deviceMaintenanceCurrentInfo, false)
 
+	deviceMaintenanceCurrentInfoList, err := GetDeviceMaintenanceCurrentInfo(deviceMaintenanceRecord.DeviceSn)
+	if err != nil {
+		return err
+	}
+	if len(deviceMaintenanceCurrentInfoList) > 0 {
+		finalStatus := "正常"
+		//判断基础信息中非未绑定的SN在当前保养信息中的各个计划项目的状态，以此更新基础信息台账的保养状态
+		for idx := 0; idx < len(deviceMaintenanceCurrentInfoList); idx++ {
+			if finalStatus == "正常" {
+				if deviceMaintenanceCurrentInfoList[idx].StatusOfMaintenance == "待保养" {
+					finalStatus = "待保养"
+				} else if deviceMaintenanceCurrentInfoList[idx].StatusOfMaintenance == "保养超时" {
+					finalStatus = "保养超时"
+					break
+				}
+			} else if finalStatus == "待保养" {
+				if deviceMaintenanceCurrentInfoList[idx].StatusOfMaintenance == "保养超时" {
+					finalStatus = "保养超时"
+					break
+				}
+			}
+		}
+		deviceBaseInfo, err := GetDeviceBaseInfo(deviceMaintenanceRecord.DeviceSn)
+		deviceBaseInfo.StatusOfMaintenance = finalStatus
+		_, err = UpdateDeviceBaseInfo(deviceBaseInfo, deviceMaintenanceRecord.DeviceSn)
+		if err != nil {
+			return err
+		}
+	}
 	return
 }
 

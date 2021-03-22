@@ -4,10 +4,10 @@ import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
 	"reflect"
+	"strconv"
 )
 
 type IOSummaryInfo struct {
-	Data    string
 	Pn      string
 	Process string
 	Input   int
@@ -17,18 +17,15 @@ type IOSummaryInfo struct {
 
 func Get10GLineIOSummaryInfoList(q *QueryCondition) ([]interface{}, error) {
 	ioSummaryInfoList := make([]IOSummaryInfo, 0)
-	sqlStr := `SELECT x.* FROM (select DISTINCT to_char(ACTION_TIME,'yyyy-mm-dd')日期,Pn AS 型号 ,LOG_ACTION AS 工序
-,COUNT(sn)OVER(PARTITION BY pn,LOG_action,to_char(ACTION_TIME,'yyyy-mm-dd'))投入
-,SUM(case P_VALUE when 'PASS' then 1 else 0 end)OVER(PARTITION BY pn,LOG_action,to_char(ACTION_TIME,'yyyy-mm-dd') ) 良品
-,SUM(case P_VALUE when 'PASS' then 0 else 1 end)OVER(PARTITION BY pn,LOG_action,to_char(ACTION_TIME,'yyyy-mm-dd') ) 不良品
- from (SELECT c.*,rank() over(partition by sn,log_action
-                        order by action_time desc)rr
-FROM superxon.AutoDT_Process_LOG c
-WHERE ACTION_TIME >=to_date('` + q.StartTime + `','yyyy-mm-dd hh24:mi:ss')
-and ACTION_TIME <=to_date('` + q.EndTime + `','yyyy-mm-dd hh24:mi:ss')
-) a
-WHERE a.rr=1 AND a.pn like 'SO%62%'
-order by to_char(ACTION_TIME,'yyyy-mm-dd'),pn,LOG_ACTION) x`
+	sqlStr := `SELECT x.* FROM (select DISTINCT Pn AS 型号, LOG_ACTION AS 工序,
+COUNT(sn) OVER(PARTITION BY pn, LOG_action) 投入, SUM(case P_VALUE
+when 'PASS' then 1 else 0 end) OVER(PARTITION BY pn, LOG_action) 良品,
+SUM(case P_VALUE when 'PASS' then 0 else 1 end) OVER(PARTITION BY pn, LOG_action) 不良品
+from (SELECT c.*, rank() over(partition by sn, log_action order by action_time desc) rr
+FROM superxon.AutoDT_Process_LOG c 
+WHERE ACTION_TIME >= to_date('` + q.StartTime + `', 'yyyy-mm-dd hh24:mi:ss')
+and ACTION_TIME <= to_date('` + q.EndTime + `', 'yyyy-mm-dd hh24:mi:ss')) a
+WHERE a.rr = 1 AND (a.pn like 'SOGX62%' or a.pn like 'SOEX62%') order by pn, LOG_ACTION) x`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -38,7 +35,6 @@ order by to_char(ACTION_TIME,'yyyy-mm-dd'),pn,LOG_ACTION) x`
 	var ioSummaryInfo IOSummaryInfo
 	for rows.Next() {
 		err = rows.Scan(
-			&ioSummaryInfo.Data,
 			&ioSummaryInfo.Pn,
 			&ioSummaryInfo.Process,
 			&ioSummaryInfo.Input,
@@ -88,9 +84,30 @@ order by to_char(ACTION_TIME,'yyyy-mm-dd'),pn,LOG_ACTION) x`
 			}
 		}
 		m["调试-不良"] = reflect.ValueOf(m["调试-投入"]).Int() - reflect.ValueOf(m["调试-产出"]).Int()
+		if reflect.ValueOf(m["调试-投入"]).Int() != 0 {
+			m["调试-不良占比"] = strconv.Itoa(int(reflect.ValueOf(m["调试-不良"]).Int()*100/reflect.ValueOf(m["调试-投入"]).Int())) + "%"
+		} else {
+			m["调试-不良占比"] = "0%"
+		}
+
 		m["常温-不良"] = reflect.ValueOf(m["常温-投入"]).Int() - reflect.ValueOf(m["常温-产出"]).Int()
+		if reflect.ValueOf(m["常温-投入"]).Int() != 0 {
+			m["常温-不良占比"] = strconv.Itoa(int(reflect.ValueOf(m["常温-不良"]).Int()*100/reflect.ValueOf(m["常温-投入"]).Int())) + "%"
+		} else {
+			m["常温-不良占比"] = "0%"
+		}
 		m["EE-不良"] = reflect.ValueOf(m["EE-投入"]).Int() - reflect.ValueOf(m["EE-产出"]).Int()
+		if reflect.ValueOf(m["EE-投入"]).Int() != 0 {
+			m["EE-不良占比"] = strconv.Itoa(int(reflect.ValueOf(m["EE-不良"]).Int()*100/reflect.ValueOf(m["EE-投入"]).Int())) + "%"
+		} else {
+			m["EE-不良占比"] = "0%"
+		}
 		m["入库-不良"] = reflect.ValueOf(m["入库-投入"]).Int() - reflect.ValueOf(m["入库-产出"]).Int()
+		if reflect.ValueOf(m["入库-投入"]).Int() != 0 {
+			m["入库-不良占比"] = strconv.Itoa(int(reflect.ValueOf(m["入库-不良"]).Int()*100/reflect.ValueOf(m["入库-投入"]).Int())) + "%"
+		} else {
+			m["入库-不良占比"] = "0%"
+		}
 		r = append(r, m)
 	}
 	return r, nil

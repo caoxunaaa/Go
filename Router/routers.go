@@ -27,6 +27,7 @@ func Init() *gin.Engine {
 	{
 		vCharts.GET("/warningCharts", waringDisplayBroad.GetWarningCountChartDataListHandler)
 		vCharts.GET("/ioSummary", qaModuleStatisticBroad.Get10GLineIOSummaryInfoListHandler)
+		vCharts.GET("/stationWarningStatistic", runModuleDisplayBroad.GetStationWarningStatisticHandler)
 	}
 
 	//实时运行看板页面
