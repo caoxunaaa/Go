@@ -50,7 +50,7 @@ func InitCron() {
 		}
 	})
 
-	spec6 := "0 0 */1 * * ?" //每隔1小时执行任务
+	spec6 := "0 55 */1 * * ?" //每隔1小时执行任务
 	_ = timedTask.AddFunc(spec6, func() { TimedUpdateStationWarningStatistic() })
 
 	timedTask.Start()
@@ -117,26 +117,33 @@ func TimedUpdateStationWarningStatistic() {
 		fmt.Println(stationWarningStatisticList, err)
 		if len(stationWarningStatisticList) <= 0 {
 			fmt.Println(err)
-			statisticsEachHour := strconv.Itoa(stationWarningList[index].Count) + ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1"
+			var statisticsEachHour string
+			if stationWarningList[index].Count > 0 {
+				statisticsEachHour = "1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1"
+			} else {
+				statisticsEachHour = "-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1"
+			}
 			err = ModuleRunDisplay.CreateStationWarningStatistic(&ModuleRunDisplay.StationWarningStatistic{StationId: stationWarningList[index].StationId.String, RecordDate: currentDate, StatisticsEachHour: statisticsEachHour})
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 		} else {
-			fmt.Println("更新")
-			stationWarningStatisticTemp := stationWarningStatisticList[0]
-			//更新statisticsEachHour字符串
-			count := stationWarningList[index].Count
-			temp := stationWarningStatisticTemp.StatisticsEachHour
-			stHourList := strings.Split(temp, ",")
-			stHourList[hour] = strconv.Itoa(count)
-			stationWarningStatisticTemp.StatisticsEachHour = strings.Join(stHourList, ",")
-			fmt.Println(stationWarningStatisticTemp)
-			err = ModuleRunDisplay.UpdateStationWarningStatistic(stationWarningStatisticTemp)
-			if err != nil {
-				fmt.Println(err)
-				return
+			if hour > 0 {
+				fmt.Println("更新")
+				stationWarningStatisticTemp := stationWarningStatisticList[0]
+				//更新statisticsEachHour字符串
+				count := stationWarningList[index].Count
+				temp := stationWarningStatisticTemp.StatisticsEachHour
+				stHourList := strings.Split(temp, ",")
+				stHourList[hour] = strconv.Itoa(count)
+				stationWarningStatisticTemp.StatisticsEachHour = strings.Join(stHourList, ",")
+				fmt.Println(stationWarningStatisticTemp)
+				err = ModuleRunDisplay.UpdateStationWarningStatistic(stationWarningStatisticTemp)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
 			}
 		}
 	}

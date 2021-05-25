@@ -4,6 +4,7 @@ import (
 	"SuperxonWebSite/Databases"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -23,6 +24,35 @@ type DeviceRepairInfo struct {
 	Solution         sql.NullString `db:"solution"`
 	PR               sql.NullString `db:"pr"`
 	Cost             uint32         `db:"cost"`
+}
+
+type Test struct {
+	DeviceName          string    `db:"device_name"`
+	DeviceAssets        string    `db:"device_assets"`
+	DeviceOwner         string    `db:"device_owner"`
+	Deadline            time.Time `db:"deadline"`
+	ItemName            string    `db:"item_name"`
+	ItemCategory        string    `db:"item_category"`
+	DeviceSn            string    `db:"device_sn"`
+	DeviceSort          string    `db:"device_sort"`
+	LastMaintenanceTime time.Time `db:"last_maintenance_time"`
+	Id                  int64     `db:"id"`
+	Status              string    `db:"status"`
+}
+
+func GetTest() (test []*Test, err error) {
+	sqlStr := fmt.Sprintf(`SELECT c.*, b.status FROM device_maintenance_current_infos c, 
+        (SELECT a.*, CASE WHEN a.v > a.threshold then '正常' WHEN a.v > 0 then '待保养' ELSE '保养超时' END 'status' 
+        FROM (SELECT t.id, t.device_sn, t.deadline, c.threshold, TIMESTAMPDIFF(DAY, CURRENT_DATE, t.deadline) as v 
+        FROM device_maintenance_current_infos t, device_maintenance_items c 
+        WHERE t.item_category= c.category AND t.item_name= c.name AND t.device_sn = '091070022'
+        ORDER BY v) a) b where c.device_sn = b.device_sn AND c.id = b.id`)
+	fmt.Println(sqlStr)
+	err = Databases.SuperxonDbDevice.Select(&test, sqlStr)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func GetAllDeviceRepairInfoList() (deviceRepairInfoList []*DeviceRepairInfo, err error) {

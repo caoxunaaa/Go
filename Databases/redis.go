@@ -30,7 +30,6 @@ func RedisPollInit() *redis.Pool {
 
 func RedisInit() {
 	RedisPool = RedisPollInit()
-	//RedisConn = RedisPool.Get()
 }
 
 //func RedisInit() {

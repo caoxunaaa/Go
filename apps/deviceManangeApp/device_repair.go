@@ -2,6 +2,7 @@ package deviceManangeApp
 
 import (
 	"SuperxonWebSite/Models/DeviceManage"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -13,6 +14,16 @@ func GetAllDeviceRepairInfoListHandler(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
 		c.JSON(http.StatusOK, deviceRepairInfoList)
+	}
+}
+
+func GetTestHandler(c *gin.Context) {
+	resp, err := DeviceManage.GetTest()
+	fmt.Println(resp)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, resp)
 	}
 }
 

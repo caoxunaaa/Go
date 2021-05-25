@@ -53,6 +53,14 @@ func GetCurrentDateAndHour() (date string, hour int) {
 }
 
 //获取当前日期和时段
+func GetYesterdayDateAndHour() (date string, hour int) {
+	yesterdayTime := time.Now().AddDate(0, 0, -1)
+	date = yesterdayTime.Format("2006-01-02")
+	hour = yesterdayTime.Hour()
+	return
+}
+
+//获取当前日期和时段
 func GetCurrentTimeAndOneHourAgo() (oneHourAgoStr string, currentTimeStr string) {
 	currentTime := time.Now()
 	currentTimeStr = currentTime.Format("2006-01-02 15:04:05")

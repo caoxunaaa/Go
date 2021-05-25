@@ -54,17 +54,22 @@ func GetAllProcessOfTRX() (processList []Process, err error) {
 
 func GetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	var qaCpkInfoList []QaCpkInfo
-	sqlStr := `select b.txaop,B.TXER,B.A2_IBIAS,B.EA_ABSORB,b.sigma,B.SMSR
+	sqlStr := ` select b.txaop,B.TXER,B.A2_IBIAS,B.EA_ABSORB,b.sigma,B.SMSR
 from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
 from superxon.autodt_process_log x
-WHERE x.pn like '` + queryCondition.Pn + `'
+WHERE x.pn like '%` + queryCondition.Pn + `%'
 and x.log_action like '` + queryCondition.Process + `'
 and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
 ) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee
 from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
+JOIN (select t.partnumber,t.version,t.pch_tc, (case when  substr(t.pch_lx,0,10) like'TRX试生产产品工单%' then 'TRX正常品' 
+when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
+from superxon.sgd_scdd_trx t) d 
+ON d.pch_tc=C.manufacture_group and A.pn=d.partnumber
+AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%'
  join superxon.autodt_results_ate_new b on a.resultsid=b.id
- where a.rr=1 AND C.EE=1`
+ where a.rr=1 AND C.EE=1 `
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -84,6 +89,44 @@ from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
 			return nil, err
 		}
 		qaCpkInfoList = append(qaCpkInfoList, qaCpkInfo)
+	}
+	if len(qaCpkInfoList) <= 0 {
+		sqlStr := `select b.txaop,B.TXER
+from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
+from superxon.autodt_process_log x
+WHERE x.pn like '` + queryCondition.Pn + `'
+and x.log_action like '` + queryCondition.Process + `%'
+and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
+) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee
+from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
+JOIN (select t.partnumber,t.version,t.pch_tc, (case when  substr(t.pch_lx,0,10) like'TRX试生产产品工单%' then 'TRX正常品' 
+when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
+from superxon.sgd_scdd_trx t) d 
+ON d.pch_tc=C.manufacture_group and A.pn=d.partnumber
+AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%'
+ join superxon.autodt_results_ate b on a.resultsid=b.id
+ where a.rr=1 AND C.EE=1 `
+		rows, err := Databases.OracleDB.Query(sqlStr)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		var qaCpkInfo QaCpkInfo
+		for rows.Next() {
+			err = rows.Scan(
+				&qaCpkInfo.TxAop,
+				&qaCpkInfo.TxER,
+				//&qaCpkInfo.A2Ibias,
+				//&qaCpkInfo.EaAbsorb,
+				//&qaCpkInfo.Sigma,
+				//&qaCpkInfo.Smsr,
+			)
+			if err != nil {
+				return nil, err
+			}
+			qaCpkInfoList = append(qaCpkInfoList, qaCpkInfo)
+		}
 	}
 	result, err = GetQaCpkResult(qaCpkInfoList...)
 	return
@@ -162,6 +205,11 @@ and ACTION_TIME >=to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi
 and ACTION_TIME <=to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')
 ) a  JOIN (SeLECT distinct y.*,RANK()OVER(partition by y.bosa_sn order by y.ID desc)ee
 from superxon.autodt_tracking y)c ON a.sn=c.bosa_sn and c.ee=1
+JOIN (select t.partnumber,t.version,t.pch_tc, (case when  substr(t.pch_lx,0,10) like'TRX试生产产品工单%' then 'TRX正常品' 
+when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
+from superxon.sgd_scdd_trx t) b 
+ON b.pch_tc=C.manufacture_group and A.pn=b.partnumber
+AND b.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%'
  join superxon.autodt_results_monitor d on a.sn=d.opticssn and a.ACTION_TIME=d.testdate
  where a.rr=1 AND C.EE=1 `
 	rows, err := Databases.OracleDB.Query(sqlStr)

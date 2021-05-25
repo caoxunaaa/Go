@@ -25,7 +25,7 @@ func GetQaPnList(queryCondition *QueryCondition) (qaPnList []QaPn, err error) {
 	} else {
 		sqlStr = `select distinct t.pn from superxon.autodt_process_log t where t.pn LIKE 'SO%' and t.action_time between to_date('` + queryCondition.StartTime + `', 'yyyy-mm-dd hh24:mi:ss') and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss')`
 	}
-
+	fmt.Println(sqlStr)
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -57,25 +57,26 @@ type QaStatisticInfo struct {
 
 func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInfoList []QaStatisticInfo, err error) {
 	sqlStr := `with TRX as (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,b.*,
-        rank()over(partition by b.sn,b.log_action order by b.action_time asc)zz,
-        rank()over(partition by b.sn,b.log_action order by b.action_time DESC)rr,
-        c."sequence" as SEQ
-        FROM superxon.autodt_process_log b,(SELECT aa.* FROM (select t.*,dense_rank()over(partition by T.PARTNUMBER,T.BOSA_SN order by T.MODIFYDATE DESC)LA
-        from superxon.autodt_tracking t)aa where aa.LA=1) a,superxon.workstage c,
-        (select t.partnumber,t.version,t.pch_tc, (case when  substr(t.pch_lx,0,10) like'TRX试生产产品工单%' then 'TRX正常品'
-        when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
-        from superxon.sgd_scdd_trx t) d
-        where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and D.LOT_TYPE like '%` + queryCondition.WorkOrderType + `%'
-        and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
-        and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
-        and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `')
-        select e.pn,e.序列,e.工序,e.总输入,e.最终良品,e.最终不良品,round(e.最终良品/e.总输入*100,2)||'%' 最终良率
-        from
-        (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序 ,
-        count(sn)over(partition by h.log_action,h.PN)总输入,
-        sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN)最终良品,
-        sum(case h.p_value when 'PASS' then 0 else 1 end)over(partition by h.log_action,h.PN)最终不良品
-        from TRX h where h.rr=1)e order by e.pn,e.序列 ASC`
+	      rank()over(partition by b.sn,b.log_action order by b.action_time asc)zz,
+	      rank()over(partition by b.sn,b.log_action order by b.action_time DESC)rr,
+	      c."sequence" as SEQ
+	      FROM superxon.autodt_process_log b,(SELECT aa.* FROM (select t.*,dense_rank()over(partition by T.PARTNUMBER,T.BOSA_SN order by T.MODIFYDATE DESC)LA
+	      from superxon.autodt_tracking t)aa where aa.LA=1) a,superxon.workstage c,
+	      (select t.partnumber,t.version,t.pch_tc, (case when  substr(t.pch_lx,0,10) like'TRX试生产产品工单%' then 'TRX正常品'
+	      when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
+	      from superxon.sgd_scdd_trx t) d
+	      where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and D.LOT_TYPE like '%` + queryCondition.WorkOrderType + `%'
+	      and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
+	      and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+	      and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `')
+	      select e.pn,e.序列,e.工序,e.总输入,e.最终良品,e.最终不良品,round(e.最终良品/e.总输入*100,2)||'%' 最终良率
+	      from
+	      (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序,
+	      count(sn)over(partition by h.log_action,h.PN)总输入,
+	      sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN)最终良品,
+	      sum(case h.p_value when 'PASS' then 0 else 1 end)over(partition by h.log_action,h.PN)最终不良品
+	      from TRX h where h.rr=1)e order by e.pn,e.序列 ASC`
+	fmt.Println(sqlStr)
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -138,6 +139,7 @@ type QaDefectsInfoByPn struct {
 }
 
 func GetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefectsInfoList []QaDefectsInfoByPn, err error) {
+	var qaDefectsInfo QaDefectsInfoByPn
 	sqlStr := `with TRX AS (select y.errorcode,x.* from (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,
 				(case when substr(b.softversion,length(b.softversion)-4) like '%验证软件' then substr(b.softversion,0,length(b.softversion)-5)
 				when substr(b.softversion,length(b.softversion)-1) LIKE '%*_'escape '*' then substr(b.softversion,0,length(b.softversion)-1) else B.SOFTVERSION END) as SVERSION,b.*,
@@ -166,7 +168,6 @@ func GetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefectsInf
 		return nil, err
 	}
 	defer rows.Close()
-	var qaDefectsInfo QaDefectsInfoByPn
 	for rows.Next() {
 		err = rows.Scan(
 			&qaDefectsInfo.Pn,
@@ -180,6 +181,49 @@ func GetQaDefectsOrderInfoListByPn(queryCondition *QueryCondition) (qaDefectsInf
 		}
 		qaDefectsInfo.ErrorDescribe, _ = Utils.GetErrorCodeDescribe(qaDefectsInfo.ErrorCode)
 		qaDefectsInfoList = append(qaDefectsInfoList, qaDefectsInfo)
+	}
+	if len(qaDefectsInfoList) <= 0 {
+		sqlStr = `with TRX AS (select y.errorcode,x.* from (SELECT distinct a.MANUFACTURE_GROUP,d.LOT_TYPE,
+				(case when substr(b.softversion,length(b.softversion)-4) like '%验证软件' then substr(b.softversion,0,length(b.softversion)-5)
+				when substr(b.softversion,length(b.softversion)-1) LIKE '%*_'escape '*' then substr(b.softversion,0,length(b.softversion)-1) else B.SOFTVERSION END) as SVERSION,b.*,
+				dense_rank()over(partition by b.sn,b.log_action order by b.action_time asc)zz,
+				dense_rank()over(partition by b.sn,b.log_action order by b.action_time DESC)rr,
+				c."sequence" as SEQ
+				FROM superxon.autodt_process_log b,(SELECT C.id,c.partnumber,c.manufacture_group,c.tosa_group,c.rosa_group,c.bosa_group,c.pcba1_group,c.bosa_sn,c.modifydate,c.la
+				FROM (select t.*,dense_rank()over(partition by T.PARTNUMBER,T.BOSA_SN order by T.MODIFYDATE DESC)LA from superxon.autodt_tracking t)C where C.LA=1) a,superxon.workstage c,
+				(select t.partnumber,t.version,t.pch_tc, (case when  substr(t.pch_lx,0,10) like'TRX试生产产品工单%' then 'TRX正常品'
+				when substr(t.pch_lx,0,10) like  'TRX量产产品工单%' then 'TRX正常品'  else'TRX改制返工品' END) as LOT_TYPE,t.pch_lx
+				from superxon.sgd_scdd_trx t)d
+				where b.sn=a.bosa_sn and b.log_action = c."processname" and a.partnumber =b.pn and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
+				and b.pn = '` + queryCondition.Pn + `' and D.LOT_TYPE LIKE '%` + queryCondition.WorkOrderType + `%'
+				and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
+				and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss'))x,superxon.autodt_results_ate y
+				where x.sn=y.opticssn and x.resultsid =y.id and y.errorcode <> '0')
+	
+				select d.* from (select distinct g.PN as PN,g.log_action as 工序,G.SVERSION,g.ERRORCODE,
+				count(G.sn)over(partition by g.ERRORCODE,G.SVERSION,g.log_action)不良数量,
+				ROUND(（count(G.sn)over(partition by g.ERRORCODE)/(sum(case g.p_value when 'FAIL' then 1 else 0 end)over(partition by g.PN))*100),2)||'%' 不良比重
+				from TRX g where g.RR=1)d
+				order by d.不良数量 DESC`
+		rows, err := Databases.OracleDB.Query(sqlStr)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			err = rows.Scan(
+				&qaDefectsInfo.Pn,
+				&qaDefectsInfo.Sequence,
+				&qaDefectsInfo.Version,
+				&qaDefectsInfo.ErrorCode,
+				&qaDefectsInfo.ErrorCount,
+				&qaDefectsInfo.ErrorRate)
+			if err != nil {
+				return nil, err
+			}
+			qaDefectsInfo.ErrorDescribe, _ = Utils.GetErrorCodeDescribe(qaDefectsInfo.ErrorCode)
+			qaDefectsInfoList = append(qaDefectsInfoList, qaDefectsInfo)
+		}
 	}
 	return
 }

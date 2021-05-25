@@ -4,6 +4,7 @@ import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Middlewares"
 	"SuperxonWebSite/Models/User"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -30,6 +31,7 @@ func AuthLoginHandler(c *gin.Context) {
 	// 用户发送用户名和密码过来
 	var user User.Profile
 	err := c.ShouldBindJSON(&user)
+	fmt.Println(user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 2001,

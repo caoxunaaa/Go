@@ -175,6 +175,46 @@ func GetQaDefectsInfoByWorkOrderIdList(queryCondition *QueryCondition) (qaDefect
 		}
 		qaDefectsInfoByWorkOrderIdList = append(qaDefectsInfoByWorkOrderIdList, qaDefectsInfoByWorkOrderId)
 	}
+	if len(qaDefectsInfoByWorkOrderIdList) <= 0 {
+		sqlStr := `with TRX as (select y.errorcode,x.* from (SELECT distinct a.MANUFACTURE_GROUP,b.*,
+				rank()over(partition by b.sn,b.log_action order by b.action_time asc)zz,
+				rank()over(partition by b.sn,b.log_action order by b.action_time DESC)rr, 
+				c."sequence" as SEQ,d.PCH_TC_DATE AS 下单时间
+				FROM superxon.autodt_process_log b, superxon.autodt_tracking A,superxon.workstage c,superxon.sgd_scdd_trx d
+				where b.sn=a.bosa_sn and b.log_action = c."processname" AND A.manufacture_group=D.PCH_TC
+				and b.action_time>=d.PCH_TC_DATE
+				--and b.action_time<=to_date('&T2','yyyy-mm-dd hh24:mi:ss') 
+				and a.manufacture_group = '` + queryCondition.WorkOrderId + `'
+				and b.pn like '%SO%'
+				and b.log_action not in('TC1_IN','TC1_OUT','MODULE_SN','TRACKING SN')
+				)x, superxon.autodt_results_ate y
+				where x.sn=y.opticssn and x.resultsid =y.id and y.errorcode <> '0')
+				
+				select d.* from (select distinct G.manufacture_group as 工单号,g.PN as PN,g.log_action as 工序,g.ERRORCODE,
+				count(G.sn)over(partition by G.PN,g.ERRORCODE,g.log_action)不良数量,
+				ROUND((count(G.sn)over(partition by g.ERRORCODE,g.log_action)/(sum(case g.p_value when 'FAIL' then 1 else 0 end)over(partition by g.PN))*100),2)||'%' 不良比重
+				from TRX g where g.RR=1)d`
+		rows, err := Databases.OracleDB.Query(sqlStr)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		var qaDefectsInfoByWorkOrderId QaDefectsInfoByWorkOrderId
+		for rows.Next() {
+			err = rows.Scan(
+				&qaDefectsInfoByWorkOrderId.WorkOrderId,
+				&qaDefectsInfoByWorkOrderId.Pn,
+				&qaDefectsInfoByWorkOrderId.Process,
+				&qaDefectsInfoByWorkOrderId.ErrorCode,
+				&qaDefectsInfoByWorkOrderId.ErrorCount,
+				&qaDefectsInfoByWorkOrderId.ErrorInputRate)
+			if err != nil {
+				return nil, err
+			}
+			qaDefectsInfoByWorkOrderIdList = append(qaDefectsInfoByWorkOrderIdList, qaDefectsInfoByWorkOrderId)
+		}
+	}
+
 	return
 }
 
