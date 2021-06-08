@@ -5,9 +5,7 @@ import (
 	"SuperxonWebSite/Utils"
 	"encoding/json"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"strconv"
-	"time"
 )
 
 type QaCpkInfo struct {
@@ -132,34 +130,6 @@ AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%'
 	return
 }
 
-func RedisGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
-	//result = make(map[string]map[string]uint)
-	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
-	if len(reBytes) != 0 {
-		_ = json.Unmarshal(reBytes, &result)
-		if len(result) != 0 {
-			fmt.Println("使用redis")
-			return
-		}
-	}
-
-	result, _ = GetQaCpkInfoList(queryCondition)
-
-	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.StartTime, time.Local)
-	startTime = startTime.AddDate(0, 0, 7)
-	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.EndTime, time.Local)
-	if !startTime.After(endTime) {
-		datas, _ := json.Marshal(result)
-		_, err = Databases.RedisPool.Get().Do("SET", key, datas, "NX", "EX", 60*60*23+60*50)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-	return
-}
-
 func CronGetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	result = make(map[string]map[string]uint)
 	key := "CpkBase" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
@@ -235,35 +205,6 @@ AND b.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%'
 		qaCpkRssiList = append(qaCpkRssiList, qaCpkRssi)
 	}
 	result, err = GetQaCpkRssiResult(qaCpkRssiList...)
-	return
-}
-
-func RedisGetQaCpkRssiList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
-	result = make(map[string]map[string]uint)
-	key := "CpkRssi" + queryCondition.Pn + queryCondition.Process + queryCondition.StartTime + queryCondition.EndTime
-	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
-	if len(reBytes) != 0 {
-		_ = json.Unmarshal(reBytes, &result)
-		if len(result) != 0 {
-			fmt.Println("使用redis")
-			return
-		}
-	}
-
-	result, _ = GetQaCpkRssiList(queryCondition)
-
-	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.StartTime, time.Local)
-	startTime = startTime.AddDate(0, 0, 7)
-	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", queryCondition.EndTime, time.Local)
-	if !startTime.After(endTime) {
-		datas, _ := json.Marshal(result)
-		_, err = Databases.RedisPool.Get().Do("SET", key, datas, "NX", "EX", 60*60*23+60*50)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-
 	return
 }
 

@@ -3,9 +3,6 @@ package ModuleRunDisplay
 import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
-	"encoding/json"
-	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"strconv"
 )
 
@@ -125,37 +122,5 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 			projectPlanInfoList = append(projectPlanInfoList, ProjectPlanInfo{valueUndone, DoneProjectPlanInfo{Pn: valueUndone.Pn, DoneToPay: 0}, "0%"})
 		}
 	}
-	return
-}
-
-/*
-func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
-获取redis缓存中的projectPlanInfoList，如果没有就重新在数据库中查询
-*/
-func RedisGetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
-	key := "projectPlanInfoList"
-	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
-	if len(reBytes) != 0 {
-		_ = json.Unmarshal(reBytes, &projectPlanInfoList)
-		if len(projectPlanInfoList) != 0 {
-			fmt.Println("使用redis")
-			return
-		}
-	}
-
-	projectPlanInfoList, err = GetProjectPlanList()
-
-	datas, _ := json.Marshal(projectPlanInfoList)
-	_, err = Databases.RedisPool.Get().Do("SET", key, datas)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*6)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	return
 }

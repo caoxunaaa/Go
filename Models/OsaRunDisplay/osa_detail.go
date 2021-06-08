@@ -4,9 +4,7 @@ import (
 	"SuperxonWebSite/Databases"
 	"SuperxonWebSite/Utils"
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 )
 
 type Osa struct {
@@ -36,35 +34,6 @@ func GetOsaList(osaQueryCondition *OsaQueryCondition) (osaList []Osa, err error)
 		}
 		osaList = append(osaList, osa)
 	}
-	return
-}
-
-func RedisGetOsaList() (osaList []Osa, err error) {
-	key := "osaList"
-	reBytes, _ := redis.Bytes(Databases.RedisPool.Get().Do("get", key))
-	if len(reBytes) != 0 {
-		_ = json.Unmarshal(reBytes, &osaList)
-		if len(osaList) != 0 {
-			fmt.Println("使用redis")
-			return
-		}
-	}
-	var osaQueryCondition OsaQueryCondition
-	osaQueryCondition.StartTime, osaQueryCondition.EndTime = Utils.GetAgoAndCurrentTime(Utils.Ago{Years: 0, Months: -1, Days: 0})
-	osaList, err = GetOsaList(&osaQueryCondition)
-
-	datas, _ := json.Marshal(osaList)
-	_, err = Databases.RedisPool.Get().Do("SET", key, datas)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	_, err = Databases.RedisPool.Get().Do("expire", key, 60*60*1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	return
 }
 
@@ -319,10 +288,12 @@ func GetYesterdayOsaInfoList(osaQueryCondition *OsaQueryCondition) (osaInfoList 
 }
 
 func GetAllOsaInfoList(osaQueryCondition *OsaQueryCondition) (osaInfoList []OsaInfo, err error) {
-	osaList, err := RedisGetOsaList()
+	startTime, endTime := Utils.GetAgoAndCurrentTime(Utils.Ago{Years: 0, Months: -2, Days: 0})
+	osaList, err := GetOsaList(&OsaQueryCondition{StartTime: startTime, EndTime: endTime})
 	if err != nil {
 		return
 	}
+
 	osaQueryCondition.StartTime, osaQueryCondition.EndTime = Utils.GetCurrentAndZeroTime()
 	ch := make(chan bool, 5)
 	for i := 0; i < len(osaList); i++ {

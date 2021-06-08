@@ -10,7 +10,9 @@ type Product struct {
 	Name sql.NullString
 }
 
-func GetModuleList(startTime string, endTime string) (moduleList []Product, err error) {
+func GetModuleList(startTime string, endTime string) ([]Product, error) {
+	var res = make([]Product, 0)
+	var err error
 	sqlStr := `select distinct t.partnumber from superxon.sgd_scdd_trx t where t.partnumber LIKE 'SO%' and t.pch_tc_date between to_date('` + startTime + `','yyyy-mm-dd hh24:mi:ss') and to_date('` + endTime + `','yyyy-mm-dd hh24:mi:ss')`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
@@ -24,10 +26,10 @@ func GetModuleList(startTime string, endTime string) (moduleList []Product, err 
 			return nil, err
 		}
 		if pn.Name.Valid == true {
-			moduleList = append(moduleList, pn)
+			res = append(res, pn)
 		}
 	}
-	return
+	return res, nil
 }
 
 type ProductInfo struct {

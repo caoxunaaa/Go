@@ -2,10 +2,8 @@ package main
 
 import (
 	"SuperxonWebSite/Databases"
-	"SuperxonWebSite/Models/DeviceManage"
 	"SuperxonWebSite/Models/FileManage"
 	"SuperxonWebSite/Models/ModuleRunDisplay"
-	"SuperxonWebSite/Models/User"
 	"SuperxonWebSite/Models/WaringDisplay"
 	"SuperxonWebSite/Router"
 	"SuperxonWebSite/Services"
@@ -13,6 +11,8 @@ import (
 )
 
 func main() {
+	var err error
+
 	Databases.InitOracle()
 	defer Databases.CloseOracle()
 
@@ -20,32 +20,29 @@ func main() {
 	defer Databases.CloseMysql()
 
 	Databases.SuperxonDbDeviceOrm.AutoMigrate(
-		&DeviceManage.DeviceBaseInfo{},
-		&DeviceManage.DeviceRepairInfo{},
-		&DeviceManage.DeviceMaintenanceItem{},
-		&DeviceManage.DeviceMaintenanceCurrentInfo{},
-		&DeviceManage.DeviceMaintenanceRecord{},
-		&DeviceManage.DeviceTransmitInfo{},
-		&DeviceManage.DeviceCategory{},
-		&DeviceManage.SelfTest{},
 		&ModuleRunDisplay.UndoneProjectPlanInfo{},
 		&WaringDisplay.PnPassRateChartData{},
 		&WaringDisplay.WarningCountChartData{},
-		&User.Profile{},
 		&FileManage.VideoInfo{},
 	)
-	_ = Databases.SuperxonDbDeviceOrm.Close()
+	err = Databases.SuperxonDbDeviceOrm.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	Databases.RedisInit()
 	defer Databases.RedisClose()
 
-	Services.InitCron()
+	Services.KafkaInit()
+	err = Services.InitCron()
+	if err != nil {
+		fmt.Println(err)
+	}
 	defer Services.CloseCron()
-
-	//Services.TimedUpdateStationWarningStatistic()
 
 	r := Router.Init()
 	if err := r.Run("0.0.0.0:8002"); err != nil {
 		fmt.Printf("startup service failed, err:%v\n\n", err)
 	}
+
 }
