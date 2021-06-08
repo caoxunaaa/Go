@@ -1,4 +1,4 @@
-package OsaQaStatisticDisplay
+package OsaStatisticDisplay
 
 import "SuperxonWebSite/Databases"
 

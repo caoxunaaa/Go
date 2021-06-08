@@ -1,15 +1,15 @@
 package moduleStatistic
 
 import (
-	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetModuleDefectsDetailInfoByPnHandler(c *gin.Context) {
 	var err error
-	var queryCondition ModuleQaStatisticDisplay.QueryCondition
-	var qaDefectsDetailInfoList []ModuleQaStatisticDisplay.QaDefectsDetailInfo
+	var queryCondition ModuleStatisticDisplay.QueryCondition
+	var qaDefectsDetailInfoList []ModuleStatisticDisplay.QaDefectsDetailInfo
 	queryCondition.Pn = c.DefaultQuery("pn", "None")
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
@@ -20,7 +20,7 @@ func GetModuleDefectsDetailInfoByPnHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaDefectsDetailInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsDetailByPn(&queryCondition)
+	qaDefectsDetailInfoList, err = ModuleStatisticDisplay.GetQaDefectsDetailByPn(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

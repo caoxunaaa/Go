@@ -1,7 +1,8 @@
 package Services
 
 import (
-	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleRunDisplay"
+	"SuperxonWebSite/Models/ModuleStatisticDisplay"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,15 +34,15 @@ func KafkaPushModuleWarningInfoByClock(clock int) error {
 
 	var err error
 	m := make(map[string][]struct {
-		ModuleQaStatisticDisplay.QaStatisticInfo
+		ModuleStatisticDisplay.QaStatisticInfo
 		YellowLine int
 		RedLine    int
 	})
-	m["ModuleNormalWarningInfo"], err = ModuleQaStatisticDisplay.GetAllModuleWaringInfo("TRX正常品", "%%", startTime, endTime)
+	m["ModuleNormalWarningInfo"], err = ModuleRunDisplay.GetModuleWaringInfo("TRX正常品", "%%", startTime, endTime)
 	if err != nil {
 		return err
 	}
-	m["ModuleRepairWarningInfo"], err = ModuleQaStatisticDisplay.GetAllModuleWaringInfo("TRX改制返工品", "%%", startTime, endTime)
+	m["ModuleRepairWarningInfo"], err = ModuleRunDisplay.GetModuleWaringInfo("TRX改制返工品", "%%", startTime, endTime)
 	if err != nil {
 		return err
 	}

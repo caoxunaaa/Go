@@ -1,4 +1,4 @@
-package fileManage
+package humanResources
 
 import (
 	"SuperxonWebSite/Models/FileManage"

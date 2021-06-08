@@ -1,7 +1,7 @@
 package osaStatistic
 
 import (
-	"SuperxonWebSite/Models/OsaQaStatisticDisplay"
+	"SuperxonWebSite/Models/OsaStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,7 +13,7 @@ func GetOsaTransmitterHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	reply, err := OsaQaStatisticDisplay.GetOsaTransmitter(startTime, endTime)
+	reply, err := OsaStatisticDisplay.GetOsaTransmitter(startTime, endTime)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

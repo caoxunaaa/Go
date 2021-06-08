@@ -1,4 +1,4 @@
-package commonConfigurationItem
+package PersonInChargeWarningInfo
 
 import (
 	"SuperxonWebSite/Models/ProductionLineOracleRelation"

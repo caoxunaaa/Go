@@ -1,7 +1,7 @@
 package moduleRunning
 
 import (
-	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleRunDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -18,7 +18,7 @@ func GetModuleAllWaringInfoHandler(c *gin.Context) {
 		return
 	}
 
-	res, err := ModuleQaStatisticDisplay.GetAllModuleWaringInfo(workOrderType, pn, startTime, endTime)
+	res, err := ModuleRunDisplay.GetModuleWaringInfo(workOrderType, pn, startTime, endTime)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

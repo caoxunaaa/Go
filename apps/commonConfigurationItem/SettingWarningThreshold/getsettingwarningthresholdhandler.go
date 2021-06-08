@@ -1,13 +1,15 @@
-package commonConfigurationItem
+package SettingWarningThreshold
 
 import (
 	"SuperxonWebSite/Models/ProductionLineOracleRelation"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
-func GetAllSettingWarningThresholdHandler(c *gin.Context) {
-	res, err := ProductionLineOracleRelation.FindAllSettingWarningThreshold()
+func GetSettingWarningThresholdHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	res, err := ProductionLineOracleRelation.FindOneSettingWarningThresholdById(int64(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

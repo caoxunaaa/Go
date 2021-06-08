@@ -16,7 +16,7 @@ type SettingWarningThreshold struct {
 	RedLine    int    `db:"red_line"`
 }
 
-func FindOneById(id int64) (SettingWarningThreshold, error) {
+func FindOneSettingWarningThresholdById(id int64) (SettingWarningThreshold, error) {
 	res := SettingWarningThreshold{}
 	sqlStr := "SELECT id, order_type, module_osa, pn, process, yellow_line, red_line FROM setting_warning_threshold WHERE id=?"
 	err := Databases.SuperxonProductionLineOracleRelationDb.Get(&res, sqlStr, id)
@@ -26,7 +26,7 @@ func FindOneById(id int64) (SettingWarningThreshold, error) {
 	return res, nil
 }
 
-func FindDefaultByOrderTypeAndModuleOsa(orderType, moduleOsa string) (SettingWarningThreshold, error) {
+func FindDefaultSettingWarningThresholdByOrderTypeAndModuleOsa(orderType, moduleOsa string) (SettingWarningThreshold, error) {
 	res := SettingWarningThreshold{}
 	sqlStr := "SELECT id, order_type, module_osa, pn, process, yellow_line, red_line FROM setting_warning_threshold WHERE pn='DEFAULT' AND process='DEFAULT' AND order_type=? AND module_osa=?"
 	err := Databases.SuperxonProductionLineOracleRelationDb.Get(&res, sqlStr, orderType, moduleOsa)
@@ -36,7 +36,7 @@ func FindDefaultByOrderTypeAndModuleOsa(orderType, moduleOsa string) (SettingWar
 	return res, nil
 }
 
-func FindSomeByOrderTypeAndModuleOsa(orderType, moduleOsa string) ([]SettingWarningThreshold, error) {
+func FindSomeSettingWarningThresholdByOrderTypeAndModuleOsa(orderType, moduleOsa string) ([]SettingWarningThreshold, error) {
 	var res = make([]SettingWarningThreshold, 0)
 	sqlStr := "SELECT id, order_type, module_osa, pn, process, yellow_line, red_line FROM setting_warning_threshold WHERE order_type=? AND module_osa=?"
 	err := Databases.SuperxonProductionLineOracleRelationDb.Select(&res, sqlStr, orderType, moduleOsa)
@@ -58,14 +58,14 @@ func FindAllSettingWarningThreshold() ([]SettingWarningThreshold, error) {
 
 func CreateSettingWarningThreshold(swt *SettingWarningThreshold) error {
 	sqlStr := "INSERT INTO setting_warning_threshold(order_type, module_osa, pn, process, yellow_line, red_line) VALUES (?,?,?,?,?,?)"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, swt.OrderType, swt.ModuleOsa, swt.Pn, swt.Process, swt.YellowLine, swt.OrderType)
+	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, swt.OrderType, swt.ModuleOsa, swt.Pn, swt.Process, swt.YellowLine, swt.RedLine)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateSettingWarningThreshold(swt *SettingWarningThreshold) error {
+func UpdateSettingWarningThreshold(swt *SettingWarningThreshold, id int64) error {
 	sqlStr := "UPDATE setting_warning_threshold SET order_type=?, module_osa=?, pn=?, process=?, yellow_line=?, red_line=? WHERE id=?"
 	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(
 		sqlStr,
@@ -75,7 +75,7 @@ func UpdateSettingWarningThreshold(swt *SettingWarningThreshold) error {
 		swt.Process,
 		swt.YellowLine,
 		swt.RedLine,
-		swt.Id)
+		id)
 	if err != nil {
 		return err
 	}

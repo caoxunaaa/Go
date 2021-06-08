@@ -1,8 +1,8 @@
 package osaStatistic
 
 import (
-	"SuperxonWebSite/Models/OsaQaStatisticDisplay"
 	"SuperxonWebSite/Models/OsaRunDisplay"
+	"SuperxonWebSite/Models/OsaStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func GetOsaDefectsInfoByPnHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaOsaDefectsInfoList, err := OsaQaStatisticDisplay.GetQaOsaDefectsInfoListByPn(&osaQueryCondition)
+	qaOsaDefectsInfoList, err := OsaStatisticDisplay.GetQaOsaDefectsInfoListByPn(&osaQueryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

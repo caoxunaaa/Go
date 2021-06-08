@@ -1,15 +1,15 @@
 package moduleStatistic
 
 import (
-	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetQaDefectsDetailByWorkOrderIdHandler(c *gin.Context) {
 	var err error
-	var queryCondition ModuleQaStatisticDisplay.QueryCondition
-	var qaDefectsDetailInfoList []ModuleQaStatisticDisplay.QaDefectsDetailInfo
+	var queryCondition ModuleStatisticDisplay.QueryCondition
+	var qaDefectsDetailInfoList []ModuleStatisticDisplay.QaDefectsDetailInfo
 	queryCondition.WorkOrderId = c.DefaultQuery("workOrderId", "None")
 	queryCondition.Process = c.DefaultQuery("process", "None")
 	queryCondition.ErrorCode = c.DefaultQuery("errorCode", "None")
@@ -17,7 +17,7 @@ func GetQaDefectsDetailByWorkOrderIdHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少参数"})
 		return
 	}
-	qaDefectsDetailInfoList, err = ModuleQaStatisticDisplay.GetQaDefectsDetailByWorkOrderId(&queryCondition)
+	qaDefectsDetailInfoList, err = ModuleStatisticDisplay.GetQaDefectsDetailByWorkOrderId(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

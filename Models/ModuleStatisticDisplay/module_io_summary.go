@@ -1,4 +1,4 @@
-package ModuleQaStatisticDisplay
+package ModuleStatisticDisplay
 
 import (
 	"SuperxonWebSite/Databases"

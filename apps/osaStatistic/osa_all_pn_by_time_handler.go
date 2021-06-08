@@ -1,8 +1,8 @@
 package osaStatistic
 
 import (
-	"SuperxonWebSite/Models/OsaQaStatisticDisplay"
 	"SuperxonWebSite/Models/OsaRunDisplay"
+	"SuperxonWebSite/Models/OsaStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,7 +16,7 @@ func GetOsaAllPnByTimeHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaOsaPnList, err := OsaQaStatisticDisplay.GetQaOsaPnList(&osaQueryCondition)
+	qaOsaPnList, err := OsaStatisticDisplay.GetQaOsaPnList(&osaQueryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

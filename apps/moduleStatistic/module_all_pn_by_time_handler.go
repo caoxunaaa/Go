@@ -1,13 +1,13 @@
 package moduleStatistic
 
 import (
-	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleStatisticDisplay"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetModuleAllPnByTimeHandler(c *gin.Context) {
-	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+	var queryCondition ModuleStatisticDisplay.QueryCondition
 	queryCondition.StartTime = c.DefaultQuery("startTime", "None")
 	queryCondition.EndTime = c.DefaultQuery("endTime", "None")
 
@@ -15,7 +15,7 @@ func GetModuleAllPnByTimeHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	qaPnList, err := ModuleQaStatisticDisplay.GetQaPnList(&queryCondition)
+	qaPnList, err := ModuleStatisticDisplay.GetQaPnList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

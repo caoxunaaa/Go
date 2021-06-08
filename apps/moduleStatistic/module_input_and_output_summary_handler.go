@@ -1,7 +1,7 @@
 package moduleStatistic
 
 import (
-	"SuperxonWebSite/Models/ModuleQaStatisticDisplay"
+	"SuperxonWebSite/Models/ModuleStatisticDisplay"
 	"SuperxonWebSite/Utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -9,11 +9,11 @@ import (
 
 func GetInputAndOutputSummaryInfoListHandler(c *gin.Context) {
 	var err error
-	var queryCondition ModuleQaStatisticDisplay.QueryCondition
+	var queryCondition ModuleStatisticDisplay.QueryCondition
 	StartTime, EndTime := Utils.GetCurrentAndZeroTime()
 	queryCondition.StartTime = c.DefaultQuery("startTime", StartTime)
 	queryCondition.EndTime = c.DefaultQuery("endTime", EndTime)
-	result, err := ModuleQaStatisticDisplay.Get10GLineIOSummaryInfoList(&queryCondition)
+	result, err := ModuleStatisticDisplay.Get10GLineIOSummaryInfoList(&queryCondition)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

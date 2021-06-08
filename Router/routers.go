@@ -3,7 +3,9 @@ package Router
 import (
 	"SuperxonWebSite/Middlewares"
 	"SuperxonWebSite/apps/commonConfigurationItem"
-	"SuperxonWebSite/apps/fileManage"
+	"SuperxonWebSite/apps/commonConfigurationItem/PersonInChargeWarningInfo"
+	"SuperxonWebSite/apps/commonConfigurationItem/SettingWarningThreshold"
+	"SuperxonWebSite/apps/humanResources"
 	"SuperxonWebSite/apps/moduleRunning"
 	"SuperxonWebSite/apps/moduleStatistic"
 	"SuperxonWebSite/apps/osaRunning"
@@ -15,9 +17,8 @@ import (
 // 初始化
 func Init() *gin.Engine {
 	r := gin.Default()
-	//pprof.Register(r)
+
 	r.Static("/assets", "./assets")
-	//r.StaticFS("/assets", http.Dir("assets"))
 	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
 	r.Use(Middlewares.Cors())
 
@@ -32,10 +33,18 @@ func Init() *gin.Engine {
 		common.GET("/all-module-pn-list-in-time-period", moduleStatistic.GetModuleAllPnByTimeHandler)
 		//某个时间段的所有Osa Pn
 		common.GET("/all-osa-pn-list-in-time-period", osaStatistic.GetOsaAllPnByTimeHandler)
-		//获取所有的告警负责人
-		common.GET("/person-in-charge-warning-info", commonConfigurationItem.GetAllPersonInChargeWarningInfoHandler)
+		//告警负责人
+		common.GET("/person-in-charge-warning-info", PersonInChargeWarningInfo.GetAllPersonInChargeWarningInfoHandler)
+		common.GET("/person-in-charge-warning-info/:nickname", PersonInChargeWarningInfo.GetAllPersonInChargeWarningInfoByNicknameHandler)
+		common.POST("/person-in-charge-warning-info", PersonInChargeWarningInfo.CreatePersonInChargeWarningInfoHandler)
+		common.PUT("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.UpdatePersonInChargeWarningInfoHandler)
+		common.DELETE("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.DeletePersonInChargeWarningInfoHandler)
 		//获取所有的告警门限设置
-		common.GET("/settings-warning-threshold", commonConfigurationItem.GetAllSettingWarningThresholdHandler)
+		common.GET("/settings-warning-threshold", SettingWarningThreshold.GetAllSettingWarningThresholdHandler)
+		common.GET("/settings-warning-threshold/:id", SettingWarningThreshold.GetSettingWarningThresholdHandler)
+		common.POST("/settings-warning-threshold", SettingWarningThreshold.CreateSettingWarningThresholdHandler)
+		common.PUT("/settings-warning-threshold/:id", SettingWarningThreshold.UpdateSettingWarningThresholdHandler)
+		common.DELETE("/settings-warning-threshold/:id", SettingWarningThreshold.DeleteSettingWarningThresholdHandler)
 	}
 	// 产线生产情况
 	productInfo := r.Group("/product-operation-info")
@@ -147,18 +156,16 @@ func Init() *gin.Engine {
 		//每日告警统计
 		charts.GET("/warning-statistic-daily", trendCharts.GetWarningStatisticDailyHandler)
 	}
-
-	//视频管理页面
-	v6 := r.Group("/fileManage").Use(Middlewares.JWTAuthMiddleware())
+	//人力资源
+	humanResource := r.Group("/human-resources")
 	{
-		v6.GET("/videoInfo", fileManage.GetVideoInfoListHandler)
+		//文件管理
+		fileManage := humanResource.Group("/file-manage")
+		{
+			fileManage.GET("/videoInfo", humanResources.GetVideoInfoListHandler).Use(Middlewares.JWTAuthMiddleware())
+			fileManage.POST("/videoInfo", humanResources.UploadVideoFileHandler).Use(Middlewares.JWTSuperuserMiddleware())
+			fileManage.DELETE("/videoInfo/:id", humanResources.DeleteVideoInfoHandler).Use(Middlewares.JWTSuperuserMiddleware())
+		}
 	}
-	//视频管理页面
-	v6Permission := r.Group("/fileManage").Use(Middlewares.JWTSuperuserMiddleware())
-	{
-		v6Permission.POST("/videoInfo", fileManage.UploadVideoFileHandler)
-		v6Permission.DELETE("/videoInfo/:id", fileManage.DeleteVideoInfoHandler)
-	}
-
 	return r
 }
