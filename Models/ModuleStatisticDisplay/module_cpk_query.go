@@ -52,7 +52,7 @@ func GetAllProcessOfTRX() (processList []Process, err error) {
 
 func GetQaCpkInfoList(queryCondition *QueryCondition) (result map[string]map[string]uint, err error) {
 	var qaCpkInfoList []QaCpkInfo
-	sqlStr := ` select b.txaop,B.TXER,B.A2_IBIAS,B.EA_ABSORB,b.sigma,B.SMSR
+	sqlStr := `select b.txaop,B.TXER,B.A2_IBIAS,B.EA_ABSORB,b.sigma,B.SMSR
 from (SeLECT distinct x.*,RANK()OVER(partition by x.sn,x.log_action order by x.action_time desc)rr
 from superxon.autodt_process_log x
 WHERE x.pn like '%` + queryCondition.Pn + `%'
@@ -67,7 +67,7 @@ from superxon.sgd_scdd_trx t) d
 ON d.pch_tc=C.manufacture_group and A.pn=d.partnumber
 AND D.LOT_TYPE LIKE '` + queryCondition.WorkOrderType + `%'
  join superxon.autodt_results_ate_new b on a.resultsid=b.id
- where a.rr=1 AND C.EE=1 `
+ where a.rr=1 AND C.EE=1`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err
@@ -263,7 +263,7 @@ func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]ui
 	defer close(c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxAop), 0.5, result["TxAop"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxER), 0.5, result["TxER"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.A2Ibias), 5.0, result["A2Ibias"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.A2Ibias), 1.0, result["A2Ibias"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.EaAbsorb), 0.5, result["EaAbsorb"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Sigma), 2.0, result["Sigma"], c)
 	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Smsr), 2.0, result["Smsr"], c)

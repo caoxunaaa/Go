@@ -36,8 +36,8 @@ func GetPnTotalPassRate(chartQueryCondition *ChartQueryCondition) (totalPassRate
 
 //获取某个PN某段时间的良率作图数据（间隔为1天）
 func GetPnChartDataList(chartQueryCondition *ChartQueryCondition) (pnChartDataList []*PnPassRateChartData, err error) {
-	sqlStr := "SELECT * FROM pn_pass_rate_chart_data WHERE pn=? and date_time between ? and ? order by date_time"
-	err = Databases.SuperxonDbDevice.Select(&pnChartDataList, sqlStr, chartQueryCondition.Pn, chartQueryCondition.StartTime, chartQueryCondition.EndTime)
+	sqlStr := "SELECT * FROM production_yield_daily WHERE pn=? and date_time between ? and ? order by date_time"
+	err = Databases.SuperxonProductionLineProductStatisticDevice.Select(&pnChartDataList, sqlStr, chartQueryCondition.Pn, chartQueryCondition.StartTime, chartQueryCondition.EndTime)
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +46,8 @@ func GetPnChartDataList(chartQueryCondition *ChartQueryCondition) (pnChartDataLi
 
 //每天PN的总量率数据插入到数据库中
 func CreatePnChartData(pnChartData *PnPassRateChartData) (err error) {
-	sqlStr := "INSERT INTO pn_pass_rate_chart_data(pn, date_time, pass_rate) values (?, ?, ?)"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+	sqlStr := "INSERT INTO production_yield_daily(pn, date_time, pass_rate) values (?, ?, ?)"
+	_, err = Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr,
 		pnChartData.Pn,
 		pnChartData.DateTime,
 		pnChartData.PassRate)
@@ -92,7 +92,7 @@ func GetWaningCount(chartQueryCondition *ChartQueryCondition) (warningCount, war
 		for _, osaInfo := range osaInfoList {
 			temp1 := strings.Split(osaInfo.OncePassRate, "%")
 			temp2, _ := strconv.Atoi(temp1[0])
-			if temp2 < 90 {
+			if temp2 < 85 {
 				warningCount++
 			}
 			warningTotal++
@@ -118,7 +118,7 @@ func GetWaningCount(chartQueryCondition *ChartQueryCondition) (warningCount, war
 		for _, stationStatus := range stationStatusList {
 			temp1 := strings.Split(stationStatus.PassRate, "%")
 			temp2, _ := strconv.Atoi(temp1[0])
-			if temp2 < 90 {
+			if temp2 < 85 {
 				warningCount++
 			}
 			warningTotal++
@@ -129,8 +129,8 @@ func GetWaningCount(chartQueryCondition *ChartQueryCondition) (warningCount, war
 
 //获取某段时间某个分类的警告作图数据（间隔为1天）
 func GetWarningCountChartDataList(chartQueryCondition *ChartQueryCondition) (warningCountChartData []*WarningCountChartData, err error) {
-	sqlStr := "SELECT * FROM warning_count_chart_data WHERE classification=? and date_time between ? and ? order by date_time"
-	err = Databases.SuperxonDbDevice.Select(&warningCountChartData, sqlStr, chartQueryCondition.Classification, chartQueryCondition.StartTime, chartQueryCondition.EndTime)
+	sqlStr := "SELECT * FROM statistic_warning_count_daily WHERE classification=? and date_time between ? and ? order by date_time"
+	err = Databases.SuperxonProductionLineProductStatisticDevice.Select(&warningCountChartData, sqlStr, chartQueryCondition.Classification, chartQueryCondition.StartTime, chartQueryCondition.EndTime)
 	if err != nil {
 		return nil, err
 	}
@@ -139,8 +139,8 @@ func GetWarningCountChartDataList(chartQueryCondition *ChartQueryCondition) (war
 
 //插入每天告警作图数据到数据库中
 func CreateWarningCountChartData(warningCountChartData *WarningCountChartData) (err error) {
-	sqlStr := "INSERT INTO warning_count_chart_data(date_time, classification, count, total) values (?, ?, ?, ?)"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+	sqlStr := "INSERT INTO statistic_warning_count_daily(date_time, classification, count, total) values (?, ?, ?, ?)"
+	_, err = Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr,
 		warningCountChartData.DateTime,
 		warningCountChartData.Classification,
 		warningCountChartData.Count,

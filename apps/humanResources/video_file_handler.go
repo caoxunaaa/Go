@@ -1,7 +1,7 @@
 package humanResources
 
 import (
-	"SuperxonWebSite/Models/FileManage"
+	"SuperxonWebSite/Models/FileManager"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,7 +11,7 @@ import (
 )
 
 func GetVideoInfoListHandler(c *gin.Context) {
-	videoInfoList, err := FileManage.GetVideoInfoList()
+	videoInfoList, err := FileManager.GetVideoInfoList()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
@@ -20,8 +20,8 @@ func GetVideoInfoListHandler(c *gin.Context) {
 }
 
 func UploadVideoFileHandler(c *gin.Context) {
-	var videoInfo *FileManage.VideoInfo
-	videoInfo = new(FileManage.VideoInfo)
+	var videoInfo *FileManager.VideoInfo
+	videoInfo = new(FileManager.VideoInfo)
 
 	videoInfo.Uploader = c.PostForm("uploader")
 	videoFile, err := c.FormFile("videoFile")
@@ -63,7 +63,7 @@ func UploadVideoFileHandler(c *gin.Context) {
 		return
 	}
 
-	err = FileManage.CreateVideoInfo(videoInfo)
+	err = FileManager.CreateVideoInfo(videoInfo)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -79,7 +79,7 @@ func DeleteVideoInfoHandler(c *gin.Context) {
 		return
 	}
 	idInt, _ := strconv.Atoi(id)
-	length, err := FileManage.DeleteVideoInfo(uint(idInt))
+	length, err := FileManager.DeleteVideoInfo(uint(idInt))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

@@ -5,7 +5,6 @@ import (
 	"SuperxonWebSite/Models/ModuleStatisticDisplay"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/tal-tech/go-queue/kq"
 	"time"
 )
@@ -46,7 +45,6 @@ func KafkaPushModuleWarningInfoByClock(clock int) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("m", m)
 	data, err := json.Marshal(m)
 	if err != nil {
 		return err

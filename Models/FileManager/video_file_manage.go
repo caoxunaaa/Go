@@ -1,4 +1,4 @@
-package FileManage
+package FileManager
 
 import (
 	"SuperxonWebSite/Databases"
@@ -14,8 +14,8 @@ type VideoInfo struct {
 }
 
 func GetVideoInfoList() (videoInfoList []*VideoInfo, err error) {
-	sqlStr := "SELECT * FROM video_infos"
-	err = Databases.SuperxonDbDevice.Select(&videoInfoList, sqlStr)
+	sqlStr := "SELECT * FROM video_resources_infos"
+	err = Databases.SuperxonHumanResourcesDb.Select(&videoInfoList, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +23,8 @@ func GetVideoInfoList() (videoInfoList []*VideoInfo, err error) {
 }
 
 func CreateVideoInfo(videoInfo *VideoInfo) (err error) {
-	sqlStr := "INSERT INTO video_infos(uploader, name, store_path) values (?, ?, ?)"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+	sqlStr := "INSERT INTO video_resources_infos(uploader, name, store_path) values (?, ?, ?)"
+	_, err = Databases.SuperxonHumanResourcesDb.Exec(sqlStr,
 		videoInfo.Uploader,
 		videoInfo.Name,
 		videoInfo.StorePath)
@@ -35,8 +35,8 @@ func CreateVideoInfo(videoInfo *VideoInfo) (err error) {
 }
 
 func DeleteVideoInfo(id uint) (length int64, err error) {
-	sqlStr := "DELETE FROM video_infos where id = ?"
-	res, err := Databases.SuperxonDbDevice.Exec(sqlStr, id)
+	sqlStr := "DELETE FROM video_resources_infos where id = ?"
+	res, err := Databases.SuperxonHumanResourcesDb.Exec(sqlStr, id)
 	if err != nil {
 		return length, err
 	}

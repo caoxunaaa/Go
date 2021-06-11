@@ -4,7 +4,10 @@
 // @Update  曹迅 (时间 2021/06/02  10:00)
 package ProductionLineOracleRelation
 
-import "SuperxonWebSite/Databases"
+import (
+	"SuperxonWebSite/Databases"
+	"errors"
+)
 
 type SettingWarningThreshold struct {
 	Id         int64  `db:"id"`
@@ -58,16 +61,23 @@ func FindAllSettingWarningThreshold() ([]SettingWarningThreshold, error) {
 
 func CreateSettingWarningThreshold(swt *SettingWarningThreshold) error {
 	sqlStr := "INSERT INTO setting_warning_threshold(order_type, module_osa, pn, process, yellow_line, red_line) VALUES (?,?,?,?,?,?)"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, swt.OrderType, swt.ModuleOsa, swt.Pn, swt.Process, swt.YellowLine, swt.RedLine)
+	res, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, swt.OrderType, swt.ModuleOsa, swt.Pn, swt.Process, swt.YellowLine, swt.RedLine)
 	if err != nil {
 		return err
+	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if c != 1 {
+		return errors.New("告警门限设置没有行被创建")
 	}
 	return nil
 }
 
 func UpdateSettingWarningThreshold(swt *SettingWarningThreshold, id int64) error {
 	sqlStr := "UPDATE setting_warning_threshold SET order_type=?, module_osa=?, pn=?, process=?, yellow_line=?, red_line=? WHERE id=?"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(
+	res, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(
 		sqlStr,
 		swt.OrderType,
 		swt.ModuleOsa,
@@ -79,14 +89,28 @@ func UpdateSettingWarningThreshold(swt *SettingWarningThreshold, id int64) error
 	if err != nil {
 		return err
 	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if c != 1 {
+		return errors.New("告警门限设置没有行被更新")
+	}
 	return nil
 }
 
 func DeleteSettingWarningThreshold(id int64) error {
 	sqlStr := "DELETE FROM setting_warning_threshold WHERE id=?"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, id)
+	res, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, id)
 	if err != nil {
 		return err
+	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if c != 1 {
+		return errors.New("告警门限设置没有行被删除")
 	}
 	return nil
 }

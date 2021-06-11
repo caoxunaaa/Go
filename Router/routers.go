@@ -4,6 +4,7 @@ import (
 	"SuperxonWebSite/Middlewares"
 	"SuperxonWebSite/apps/commonConfigurationItem"
 	"SuperxonWebSite/apps/commonConfigurationItem/PersonInChargeWarningInfo"
+	"SuperxonWebSite/apps/commonConfigurationItem/ProductionParameterChange"
 	"SuperxonWebSite/apps/commonConfigurationItem/SettingWarningThreshold"
 	"SuperxonWebSite/apps/humanResources"
 	"SuperxonWebSite/apps/moduleRunning"
@@ -33,18 +34,7 @@ func Init() *gin.Engine {
 		common.GET("/all-module-pn-list-in-time-period", moduleStatistic.GetModuleAllPnByTimeHandler)
 		//某个时间段的所有Osa Pn
 		common.GET("/all-osa-pn-list-in-time-period", osaStatistic.GetOsaAllPnByTimeHandler)
-		//告警负责人
-		common.GET("/person-in-charge-warning-info", PersonInChargeWarningInfo.GetAllPersonInChargeWarningInfoHandler)
-		common.GET("/person-in-charge-warning-info/:nickname", PersonInChargeWarningInfo.GetAllPersonInChargeWarningInfoByNicknameHandler)
-		common.POST("/person-in-charge-warning-info", PersonInChargeWarningInfo.CreatePersonInChargeWarningInfoHandler)
-		common.PUT("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.UpdatePersonInChargeWarningInfoHandler)
-		common.DELETE("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.DeletePersonInChargeWarningInfoHandler)
-		//获取所有的告警门限设置
-		common.GET("/settings-warning-threshold", SettingWarningThreshold.GetAllSettingWarningThresholdHandler)
-		common.GET("/settings-warning-threshold/:id", SettingWarningThreshold.GetSettingWarningThresholdHandler)
-		common.POST("/settings-warning-threshold", SettingWarningThreshold.CreateSettingWarningThresholdHandler)
-		common.PUT("/settings-warning-threshold/:id", SettingWarningThreshold.UpdateSettingWarningThresholdHandler)
-		common.DELETE("/settings-warning-threshold/:id", SettingWarningThreshold.DeleteSettingWarningThresholdHandler)
+
 	}
 	// 产线生产情况
 	productInfo := r.Group("/product-operation-info")
@@ -166,6 +156,48 @@ func Init() *gin.Engine {
 			fileManage.POST("/videoInfo", humanResources.UploadVideoFileHandler).Use(Middlewares.JWTSuperuserMiddleware())
 			fileManage.DELETE("/videoInfo/:id", humanResources.DeleteVideoInfoHandler).Use(Middlewares.JWTSuperuserMiddleware())
 		}
+	}
+	//告警相关配置
+	warningRelated := r.Group("/warning-related")
+	{
+		//告警负责人
+		warningRelated.GET("/person-in-charge-warning-info", PersonInChargeWarningInfo.GetAllPersonInChargeWarningInfoHandler)
+		warningRelated.GET("/person-in-charge-warning-info/:nickname", PersonInChargeWarningInfo.GetAllPersonInChargeWarningInfoByNicknameHandler)
+		//获取所有的告警门限设置
+		warningRelated.GET("/settings-warning-threshold", SettingWarningThreshold.GetAllSettingWarningThresholdHandler)
+		warningRelated.GET("/settings-warning-threshold/:id", SettingWarningThreshold.GetSettingWarningThresholdHandler)
+	}
+	//生产工艺变更
+	productionParameterChanged := r.Group("/production-parameter")
+	{
+		//获取Oracle监控表中的所有字段
+		productionParameterChanged.GET("/all-field-in-oracle-monitoring-table", ProductionParameterChange.GetAllFieldByMonitoringTableHandler)
+		//获取Oracle监控表中的需要更改的某个字段值
+		productionParameterChanged.GET("/production-parameter-by-monitoring-table-and-only-field-and-changed-item", ProductionParameterChange.GetParameterByMonitoringTableAndOnlyFieldAndChangedItemHandler)
+		//工艺变更记录
+		productionParameterChanged.GET("/all-production-parameter-record", ProductionParameterChange.GetAllProductionParameterChangedHandler)
+		productionParameterChanged.GET("/all-production-parameter-record-by-monitoring-table", ProductionParameterChange.GetAllProductionParameterChangedByMonitoringTableHandler)
+		productionParameterChanged.GET("/all-production-parameter-record-by-monitoring-table-and-only-field", ProductionParameterChange.GetAllProductionParameterChangedByMonitoringTableAndOnlyFieldHandler)
+		productionParameterChanged.GET("/all-production-parameter-record-by-monitoring-table-and-only-field-and-changed-item", ProductionParameterChange.GetAllProductionParameterChangedByMonitoringTableAndOnlyFieldAndChangedItemHandler)
+		//监控表唯一索引字段关联表
+		productionParameterChanged.GET("/all-production-parameter-relation-field", ProductionParameterChange.GetAllProductionParameterChangedRelationHandler)
+		productionParameterChanged.GET("/production-parameter-relation-field-by-table-name", ProductionParameterChange.GetProductionParameterChangedRelationByTableNameHandler)
+	}
+	//后台管理
+	backManager := r.Group("/background-management")
+	{
+		//告警负责人
+		backManager.POST("/person-in-charge-warning-info", PersonInChargeWarningInfo.CreatePersonInChargeWarningInfoHandler)
+		backManager.PUT("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.UpdatePersonInChargeWarningInfoHandler)
+		backManager.DELETE("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.DeletePersonInChargeWarningInfoHandler)
+		//告警门限设置
+		backManager.POST("/settings-warning-threshold", SettingWarningThreshold.CreateSettingWarningThresholdHandler)
+		backManager.PUT("/settings-warning-threshold/:id", SettingWarningThreshold.UpdateSettingWarningThresholdHandler)
+		backManager.DELETE("/settings-warning-threshold/:id", SettingWarningThreshold.DeleteSettingWarningThresholdHandler)
+		//生产工艺参数设置
+		//backManager.POST("/production-parameter-record", ProductionParameterChange.CreateProductionParameterChangedHandler)
+		backManager.PUT("/production-parameter-record", ProductionParameterChange.UpdateProductionParameterChangedHandler)
+		//backManager.DELETE("/production-parameter-record/:id", ProductionParameterChange.DeleteProductionParameterChangedHandler)
 	}
 	return r
 }

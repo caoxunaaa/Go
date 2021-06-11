@@ -3,30 +3,23 @@ package Databases
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
-var SuperxonDbDevice *sqlx.DB
+var SuperxonProductionLineProductStatisticDevice *sqlx.DB
 var SuperxonProductionLineOracleRelationDb *sqlx.DB
-var SuperxonDbDeviceOrm *gorm.DB
+var SuperxonHumanResourcesDb *sqlx.DB
 
 func InitMysql() {
 	var err error
-	SuperxonDbDeviceOrm, err = gorm.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon?charset=utf8mb4&parseTime=true&loc=Local")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	SuperxonDbDevice, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon?charset=utf8mb4&parseTime=true&loc=Local")
+	SuperxonProductionLineProductStatisticDevice, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/production-line-product-statistic?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println("open mysql failed,", err)
 		return
 	}
-	SuperxonDbDevice.SetMaxIdleConns(10)
-	SuperxonDbDevice.SetMaxOpenConns(50)
+	SuperxonProductionLineProductStatisticDevice.SetMaxIdleConns(10)
+	SuperxonProductionLineProductStatisticDevice.SetMaxOpenConns(50)
 
 	SuperxonProductionLineOracleRelationDb, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/production-line-oracle-relation?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
@@ -35,9 +28,18 @@ func InitMysql() {
 	}
 	SuperxonProductionLineOracleRelationDb.SetMaxIdleConns(10)
 	SuperxonProductionLineOracleRelationDb.SetMaxOpenConns(50)
+
+	SuperxonHumanResourcesDb, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon-human-resources?charset=utf8mb4&parseTime=true&loc=Local")
+	if err != nil {
+		fmt.Println("open superxon-human-resources failed,", err)
+		return
+	}
+	SuperxonHumanResourcesDb.SetMaxIdleConns(10)
+	SuperxonHumanResourcesDb.SetMaxOpenConns(50)
 }
 
 func CloseMysql() {
-	_ = SuperxonDbDevice.Close()
+	_ = SuperxonProductionLineProductStatisticDevice.Close()
 	_ = SuperxonProductionLineOracleRelationDb.Close()
+	_ = SuperxonHumanResourcesDb.Close()
 }

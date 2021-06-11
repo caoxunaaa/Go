@@ -107,8 +107,8 @@ func GetStationWarningFlag(queryCondition *QueryCondition) (stationWarningList [
 
 //mysql创建当天的告警的各工位标志总数记录
 func CreateStationWarningStatistic(stationWarningStatistic *StationWarningStatistic) error {
-	sqlStr := "INSERT INTO station_warning_statistics(station_id, record_date, statistics_each_hour) values (?, ?, ?)"
-	_, err := Databases.SuperxonDbDevice.Exec(sqlStr,
+	sqlStr := "INSERT INTO station_warning_statistics_each_hour(station_id, record_date, statistics_each_hour) values (?, ?, ?)"
+	_, err := Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr,
 		stationWarningStatistic.StationId,
 		stationWarningStatistic.RecordDate,
 		stationWarningStatistic.StatisticsEachHour,
@@ -121,9 +121,9 @@ func CreateStationWarningStatistic(stationWarningStatistic *StationWarningStatis
 
 //mysql获取当天的告警的各工位标志总数记录
 func GetStationWarningStatisticFindAll(queryCondition *QueryCondition) (stationWarningStatisticList []*StationWarningStatistic, err error) {
-	sqlStr := `SELECT * FROM station_warning_statistics WHERE DATE_FORMAT(record_date, '%Y-%m-%d') = DATE_FORMAT('` + queryCondition.StartTime + `', '%Y-%m-%d')`
+	sqlStr := `SELECT * FROM station_warning_statistics_each_hour WHERE DATE_FORMAT(record_date, '%Y-%m-%d') = DATE_FORMAT('` + queryCondition.StartTime + `', '%Y-%m-%d')`
 	fmt.Println(sqlStr)
-	err = Databases.SuperxonDbDevice.Select(&stationWarningStatisticList, sqlStr)
+	err = Databases.SuperxonProductionLineProductStatisticDevice.Select(&stationWarningStatisticList, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -132,9 +132,9 @@ func GetStationWarningStatisticFindAll(queryCondition *QueryCondition) (stationW
 
 //mysql获取当天的告警的各工位标志总数记录
 func GetStationWarningStatisticFindOne(queryCondition *QueryCondition) (stationWarningStatistic []*StationWarningStatistic, err error) {
-	sqlStr := `SELECT * FROM station_warning_statistics WHERE station_id = '` + queryCondition.StationId + `' AND DATE_FORMAT(record_date, '%Y-%m-%d') = DATE_FORMAT('` + queryCondition.StartTime + `', '%Y-%m-%d')`
+	sqlStr := `SELECT * FROM station_warning_statistics_each_hour WHERE station_id = '` + queryCondition.StationId + `' AND DATE_FORMAT(record_date, '%Y-%m-%d') = DATE_FORMAT('` + queryCondition.StartTime + `', '%Y-%m-%d')`
 	fmt.Println(sqlStr)
-	err = Databases.SuperxonDbDevice.Select(&stationWarningStatistic, sqlStr)
+	err = Databases.SuperxonProductionLineProductStatisticDevice.Select(&stationWarningStatistic, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +143,8 @@ func GetStationWarningStatisticFindOne(queryCondition *QueryCondition) (stationW
 
 //mysql更新各时间段当天的告警的各工位标志总数记录
 func UpdateStationWarningStatistic(stationWarningStatistic *StationWarningStatistic) error {
-	sqlStr := "UPDATE station_warning_statistics SET station_id=?, record_date=?, statistics_each_hour=? WHERE station_id=? and record_date=?"
-	_, err := Databases.SuperxonDbDevice.Exec(sqlStr,
+	sqlStr := "UPDATE station_warning_statistics_each_hour SET station_id=?, record_date=?, statistics_each_hour=? WHERE station_id=? and record_date=?"
+	_, err := Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr,
 		stationWarningStatistic.StationId,
 		stationWarningStatistic.RecordDate,
 		stationWarningStatistic.StatisticsEachHour,

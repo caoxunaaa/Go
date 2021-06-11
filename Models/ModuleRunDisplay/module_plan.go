@@ -30,7 +30,7 @@ type ProjectPlanInfo struct {
 
 func GetUndoneProjectPlanInfoList() (undoneProjectPlanInfoList []*UndoneProjectPlanInfo, err error) {
 	sqlStr := "SELECT * from project_plan_infos"
-	err = Databases.SuperxonDbDevice.Select(&undoneProjectPlanInfoList, sqlStr)
+	err = Databases.SuperxonProductionLineProductStatisticDevice.Select(&undoneProjectPlanInfoList, sqlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func GetUndoneProjectPlanInfoList() (undoneProjectPlanInfoList []*UndoneProjectP
 
 func CreateUndoneProjectPlanInfo(undoneProjectPlanInfo *UndoneProjectPlanInfo) (err error) {
 	sqlStr := "INSERT INTO project_plan_infos(type, customers, code, pn, plan_to_pay) values (?, ?, ?, ?, ?)"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+	_, err = Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr,
 		undoneProjectPlanInfo.Type,
 		undoneProjectPlanInfo.Customers,
 		undoneProjectPlanInfo.Code,
@@ -53,7 +53,7 @@ func CreateUndoneProjectPlanInfo(undoneProjectPlanInfo *UndoneProjectPlanInfo) (
 
 func DeleteUndoneProjectPlanInfo(id int) (err error) {
 	sqlStr := "DELETE FROM project_plan_infos where id = ?"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr, id)
+	_, err = Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr, id)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func DeleteUndoneProjectPlanInfo(id int) (err error) {
 
 func UpdateUndoneProjectPlanInfo(undoneProjectPlanInfo *UndoneProjectPlanInfo, id int) (err error) {
 	sqlStr := "UPDATE project_plan_infos SET type=?, customers=?, code=?, pn=?, plan_to_pay=? WHERE id=?"
-	_, err = Databases.SuperxonDbDevice.Exec(sqlStr,
+	_, err = Databases.SuperxonProductionLineProductStatisticDevice.Exec(sqlStr,
 		undoneProjectPlanInfo.Type,
 		undoneProjectPlanInfo.Customers,
 		undoneProjectPlanInfo.Code,
@@ -82,7 +82,7 @@ func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error)
 func GetProjectPlanList() (projectPlanInfoList []ProjectPlanInfo, err error) {
 	undoneProjectPlanInfoList := make([]UndoneProjectPlanInfo, 0)
 	sqlStr := `SELECT * from project_plan_infos`
-	err = Databases.SuperxonDbDevice.Select(&undoneProjectPlanInfoList, sqlStr)
+	err = Databases.SuperxonProductionLineProductStatisticDevice.Select(&undoneProjectPlanInfoList, sqlStr)
 	if err != nil {
 		return nil, err
 	}

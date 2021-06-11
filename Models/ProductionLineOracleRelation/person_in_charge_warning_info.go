@@ -1,6 +1,9 @@
 package ProductionLineOracleRelation
 
-import "SuperxonWebSite/Databases"
+import (
+	"SuperxonWebSite/Databases"
+	"errors"
+)
 
 type PersonInChargeWarningInfo struct {
 	Id        int64  `db:"id"`
@@ -32,16 +35,23 @@ func FindAllPersonInChargeWarningInfoByNickname(nickname string) ([]PersonInChar
 
 func CreatePersonInChargeWarningInfo(p *PersonInChargeWarningInfo) error {
 	sqlStr := "INSERT INTO person_in_charge_warning_info(username, nickname, module_osa, pn) VALUES (?,?,?,?)"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, p.Username, p.Nickname, p.ModuleOsa, p.Pn)
+	res, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, p.Username, p.Nickname, p.ModuleOsa, p.Pn)
 	if err != nil {
 		return err
+	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if c != 1 {
+		return errors.New("告警负责人没有行被创建")
 	}
 	return nil
 }
 
 func UpdatePersonInChargeWarningInfo(p *PersonInChargeWarningInfo, id int64) error {
 	sqlStr := "UPDATE person_in_charge_warning_info SET username=?, nickname=?, module_osa=?, pn=? WHERE id=?"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(
+	res, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(
 		sqlStr,
 		p.Username,
 		p.Nickname,
@@ -51,14 +61,28 @@ func UpdatePersonInChargeWarningInfo(p *PersonInChargeWarningInfo, id int64) err
 	if err != nil {
 		return err
 	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if c != 1 {
+		return errors.New("告警负责人没有行被更新")
+	}
 	return nil
 }
 
 func DeletePersonInChargeWarningInfo(id int64) error {
 	sqlStr := "DELETE FROM person_in_charge_warning_info WHERE id=?"
-	_, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, id)
+	res, err := Databases.SuperxonProductionLineOracleRelationDb.Exec(sqlStr, id)
 	if err != nil {
 		return err
+	}
+	c, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if c != 1 {
+		return errors.New("告警负责人没有行被删除")
 	}
 	return nil
 }
