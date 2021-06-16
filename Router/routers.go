@@ -2,7 +2,6 @@ package Router
 
 import (
 	"SuperxonWebSite/Middlewares"
-	"SuperxonWebSite/apps/commonConfigurationItem"
 	"SuperxonWebSite/apps/commonConfigurationItem/PersonInChargeWarningInfo"
 	"SuperxonWebSite/apps/commonConfigurationItem/ProductionParameterChange"
 	"SuperxonWebSite/apps/commonConfigurationItem/SettingWarningThreshold"
@@ -89,12 +88,12 @@ func Init() *gin.Engine {
 		planOfProductInfo := productInfo.Group("/product-plan")
 		{
 			//计划完成情况
-			planOfProductInfo.GET("/completed-situation", commonConfigurationItem.GetProjectPlanListHandler)
+			planOfProductInfo.GET("/completed-situation", moduleRunning.GetProjectPlanListHandler)
 			//计划任务
-			planOfProductInfo.GET("/plan-info", commonConfigurationItem.GetUndoneProjectPlanInfoListHandler)
-			planOfProductInfo.POST("/plan-info", commonConfigurationItem.CreateUndoneProjectPlanInfoHandler)
-			planOfProductInfo.PUT("/plan-info/:id", commonConfigurationItem.UpdateUndoneProjectPlanInfoHandler)
-			planOfProductInfo.DELETE("/plan-info/:id", commonConfigurationItem.DeleteUndoneProjectPlanInfoHandler)
+			planOfProductInfo.GET("/plan-info", moduleRunning.GetUndoneProjectPlanInfoListHandler)
+			planOfProductInfo.POST("/plan-info", moduleRunning.CreateUndoneProjectPlanInfoHandler)
+			planOfProductInfo.PUT("/plan-info/:id", moduleRunning.UpdateUndoneProjectPlanInfoHandler)
+			planOfProductInfo.DELETE("/plan-info/:id", moduleRunning.DeleteUndoneProjectPlanInfoHandler)
 		}
 	}
 	// 统计查询
@@ -136,6 +135,12 @@ func Init() *gin.Engine {
 			osaOfStatisticQuery.GET("/production-bad-code-distribution-by-pn", osaStatistic.GetOsaDefectsInfoByPnHandler)
 			//通过工单号获取产品良率
 			osaOfStatisticQuery.GET("/production-yield-info-by-work-order-id", osaStatistic.GetOsaYieldInfoByWorkOrderIdHandler)
+			//通过OsaPn获取某个时间段的工位良率等信息
+			osaOfStatisticQuery.GET("/production-yield-with-station-by-pn", osaStatistic.GetOsaYieldWithStationByOsaPnHandler)
+			//获取某段时间osaPn对应的TC1的收端失败信息
+			osaOfStatisticQuery.GET("/production-optics-defect-info-of-rx-by-pn", osaStatistic.GetOsaOpticsDefectInfoOfRxByOsaPnHandler)
+			//获取某段时间osaPn对应的TC1的发端失败信息
+			osaOfStatisticQuery.GET("/production-optics-defect-info-of-tx-by-pn", osaStatistic.GetOsaOpticsDefectInfoOfTxByOsaPnHandler)
 		}
 		//产线投入产出汇总
 		statisticQuery.GET("/input-and-output-summary", moduleStatistic.GetInputAndOutputSummaryInfoListHandler)
@@ -184,20 +189,24 @@ func Init() *gin.Engine {
 		productionParameterChanged.GET("/production-parameter-relation-field-by-table-name", ProductionParameterChange.GetProductionParameterChangedRelationByTableNameHandler)
 	}
 	//后台管理
-	backManager := r.Group("/background-management")
+	backManagerPicwi := r.Group("/background-management").Use(Middlewares.JWTAuthMiddleware())
 	{
-		//告警负责人
-		backManager.POST("/person-in-charge-warning-info", PersonInChargeWarningInfo.CreatePersonInChargeWarningInfoHandler)
-		backManager.PUT("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.UpdatePersonInChargeWarningInfoHandler)
-		backManager.DELETE("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.DeletePersonInChargeWarningInfoHandler)
-		//告警门限设置
-		backManager.POST("/settings-warning-threshold", SettingWarningThreshold.CreateSettingWarningThresholdHandler)
-		backManager.PUT("/settings-warning-threshold/:id", SettingWarningThreshold.UpdateSettingWarningThresholdHandler)
-		backManager.DELETE("/settings-warning-threshold/:id", SettingWarningThreshold.DeleteSettingWarningThresholdHandler)
-		//生产工艺参数设置
-		//backManager.POST("/production-parameter-record", ProductionParameterChange.CreateProductionParameterChangedHandler)
-		backManager.PUT("/production-parameter-record", ProductionParameterChange.UpdateProductionParameterChangedHandler)
-		//backManager.DELETE("/production-parameter-record/:id", ProductionParameterChange.DeleteProductionParameterChangedHandler)
+		//后台管理-告警负责人
+		backManagerPicwi.POST("/person-in-charge-warning-info", PersonInChargeWarningInfo.CreatePersonInChargeWarningInfoHandler)
+		backManagerPicwi.PUT("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.UpdatePersonInChargeWarningInfoHandler)
+		backManagerPicwi.DELETE("/person-in-charge-warning-info/:id", PersonInChargeWarningInfo.DeletePersonInChargeWarningInfoHandler)
+	}
+	backManagerSwt := r.Group("/background-management").Use(Middlewares.JWTAuthMiddleware())
+	{
+		//后台管理-告警门限设置
+		backManagerSwt.POST("/settings-warning-threshold", SettingWarningThreshold.CreateSettingWarningThresholdHandler)
+		backManagerSwt.PUT("/settings-warning-threshold/:id", SettingWarningThreshold.UpdateSettingWarningThresholdHandler)
+		backManagerSwt.DELETE("/settings-warning-threshold/:id", SettingWarningThreshold.DeleteSettingWarningThresholdHandler)
+	}
+	backManagerPpr := r.Group("/background-management").Use(Middlewares.JWTAuthMiddleware(), Middlewares.ProductionParameterRightMiddleware())
+	{
+		//后台管理-生产工艺参数设置
+		backManagerPpr.PUT("/production-parameter-record", ProductionParameterChange.UpdateProductionParameterChangedHandler)
 	}
 	return r
 }

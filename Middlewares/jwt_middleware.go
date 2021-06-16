@@ -33,7 +33,6 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 			return
 		}
 		mc, ok := ParseToken(authHeader, Secret)
-		fmt.Println(mc)
 		if ok == false {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": 2005,
@@ -43,7 +42,6 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 			return
 		}
 		m := mc.(jwt.MapClaims)
-		fmt.Println(m["username"])
 		// 将当前请求的username信息保存到请求的上下文c上
 		c.Set("username", m["username"])
 		c.Next() // 后续的处理函数可以用过c.Get("username")来获取当前请求的用户信息

@@ -10,6 +10,7 @@ import (
 var SuperxonProductionLineProductStatisticDevice *sqlx.DB
 var SuperxonProductionLineOracleRelationDb *sqlx.DB
 var SuperxonHumanResourcesDb *sqlx.DB
+var SuperxonUserDb *sqlx.DB
 
 func InitMysql() {
 	var err error
@@ -36,10 +37,19 @@ func InitMysql() {
 	}
 	SuperxonHumanResourcesDb.SetMaxIdleConns(10)
 	SuperxonHumanResourcesDb.SetMaxOpenConns(50)
+
+	SuperxonUserDb, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon-user?charset=utf8mb4&parseTime=true&loc=Local")
+	if err != nil {
+		fmt.Println("open superxon-user failed,", err)
+		return
+	}
+	SuperxonUserDb.SetMaxIdleConns(10)
+	SuperxonUserDb.SetMaxOpenConns(50)
 }
 
 func CloseMysql() {
 	_ = SuperxonProductionLineProductStatisticDevice.Close()
 	_ = SuperxonProductionLineOracleRelationDb.Close()
 	_ = SuperxonHumanResourcesDb.Close()
+	_ = SuperxonUserDb.Close()
 }

@@ -67,13 +67,13 @@ func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInf
 	      and d.pch_tc=a.manufacture_group and b.pn=d.partnumber
 	      and b.action_time between to_date('` + queryCondition.StartTime + `','yyyy-mm-dd hh24:mi:ss')
 	      and to_date('` + queryCondition.EndTime + `','yyyy-mm-dd hh24:mi:ss') and b.pn like '` + queryCondition.Pn + `')
-	      select e.pn,e.序列,e.工序,e.总输入,e.最终良品,e.最终不良品,round(e.最终良品/e.总输入*100,2)||'%' 最终良率
+	      select e.pn,e.序列,e.工序,e.总输入,e.最终良品,e.最终不良品,round(e.最终良品/e.总输入*100,2) 最终良率
 	      from
 	      (select distinct h.PN as PN,h.SEQ as 序列,h.log_action as 工序,
 	      count(sn)over(partition by h.log_action,h.PN)总输入,
 	      sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN)最终良品,
 	      sum(case h.p_value when 'PASS' then 0 else 1 end)over(partition by h.log_action,h.PN)最终不良品
-	      from TRX h where h.rr=1)e order by e.pn,e.序列 ASC`
+	      from TRX h where h.rr=1)e order by e.pn,最终良率 ASC`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err

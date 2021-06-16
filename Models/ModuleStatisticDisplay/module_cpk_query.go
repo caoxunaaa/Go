@@ -261,23 +261,22 @@ func GetQaCpkResult(qaCpkInfoList ...QaCpkInfo) (result map[string]map[string]ui
 	//startT := time.Now()
 	c := make(chan bool, 6)
 	defer close(c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxAop), 0.5, result["TxAop"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxER), 0.5, result["TxER"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.A2Ibias), 1.0, result["A2Ibias"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.EaAbsorb), 0.5, result["EaAbsorb"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Sigma), 2.0, result["Sigma"], c)
-	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Smsr), 2.0, result["Smsr"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxAop), 8, result["TxAop"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.TxER), 8, result["TxER"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.A2Ibias), 8, result["A2Ibias"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.EaAbsorb), 8, result["EaAbsorb"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Sigma), 8, result["Sigma"], c)
+	go CpkDataHandle(Utils.RemoveZero(qaCpkInfoResult.Smsr), 8, result["Smsr"], c)
 	for i := 0; i < 6; i++ {
 		<-c
 	}
-	//fmt.Println(time.Since(startT))
 	return
 }
 
-func CpkDataHandle(slice []float64, segmentInterval float64, dst map[string]uint, c chan bool) {
-	sliceMax, sliceMin := Utils.MaxAndMin(segmentInterval, slice...)
+func CpkDataHandle(slice []float64, segment uint, dst map[string]uint, c chan bool) {
+	sliceMax, sliceMin := Utils.MaxAndMin(0.5, slice...)
 	AxisSlice := make([]float64, 0)
-	segment := (sliceMax - sliceMin) / segmentInterval //分成多少段
+	segmentInterval := (sliceMax - sliceMin) / float64(segment) //间隔为多少
 	for i := 0; i < int(segment); i++ {
 		AxisSlice = append(AxisSlice, sliceMin+float64(i)*segmentInterval)
 	}
@@ -345,24 +344,24 @@ func GetQaCpkRssiResult(qaCpkRssiList ...QaCpkRssi) (result map[string]map[strin
 	}
 	c := make(chan bool, 8)
 	defer close(c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP1), 0.5, result["CP1"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP2), 0.5, result["CP2"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP3), 0.5, result["CP3"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP4), 0.5, result["CP4"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP5), 0.5, result["CP5"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP6), 0.5, result["CP6"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP7), 0.5, result["CP7"], c)
-	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP8), 0.5, result["CP8"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP1), 8, result["CP1"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP2), 8, result["CP2"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP3), 8, result["CP3"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP4), 8, result["CP4"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP5), 8, result["CP5"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP6), 8, result["CP6"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP7), 8, result["CP7"], c)
+	go CpkRssiDataHandle(Utils.RemoveZero(QaCpkRssiResult.CP8), 8, result["CP8"], c)
 	for i := 0; i < 8; i++ {
 		<-c
 	}
 	return
 }
 
-func CpkRssiDataHandle(slice []float64, segmentInterval float64, dst map[string]uint, c chan bool) {
-	sliceMax, sliceMin := Utils.NegativeMaxAndMin(segmentInterval, slice...)
+func CpkRssiDataHandle(slice []float64, segment uint, dst map[string]uint, c chan bool) {
+	sliceMax, sliceMin := Utils.NegativeMaxAndMin(0.5, slice...)
+	segmentInterval := (sliceMax - sliceMin) / float64(segment) //间隔为多少
 	AxisSlice := make([]float64, 0)
-	segment := (sliceMax - sliceMin) / segmentInterval //分成多少段
 	for i := 0; i < int(segment); i++ {
 		AxisSlice = append(AxisSlice, sliceMax-float64(i)*segmentInterval)
 	}
@@ -378,34 +377,3 @@ func CpkRssiDataHandle(slice []float64, segmentInterval float64, dst map[string]
 	}
 	c <- true
 }
-
-/*  result map[string]map[string]uint 示例
-{
-    "A2Ibias": {
-        "100.0": 1,
-        "50.0": 4,
-        "60.0": 140,
-        "70.0": 166,
-        "80.0": 69,
-        "90.0": 7
-    },
-    "EaAbsorb": {},
-    "Sigma": {
-        "0.0": 372
-    },
-    "Smsr": {},
-    "TxAop": {
-        "2.5": 17,
-        "3.0": 168,
-        "3.5": 176,
-        "4.0": 25,
-        "4.5": 1
-    },
-    "TxER": {
-        "7.0": 9,
-        "7.5": 144,
-        "8.0": 211,
-        "8.5": 21
-    }
-}
-*/

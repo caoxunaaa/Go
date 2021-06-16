@@ -180,6 +180,7 @@ func GetParameterByMonitoringTableAndOnlyFieldAndChangedItem(p *ProductionParame
 	} else {
 		sqlStr = fmt.Sprint("SELECT "+p.ChangedItem+" FROM "+p.MonitoringTable+" WHERE ", p.OnlyField1Name, "='", p.OnlyField1Value, "' AND ", p.OnlyField2Name, "='", p.OnlyField2Value, "' AND ", p.OnlyField3Name, "='", p.OnlyField3Value, "' AND ", p.OnlyField4Name, "='", p.OnlyField4Value, "'")
 	}
+	fmt.Println(sqlStr)
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return "", err

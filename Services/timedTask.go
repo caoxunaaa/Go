@@ -41,7 +41,7 @@ func InitCron() error {
 		return err
 	}
 
-	spec = "0 24 9 * * ?"
+	spec = "0 0 13 * * ?"
 	err = timedTask.AddFunc(spec, func() {
 		KafkaPushModuleWarningInfoByClock(13)
 	})

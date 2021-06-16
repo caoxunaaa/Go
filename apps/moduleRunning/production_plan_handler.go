@@ -1,4 +1,4 @@
-package commonConfigurationItem
+package moduleRunning
 
 import (
 	"SuperxonWebSite/Models/ModuleRunDisplay"
