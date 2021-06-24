@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func GetModuleAllStationStatusHandler(c *gin.Context) {
-	stationStatusList, err := ModuleRunDisplay.GetStationStatus(Utils.GetCurrentAndZeroTime())
+func GetModuleAllInfoWithStationTodayHandler(c *gin.Context) {
+	startTime, endTime := Utils.GetCurrentAndZeroTime()
+	stationStatusList, err := ModuleRunDisplay.GetStationStatus("%%", "", startTime, endTime)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {

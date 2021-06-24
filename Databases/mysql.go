@@ -12,12 +12,12 @@ var SuperxonProductionLineOracleRelationDb *sqlx.DB
 var SuperxonHumanResourcesDb *sqlx.DB
 var SuperxonUserDb *sqlx.DB
 
-func InitMysql() {
+func InitMysql() error {
 	var err error
 	SuperxonProductionLineProductStatisticDevice, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/production-line-product-statistic?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println("open mysql failed,", err)
-		return
+		return err
 	}
 	SuperxonProductionLineProductStatisticDevice.SetMaxIdleConns(10)
 	SuperxonProductionLineProductStatisticDevice.SetMaxOpenConns(50)
@@ -25,7 +25,7 @@ func InitMysql() {
 	SuperxonProductionLineOracleRelationDb, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/production-line-oracle-relation?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println("open production-line-oracle-relation failed,", err)
-		return
+		return err
 	}
 	SuperxonProductionLineOracleRelationDb.SetMaxIdleConns(10)
 	SuperxonProductionLineOracleRelationDb.SetMaxOpenConns(50)
@@ -33,7 +33,7 @@ func InitMysql() {
 	SuperxonHumanResourcesDb, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon-human-resources?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println("open superxon-human-resources failed,", err)
-		return
+		return err
 	}
 	SuperxonHumanResourcesDb.SetMaxIdleConns(10)
 	SuperxonHumanResourcesDb.SetMaxOpenConns(50)
@@ -41,10 +41,11 @@ func InitMysql() {
 	SuperxonUserDb, err = sqlx.Open("mysql", "superxon:superxon@(172.20.3.12:3306)/superxon-user?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		fmt.Println("open superxon-user failed,", err)
-		return
+		return err
 	}
 	SuperxonUserDb.SetMaxIdleConns(10)
 	SuperxonUserDb.SetMaxOpenConns(50)
+	return nil
 }
 
 func CloseMysql() {

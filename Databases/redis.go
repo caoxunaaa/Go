@@ -8,8 +8,6 @@ import (
 
 var RedisPool *redis.Pool
 
-//var RedisConn redis.Conn
-
 func RedisPollInit() *redis.Pool {
 	return &redis.Pool{
 		MaxIdle:     20,
@@ -31,15 +29,6 @@ func RedisPollInit() *redis.Pool {
 func RedisInit() {
 	RedisPool = RedisPollInit()
 }
-
-//func RedisInit() {
-//	var err error
-//	RedisConn, err = redis.Dial("tcp","127.0.0.1:6379")
-//	if err != nil {
-//		fmt.Println("error : ", err)
-//		return
-//	}
-//}
 
 func RedisClose() {
 	_ = RedisPool.Get().Close()

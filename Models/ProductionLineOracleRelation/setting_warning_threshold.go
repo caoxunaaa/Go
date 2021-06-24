@@ -31,7 +31,7 @@ func FindOneSettingWarningThresholdById(id int64) (SettingWarningThreshold, erro
 
 func FindDefaultSettingWarningThresholdByOrderTypeAndModuleOsa(orderType, moduleOsa string) (SettingWarningThreshold, error) {
 	res := SettingWarningThreshold{}
-	sqlStr := "SELECT id, order_type, module_osa, pn, process, yellow_line, red_line FROM setting_warning_threshold WHERE pn='DEFAULT' AND process='DEFAULT' AND order_type=? AND module_osa=?"
+	sqlStr := "SELECT id, order_type, module_osa, pn, process, yellow_line, red_line FROM setting_warning_threshold WHERE pn='默认' AND process='默认' AND order_type=? AND module_osa=?"
 	err := Databases.SuperxonProductionLineOracleRelationDb.Get(&res, sqlStr, orderType, moduleOsa)
 	if err != nil {
 		return res, err

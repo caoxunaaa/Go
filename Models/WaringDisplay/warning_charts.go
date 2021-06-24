@@ -98,7 +98,7 @@ func GetWaningCount(chartQueryCondition *ChartQueryCondition) (warningCount, war
 			warningTotal++
 		}
 	case "模块工位良率":
-		stationStatusList, err1 := ModuleRunDisplay.GetStationStatus(chartQueryCondition.StartTime, chartQueryCondition.EndTime)
+		stationStatusList, err1 := ModuleRunDisplay.GetStationStatus("%%", "", chartQueryCondition.StartTime, chartQueryCondition.EndTime)
 		if err1 != nil {
 			return
 		}

@@ -2,6 +2,7 @@ package ProductionParameterChange
 
 import (
 	"SuperxonWebSite/Models/ProductionLineOracleRelation"
+	"SuperxonWebSite/Services"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -38,6 +39,22 @@ func UpdateProductionParameterChangedHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
+		mes := "<html><b>" + p.Nickname + "</b> 于 <b>" + p.UpdateTime.Format("2006-01-02 15:04:05") + "</b>修改<br>" +
+			"----------------------------------------------<br>" +
+			"表: <b>" + p.MonitoringTable + "</b><br>" +
+			"字段1: <b>" + p.OnlyField1Name + "</b> 值为: <b>" + p.OnlyField1Value + "</b><br>" +
+			"字段2: <b>" + p.OnlyField2Name + "</b> 值为: <b>" + p.OnlyField2Value + "</b><br>" +
+			"字段3: <b>" + p.OnlyField3Name + "</b> 值为: <b>" + p.OnlyField3Value + "</b><br>" +
+			"字段4: <b>" + p.OnlyField4Name + "</b> 值为: <b>" + p.OnlyField4Value + "</b><br>" +
+			"----------------------------------------------<br>" +
+			"修改项为: <b>" + p.ChangedItem + "</b><br>" +
+			"由<b>" + p.OldValue + "</b>更改为<b>" + p.NewValue + "</b><br>" +
+			"更改原因为: <b>" + p.UpdateReason + "</b></html>"
+		err := Services.EmailOfPtrChangeInfoKqPusher.Push(mes)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusOK, "Ok")
 	}
 }

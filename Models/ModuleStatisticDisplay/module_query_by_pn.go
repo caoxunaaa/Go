@@ -73,7 +73,7 @@ func GetQaStatisticOrderInfoList(queryCondition *QueryCondition) (qaStatisticInf
 	      count(sn)over(partition by h.log_action,h.PN)总输入,
 	      sum(case h.p_value when 'PASS' then 1 else 0 end)over(partition by h.log_action,h.PN)最终良品,
 	      sum(case h.p_value when 'PASS' then 0 else 1 end)over(partition by h.log_action,h.PN)最终不良品
-	      from TRX h where h.rr=1)e order by e.pn,最终良率 ASC`
+	      from TRX h where h.rr=1)e order by 最终良率 ASC`
 	rows, err := Databases.OracleDB.Query(sqlStr)
 	if err != nil {
 		return nil, err

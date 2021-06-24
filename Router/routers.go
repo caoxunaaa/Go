@@ -10,6 +10,7 @@ import (
 	"SuperxonWebSite/apps/moduleStatistic"
 	"SuperxonWebSite/apps/osaRunning"
 	"SuperxonWebSite/apps/osaStatistic"
+	"SuperxonWebSite/apps/productionStationInfo"
 	"SuperxonWebSite/apps/trendCharts"
 	"github.com/gin-gonic/gin"
 )
@@ -53,15 +54,17 @@ func Init() *gin.Engine {
 				//某个模块wip信息-当天0点到当前时间
 				overview.GET("/wip-of-module-info-today/:pn", moduleRunning.GetModuleWipHandler)
 				//所有工位的模块生产信息--当天0点到当前时间
-				overview.GET("/station-product-info-of-module-today", moduleRunning.GetModuleAllStationStatusHandler)
+				overview.GET("/station-product-info-of-module-today", moduleRunning.GetModuleAllInfoWithStationTodayHandler)
 			}
 			//模块告警
 			warningView := moduleOfProductInfo.Group("warning-view")
 			{
 				//通过工单类型获取某个时间段的告警信息
 				warningView.GET("/warning-info-in-time-period-by-work-order-type", moduleRunning.GetModuleAllWaringInfoHandler)
-				//工位动态告警
+				//模块工位动态告警
 				warningView.GET("/station-dynamic-warning-monitoring", moduleRunning.GetModuleAllStationDynamicWarningMonitoringHandler)
+				//通过工单类型获取某个时间段的关于台位的告警信息
+				warningView.GET("/warning-info-with-station-in-time-period-by-work-order-type", moduleRunning.GetModuleAllWaringInfoWithStationHandler)
 			}
 		}
 		// 2.OSA端信息
@@ -94,6 +97,20 @@ func Init() *gin.Engine {
 			planOfProductInfo.POST("/plan-info", moduleRunning.CreateUndoneProjectPlanInfoHandler)
 			planOfProductInfo.PUT("/plan-info/:id", moduleRunning.UpdateUndoneProjectPlanInfoHandler)
 			planOfProductInfo.DELETE("/plan-info/:id", moduleRunning.DeleteUndoneProjectPlanInfoHandler)
+		}
+		// 4.产线工位各种信息
+		stationOfProductInfo := productInfo.Group("/station")
+		{
+			//总览
+			overview := stationOfProductInfo.Group("/overview")
+			{
+				// 自动发射耦合的总览
+				overview.GET("/all-transmit-auto-couple-info", productionStationInfo.GetProductionTransmitAutoCoupleOverviewHandler)
+				// 自动发射耦合某个台位详细信息
+				overview.GET("/transmit-auto-couple-info-detail-info-by-stationid", productionStationInfo.GetProductionTransmitAutoCoupleDetailInfoByStationIdHandler)
+				//通过时间段和某个台位编号 pn分组统计
+				overview.GET("/transmit-auto-couple-info-statistic-group-by-pn", productionStationInfo.GetProductionTransmitAutoCoupleStatisticGroupByPnHandler)
+			}
 		}
 	}
 	// 统计查询
@@ -139,8 +156,12 @@ func Init() *gin.Engine {
 			osaOfStatisticQuery.GET("/production-yield-with-station-by-pn", osaStatistic.GetOsaYieldWithStationByOsaPnHandler)
 			//获取某段时间osaPn对应的TC1的收端失败信息
 			osaOfStatisticQuery.GET("/production-optics-defect-info-of-rx-by-pn", osaStatistic.GetOsaOpticsDefectInfoOfRxByOsaPnHandler)
+			//获取某段时间osaPn对应的TC1的收端失败信息-对应错误码作图详情
+			osaOfStatisticQuery.GET("/production-optics-defect-info-of-rx-in-chart-by-pn-and-errorcode", osaStatistic.GetOsaOpticsDefectInfoOfRxInChartByOsaPnAndErrorCodeHandler)
 			//获取某段时间osaPn对应的TC1的发端失败信息
 			osaOfStatisticQuery.GET("/production-optics-defect-info-of-tx-by-pn", osaStatistic.GetOsaOpticsDefectInfoOfTxByOsaPnHandler)
+			//获取某段时间osaPn对应的TC1的发端失败信息-对应错误码作图详情
+			osaOfStatisticQuery.GET("/production-optics-defect-info-of-tx-in-chart-by-pn-and-errorcode", osaStatistic.GetOsaOpticsDefectInfoOfTxInChartByOsaPnAndErrorCodeHandler)
 		}
 		//产线投入产出汇总
 		statisticQuery.GET("/input-and-output-summary", moduleStatistic.GetInputAndOutputSummaryInfoListHandler)
@@ -181,6 +202,7 @@ func Init() *gin.Engine {
 		productionParameterChanged.GET("/production-parameter-by-monitoring-table-and-only-field-and-changed-item", ProductionParameterChange.GetParameterByMonitoringTableAndOnlyFieldAndChangedItemHandler)
 		//工艺变更记录
 		productionParameterChanged.GET("/all-production-parameter-record", ProductionParameterChange.GetAllProductionParameterChangedHandler)
+		productionParameterChanged.GET("/all-production-parameter-record-in-the-latest-week", ProductionParameterChange.GetAllProductionParameterChangedInTheLatestWeekHandler)
 		productionParameterChanged.GET("/all-production-parameter-record-by-monitoring-table", ProductionParameterChange.GetAllProductionParameterChangedByMonitoringTableHandler)
 		productionParameterChanged.GET("/all-production-parameter-record-by-monitoring-table-and-only-field", ProductionParameterChange.GetAllProductionParameterChangedByMonitoringTableAndOnlyFieldHandler)
 		productionParameterChanged.GET("/all-production-parameter-record-by-monitoring-table-and-only-field-and-changed-item", ProductionParameterChange.GetAllProductionParameterChangedByMonitoringTableAndOnlyFieldAndChangedItemHandler)

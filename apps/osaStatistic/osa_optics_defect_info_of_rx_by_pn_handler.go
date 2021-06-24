@@ -15,10 +15,19 @@ func GetOsaOpticsDefectInfoOfRxByOsaPnHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的参数"})
 		return
 	}
-	res, err := OsaStatisticDisplay.GetOsaOpticsDefectInfoOfRxByPn(osaPn, startTime, endTime)
+	var err error
+	res := make(map[string]interface{})
+	r, err := OsaStatisticDisplay.RedisGetOsaOpticsDefectInfoOfRxByPn(osaPn, startTime, endTime)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-	} else {
-		c.JSON(http.StatusOK, res)
+		return
 	}
+	res["完整数据"] = r
+	res["所有错误代码分布"], err = OsaStatisticDisplay.GetErrorCodeDistribution(r)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, res)
+
 }

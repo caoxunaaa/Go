@@ -340,7 +340,6 @@ func GetQaCpkRssiResult(qaCpkRssiList ...QaCpkRssi) (result map[string]map[strin
 		if qaCpkRssi.CP8 < 0 {
 			QaCpkRssiResult.CP8[index] = qaCpkRssi.CP8
 		}
-
 	}
 	c := make(chan bool, 8)
 	defer close(c)

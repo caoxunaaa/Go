@@ -70,6 +70,16 @@ func FindAllProductionParameterChanged() ([]ProductionParameterChanged, error) {
 	return res, nil
 }
 
+func FindAllProductionParameterChangedInTheLatestWeek() ([]ProductionParameterChanged, error) {
+	var res = make([]ProductionParameterChanged, 0)
+	sqlStr := "SELECT * FROM production_parameter_changed WHERE date_sub(curdate(), interval 7 day) <= date(update_time)"
+	err := Databases.SuperxonProductionLineOracleRelationDb.Select(&res, sqlStr)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func FindAllProductionParameterChangedByMonitoringTable(monitoringTable string) ([]ProductionParameterChanged, error) {
 	var res = make([]ProductionParameterChanged, 0)
 	sqlStr := "SELECT * FROM production_parameter_changed WHERE monitoring_table=?"

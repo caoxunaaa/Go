@@ -36,6 +36,7 @@ func InitCron() error {
 	spec = "0 30 8 * * ?"
 	err = timedTask.AddFunc(spec, func() {
 		KafkaPushModuleWarningInfoByClock(8)
+		_ = KafkaPushModuleWarningInfoWithStationByClock(8)
 	})
 	if err != nil {
 		return err
@@ -44,6 +45,7 @@ func InitCron() error {
 	spec = "0 0 13 * * ?"
 	err = timedTask.AddFunc(spec, func() {
 		KafkaPushModuleWarningInfoByClock(13)
+		_ = KafkaPushModuleWarningInfoWithStationByClock(13)
 	})
 	if err != nil {
 		return err
@@ -52,6 +54,7 @@ func InitCron() error {
 	spec = "0 0 17 * * ?"
 	err = timedTask.AddFunc(spec, func() {
 		KafkaPushModuleWarningInfoByClock(17)
+		_ = KafkaPushModuleWarningInfoWithStationByClock(17)
 	})
 	if err != nil {
 		return err
